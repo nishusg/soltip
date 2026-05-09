@@ -6,15 +6,39 @@ import DiamondIcon from "@mui/icons-material/Diamond";
 
 export default function WalletConnect() {
   return (
-    <Box sx={{ py: 8, textAlign: "center" }}>
+    <Box sx={{ py: { xs: 8, md: 12 }, textAlign: "center", position: "relative" }}>
+      {/* Background Glow */}
+      <Box 
+        sx={{ 
+          position: "absolute", 
+          top: "10%", 
+          left: "50%", 
+          transform: "translateX(-50%)",
+          width: "60%", 
+          height: "40%", 
+          background: "radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, transparent 70%)",
+          zIndex: -1,
+          filter: "blur(60px)"
+        }} 
+      />
+
       {/* ---- Hero Content ---- */}
-      <Box sx={{ mb: 8 }}>
-        <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 800 }}>
+      <Box className="fade-in-up" sx={{ mb: 10 }}>
+        <Typography 
+          variant="h1" 
+          sx={{ 
+            fontSize: { xs: "3rem", md: "4.5rem" }, 
+            mb: 2,
+            background: "linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.5) 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent"
+          }}
+        >
           Send{" "}
           <Box
             component="span"
             sx={{
-              background: "linear-gradient(90deg, #00e5ff 0%, #b400ff 100%)",
+              background: "linear-gradient(90deg, #00f2ff 0%, #7000ff 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
@@ -23,60 +47,126 @@ export default function WalletConnect() {
           </Box>{" "}
           on Solana
         </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 4, maxWidth: 600, mx: "auto" }}>
-          Tip your favorite creators with SOL. Fast, transparent, on-chain.
+        <Typography 
+          variant="h6" 
+          color="text.secondary" 
+          sx={{ 
+            mb: 6, 
+            maxWidth: 700, 
+            mx: "auto", 
+            fontSize: "1.1rem",
+            fontWeight: 400,
+            lineHeight: 1.8
+          }}
+        >
+          The most seamless way to tip your favorite creators. 
+          Experience lightning-fast, transparent, and secure on-chain interactions.
         </Typography>
 
         {/* Wallet connect button */}
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box sx={{ 
+          display: "flex", 
+          justifyContent: "center",
+          "& .wallet-adapter-button": {
+            height: "56px",
+            fontSize: "1.1rem",
+            px: 4,
+            borderRadius: "14px",
+            background: "linear-gradient(135deg, #00f2ff 0%, #7000ff 100%) !important",
+            boxShadow: "0 10px 30px rgba(0, 242, 255, 0.3) !important",
+            transition: "all 0.3s ease !important",
+            "&:hover": {
+              transform: "scale(1.05) translateY(-2px)",
+              boxShadow: "0 15px 40px rgba(0, 242, 255, 0.4) !important",
+            }
+          }
+        }}>
           <WalletMultiButton />
         </Box>
       </Box>
 
       {/* ---- Feature Cards ---- */}
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, gap: 4 }}>
-        <Box>
-          <Card sx={{ height: "100%", textAlign: "center", py: 3 }}>
-            <CardContent>
-              <FlashOnIcon sx={{ fontSize: 48, color: "primary.main", mb: 2 }} />
-              <Typography variant="h5" gutterBottom>
-                Lightning Fast
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Sub-second transactions on Solana
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
+      <Box 
+        sx={{ 
+          display: "grid", 
+          gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, 
+          gap: 3,
+          mt: 4
+        }}
+      >
+        <Card sx={{ p: 1 }}>
+          <CardContent sx={{ py: 4 }}>
+            <Box sx={{ 
+              width: 56, 
+              height: 56, 
+              borderRadius: "14px", 
+              bgcolor: "rgba(0, 242, 255, 0.1)", 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              mx: "auto",
+              mb: 3
+            }}>
+              <FlashOnIcon sx={{ fontSize: 32, color: "primary.main" }} />
+            </Box>
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
+              Instant
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Transactions settle in seconds, not minutes.
+            </Typography>
+          </CardContent>
+        </Card>
 
-        <Box>
-          <Card sx={{ height: "100%", textAlign: "center", py: 3 }}>
-            <CardContent>
-              <LockIcon sx={{ fontSize: 48, color: "primary.main", mb: 2 }} />
-              <Typography variant="h5" gutterBottom>
-                Secure
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Wallet-based auth, no passwords
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
+        <Card sx={{ p: 1 }}>
+          <CardContent sx={{ py: 4 }}>
+            <Box sx={{ 
+              width: 56, 
+              height: 56, 
+              borderRadius: "14px", 
+              bgcolor: "rgba(112, 0, 255, 0.1)", 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              mx: "auto",
+              mb: 3
+            }}>
+              <LockIcon sx={{ fontSize: 32, color: "secondary.main" }} />
+            </Box>
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
+              Secure
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Directly peer-to-peer using your own wallet.
+            </Typography>
+          </CardContent>
+        </Card>
 
-        <Box>
-          <Card sx={{ height: "100%", textAlign: "center", py: 3 }}>
-            <CardContent>
-              <DiamondIcon sx={{ fontSize: 48, color: "primary.main", mb: 2 }} />
-              <Typography variant="h5" gutterBottom>
-                Transparent
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                All tips verified on-chain
-              </Typography>
-            </CardContent>
-          </Card>
-        </Box>
+        <Card sx={{ p: 1 }}>
+          <CardContent sx={{ py: 4 }}>
+            <Box sx={{ 
+              width: 56, 
+              height: 56, 
+              borderRadius: "14px", 
+              bgcolor: "rgba(255, 255, 255, 0.05)", 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center", 
+              mx: "auto",
+              mb: 3
+            }}>
+              <DiamondIcon sx={{ fontSize: 32, color: "#fff" }} />
+            </Box>
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
+              Verified
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Fully transparent and verifiable on the ledger.
+            </Typography>
+          </CardContent>
+        </Card>
       </Box>
     </Box>
+
   );
 }

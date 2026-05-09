@@ -24,6 +24,7 @@ const Home = React.lazy(() => import("./pages/Home"));
 const CreatorPage = React.lazy(() => import("./pages/CreatorPage"));
 const CreatorLeaderboard = React.lazy(() => import("./components/CreatorLeaderboard"));
 const ProfileSettings = React.lazy(() => import("./pages/ProfileSettings"));
+const ActivityPage = React.lazy(() => import("./pages/ActivityPage"));
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
               </div>
             }
           />
+          <Route path="/activity" element={<ActivityPage />} />
           <Route path="/creator/:wallet" element={<CreatorPage />} />
           <Route path="/settings" element={<ProfileSettings />} />
         </Routes>

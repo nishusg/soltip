@@ -10,6 +10,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ErrorIcon from "@mui/icons-material/Error";
+import TipForm from "../components/TipForm";
 
 interface CreatorProfile {
   wallet_address: string;
@@ -145,12 +146,13 @@ export default function CreatorPage() {
                   Edit Profile
                 </Button>
               ) : (
-                <Button component={RouterLink} to="/" variant="contained" color="primary" size="large" startIcon={<FlashOnIcon />}>
-                  Send a Tip
-                </Button>
+                <Box sx={{ mt: 4, textAlign: "left" }}>
+                  <TipForm defaultCreatorAddress={creator.wallet_address} />
+                </Box>
               )}
             </CardContent>
           </Card>
+
 
           {/* Recent Tips */}
           {tips.length > 0 && (

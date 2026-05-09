@@ -29,6 +29,7 @@ function Root() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <div className="mesh-gradient" />
       <ConnectionProvider endpoint={endpoint}>
         <WalletProvider wallets={wallets} autoConnect>
           <WalletModalProvider>

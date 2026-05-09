@@ -77,80 +77,130 @@ export default function CreatorLeaderboard() {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, mx: "auto", py: 4 }}>
-      <Box sx={{ textAlign: "center", mb: 4 }}>
-        <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: 800 }}>
-          <Box
-            component="span"
-            sx={{
-              background: "linear-gradient(90deg, #00e5ff 0%, #b400ff 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Top Creators
-          </Box>
+    <Box sx={{ maxWidth: 900, mx: "auto", py: { xs: 4, md: 8 }, px: 2 }}>
+      <Box sx={{ textAlign: "center", mb: 8 }} className="fade-in-up">
+        <Typography 
+          variant="h2" 
+          component="h2" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 800,
+            background: "linear-gradient(135deg, #fff 0%, #a0a0b0 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent"
+          }}
+        >
+          Top Creators
         </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          Ranked by total tips received
+        <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400 }}>
+          The champions of the Solana tipping ecosystem
         </Typography>
       </Box>
 
       {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 8 }}>
-          <CircularProgress size={32} sx={{ mr: 2 }} />
-          <Typography color="text.secondary">Loading leaderboard...</Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", py: 12 }}>
+          <CircularProgress size={48} thickness={4} sx={{ mb: 3, color: "primary.main" }} />
+          <Typography color="text.secondary" sx={{ letterSpacing: "0.1em", textTransform: "uppercase", fontSize: "0.8rem", fontWeight: 700 }}>
+            Fetching Legends...
+          </Typography>
         </Box>
       )}
 
       {!loading && creators.length === 0 && (
-        <Card sx={{ textAlign: "center", py: 8 }}>
+        <Card sx={{ textAlign: "center", py: 10, bgcolor: "rgba(255,255,255,0.02)" }}>
           <CardContent>
-            <EmojiEventsIcon sx={{ fontSize: 64, color: "text.secondary", mb: 2 }} />
-            <Typography variant="h6" gutterBottom>
-              No creators on the leaderboard yet.
+            <EmojiEventsIcon sx={{ fontSize: 80, color: "rgba(255,255,255,0.1)", mb: 3 }} />
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
+              No legends yet.
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Be the first to send a tip!
+            <Typography variant="body1" color="text.secondary">
+              Be the first to send a tip and start the journey!
             </Typography>
           </CardContent>
         </Card>
       )}
 
       {!loading && creators.length > 0 && (
-        <List sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <List sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
           {creators.map((creator, index) => {
             const isTop3 = index < 3;
+            const rankColors = ["#ffd700", "#c0c0c0", "#cd7f32"];
+            const rankGlows = [
+              "0 0 20px rgba(255, 215, 0, 0.2)",
+              "0 0 20px rgba(192, 192, 192, 0.15)",
+              "0 0 20px rgba(205, 127, 50, 0.1)"
+            ];
+
             return (
               <Card 
                 key={creator.wallet_address} 
+                className="fade-in-up"
                 sx={{ 
                   display: "flex", 
                   alignItems: "center", 
-                  p: 2,
+                  p: { xs: 2, sm: 3 },
+                  position: "relative",
+                  overflow: "hidden",
+                  animationDelay: `${index * 0.1}s`,
                   ...(isTop3 && {
-                    background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%)",
-                    border: "1px solid rgba(0, 229, 255, 0.3)",
-                    boxShadow: "0 0 20px rgba(0, 229, 255, 0.1)",
+                    background: `linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)`,
+                    border: `1px solid ${rankColors[index]}44`,
+                    boxShadow: rankGlows[index],
                   })
                 }}
               >
-                <Box sx={{ width: 48, textAlign: "center", fontSize: "1.5rem" }}>
-                  {getRankDisplay(index)}
+                {isTop3 && (
+                  <Box 
+                    sx={{ 
+                      position: "absolute", 
+                      top: 0, 
+                      left: 0, 
+                      width: 4, 
+                      height: "100%", 
+                      bgcolor: rankColors[index] 
+                    }} 
+                  />
+                )}
+
+                <Box 
+                  sx={{ 
+                    width: 60, 
+                    height: 60,
+                    display: "flex", 
+                    alignItems: "center", 
+                    justifyContent: "center",
+                    borderRadius: "50%",
+                    bgcolor: isTop3 ? `${rankColors[index]}11` : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${isTop3 ? rankColors[index] + "44" : "rgba(255,255,255,0.08)"}`,
+                    color: isTop3 ? rankColors[index] : "text.secondary",
+                    fontSize: isTop3 ? "1.5rem" : "1.1rem",
+                    fontWeight: 800,
+                    mr: 3
+                  }}
+                >
+                  {index + 1}
                 </Box>
                 
-                <Box sx={{ flexGrow: 1, ml: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {creator.name || shorten(creator.wallet_address)}
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                    {creator.name || "Anonymous Creator"}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {shorten(creator.wallet_address)}
+                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "monospace", opacity: 0.7 }}>
+                    {creator.wallet_address}
                   </Typography>
                 </Box>
                 
-                <Box sx={{ textAlign: "right", color: isTop3 ? "primary.main" : "text.primary" }}>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    {formatSol(creator.total_received)} SOL
+                <Box sx={{ textAlign: "right" }}>
+                  <Typography 
+                    variant="h5" 
+                    sx={{ 
+                      fontWeight: 800,
+                      color: isTop3 ? rankColors[index] : "primary.main",
+                      textShadow: isTop3 ? `0 0 10px ${rankColors[index]}44` : "none"
+                    }}
+                  >
+                    {formatSol(creator.total_received)}
+                    <Box component="span" sx={{ fontSize: "0.9rem", ml: 1, opacity: 0.7 }}>SOL</Box>
                   </Typography>
                 </Box>
               </Card>

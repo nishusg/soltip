@@ -86,22 +86,22 @@ export default function RecentTips() {
   }
 
   return (
-    <Card sx={{ mt: 4 }}>
-      <CardContent sx={{ p: 4 }}>
-        <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 700, mb: 3 }}>
-          Recent Transactions
+    <Card sx={{ mt: 6 }} className="fade-in-up">
+      <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+        <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 800, mb: 4 }}>
+          Activity Log
         </Typography>
 
         {loading && (
-          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
-            <CircularProgress size={24} sx={{ mr: 2 }} />
-            <Typography color="text.secondary">Loading...</Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", py: 6 }}>
+            <CircularProgress size={32} sx={{ mb: 2 }} />
+            <Typography variant="body2" color="text.secondary">Loading activity...</Typography>
           </Box>
         )}
 
         {!loading && transactions.length === 0 && (
-          <Box sx={{ textAlign: "center", py: 4 }}>
-            <Typography color="text.secondary">No transactions yet. Send your first tip! 🚀</Typography>
+          <Box sx={{ textAlign: "center", py: 6, bgcolor: "rgba(255,255,255,0.01)", borderRadius: "14px", border: "1px dashed rgba(255,255,255,0.1)" }}>
+            <Typography variant="body1" color="text.secondary">No transactions found. Ready for your first tip? 🚀</Typography>
           </Box>
         )}
 
@@ -111,47 +111,85 @@ export default function RecentTips() {
               const isSent = tx.sender_wallet === walletAddress;
               return (
                 <Box key={tx._id || tx.tx_hash}>
-                  <ListItem sx={{ flexDirection: "column", alignItems: "stretch", px: 0, py: 2 }}>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Chip
-                          icon={isSent ? <CallMadeIcon fontSize="small" /> : <CallReceivedIcon fontSize="small" />}
-                          label={isSent ? "Sent" : "Received"}
-                          color={isSent ? "primary" : "secondary"}
-                          size="small"
-                          variant="outlined"
-                        />
-                        <Typography variant="subtitle1" fontWeight={600}>
-                          {formatSol(tx.amount)} SOL
-                        </Typography>
+                  <ListItem sx={{ flexDirection: "column", alignItems: "stretch", px: 0, py: 3 }}>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <Box sx={{ 
+                          width: 40, 
+                          height: 40, 
+                          borderRadius: "10px", 
+                          bgcolor: isSent ? "rgba(0, 242, 255, 0.1)" : "rgba(112, 0, 255, 0.1)",
+                          display: "flex", 
+                          alignItems: "center", 
+                          justifyContent: "center",
+                          color: isSent ? "primary.main" : "secondary.main"
+                        }}>
+                          {isSent ? <CallMadeIcon fontSize="small" /> : <CallReceivedIcon fontSize="small" />}
+                        </Box>
+                        <Box>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                            {formatSol(tx.amount)} SOL
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
+                            {isSent ? `To ${shorten(tx.creator_wallet)}` : `From ${shorten(tx.sender_wallet)}`}
+                          </Typography>
+                        </Box>
                       </Box>
-                      <Typography variant="body2" color="text.secondary">
-                        {isSent ? `to ${shorten(tx.creator_wallet)}` : `from ${shorten(tx.sender_wallet)}`}
-                      </Typography>
+                      <Chip
+                        label={isSent ? "Sent" : "Received"}
+                        size="small"
+                        sx={{ 
+                          fontWeight: 700, 
+                          fontSize: "0.7rem", 
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                          bgcolor: isSent ? "rgba(0, 242, 255, 0.05)" : "rgba(112, 0, 255, 0.05)",
+                          color: isSent ? "primary.main" : "secondary.main",
+                          borderColor: isSent ? "rgba(0, 242, 255, 0.2)" : "rgba(112, 0, 255, 0.2)",
+                          borderRadius: "6px"
+                        }}
+                        variant="outlined"
+                      />
                     </Box>
 
                     {tx.message && (
-                      <Box sx={{ my: 1, p: 1.5, bgcolor: "rgba(255,255,255,0.03)", borderRadius: 1 }}>
-                        <Typography variant="body2" sx={{ fontStyle: "italic" }}>"{tx.message}"</Typography>
+                      <Box sx={{ 
+                        my: 1.5, 
+                        p: 2, 
+                        bgcolor: "rgba(255,255,255,0.02)", 
+                        borderRadius: "12px",
+                        borderLeft: `3px solid ${isSent ? "#00f2ff" : "#7000ff"}`
+                      }}>
+                        <Typography variant="body2" sx={{ fontStyle: "italic", color: "text.primary", opacity: 0.9 }}>
+                          "{tx.message}"
+                        </Typography>
                       </Box>
                     )}
 
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>
                         {formatTime(tx.timestamp)}
                       </Typography>
                       <Link
                         href={getExplorerUrl(tx.tx_hash)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        color="primary.main"
-                        sx={{ display: "flex", alignItems: "center", fontSize: "0.75rem", gap: 0.5 }}
+                        sx={{ 
+                          display: "flex", 
+                          alignItems: "center", 
+                          fontSize: "0.8rem", 
+                          gap: 0.5,
+                          color: "primary.main",
+                          textDecoration: "none",
+                          fontWeight: 600,
+                          "&:hover": { textDecoration: "underline" }
+                        }}
                       >
-                        Explorer <OpenInNewIcon sx={{ fontSize: 12 }} />
+                        Ledger Proof <OpenInNewIcon sx={{ fontSize: 14 }} />
                       </Link>
                     </Box>
                   </ListItem>
-                  {idx < transactions.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.05)" }} />}
+                  {idx < transactions.length - 1 && <Divider sx={{ opacity: 0.5 }} />}
                 </Box>
               );
             })}
