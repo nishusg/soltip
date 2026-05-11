@@ -79,15 +79,16 @@ export async function verifySignature(wallet: string, signature: string) {
 // ---------------------------------------------------------------------------
 
 /** Verify a tip transaction on-chain and store it */
-export async function verifyTransaction(
-  tx_hash: string,
-  sender_wallet: string,
-  creator_wallet: string,
-  message: string
-) {
+export async function verifyAndStoreTransaction(data: {
+  tx_hash: string;
+  sender_wallet: string;
+  creator_wallet: string;
+  message?: string;
+  stream_id?: string;
+}) {
   return api("/tx/verify", {
     method: "POST",
-    body: JSON.stringify({ tx_hash, sender_wallet, creator_wallet, message }),
+    body: JSON.stringify(data),
   });
 }
 
@@ -103,6 +104,11 @@ export async function listTransactions(wallet: string) {
 /** Get daily tip statistics */
 export async function getDailyStats() {
   return api("/stats/daily");
+}
+
+/** Get creator dashboard statistics (authenticated) */
+export async function getDashboardData() {
+  return api("/stats/dashboard");
 }
 
 /** Get a user's profile and recent tips (both sent and received) */

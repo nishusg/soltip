@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useAuth } from "../context/AuthContext";
 import { sendTip, getExplorerUrl, calculateFeeBreakdown } from "../services/solana";
-import { verifyTransaction } from "../services/api";
+import { verifyAndStoreTransaction } from "../services/api";
 import { PublicKey } from "@solana/web3.js";
 import toast from "react-hot-toast";
 import { Card, CardContent, Typography, TextField, Button, Box, CircularProgress, Link, Alert, Stack } from "@mui/material";
@@ -71,12 +71,12 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
       setTxStatus("verifying");
 
       try {
-        await verifyTransaction(
-          signature,
-          wallet.publicKey.toString(),
-          creatorAddress,
-          message
-        );
+        await verifyAndStoreTransaction({
+          tx_hash: signature,
+          sender_wallet: wallet.publicKey.toString(),
+          creator_wallet: creatorAddress,
+          message: message
+        });
       } catch (verifyErr) {
         console.warn("Backend verification failed:", verifyErr);
         toast.error("Transaction sent, but backend verification failed");

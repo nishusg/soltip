@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getStream, getUserProfile } from "../services/api";
 import { useSocket } from "../context/SocketContext";
+import ChatBox from "../components/ChatBox";
 import { Container, Grid, Box, Typography, Paper, Chip, Avatar, Skeleton, Button } from "@mui/material";
 import PeopleIcon from "@mui/icons-material/People";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
@@ -236,16 +237,8 @@ export default function StreamPage() {
               <Typography sx={{ fontWeight: 800, letterSpacing: "0.1em" }}>STREAM CHAT</Typography>
             </Box>
 
-            <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center", p: 4, textAlign: "center" }}>
-              <Typography color="text.secondary">
-                Chat integration coming in Phase 3...
-              </Typography>
-            </Box>
-
-            <Box sx={{ p: 2, bgcolor: "rgba(0,0,0,0.2)" }}>
-              <Typography variant="caption" color="grey.600">
-                You must be signed in to chat.
-              </Typography>
+            <Box sx={{ flexGrow: 1, overflow: "hidden" }}>
+              <ChatBox streamId={id!} creatorWallet={stream.creator_wallet} />
             </Box>
           </Paper>
         </Grid>

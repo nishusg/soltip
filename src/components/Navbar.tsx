@@ -134,6 +134,19 @@ export default function Navbar() {
               </Button>
               <Button 
                 component={RouterLink} 
+                to="/dashboard" 
+                color="inherit" 
+                sx={{ 
+                  px: 3,
+                  borderRadius: "10px",
+                  fontWeight: 600,
+                  "&:hover": { bgcolor: "rgba(255,255,255,0.05)" }
+                }}
+              >
+                Dashboard
+              </Button>
+              <Button 
+                component={RouterLink} 
                 to="/settings" 
                 color="inherit" 
                 sx={{ 
