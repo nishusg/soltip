@@ -16,6 +16,7 @@ import {
 } from "@solana/wallet-adapter-wallets";
 import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
+import { HelmetProvider } from "react-helmet-async";
 import App from "./App";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -41,17 +42,19 @@ function Root() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="mesh-gradient" />
-      <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets} autoConnect>
-          <WalletModalProvider>
-            <SocketProvider>
-              <AuthProvider>
-                <App />
-              </AuthProvider>
-            </SocketProvider>
-          </WalletModalProvider>
-        </WalletProvider>
-      </ConnectionProvider>
+      <HelmetProvider>
+        <ConnectionProvider endpoint={endpoint}>
+          <WalletProvider wallets={wallets} autoConnect>
+            <WalletModalProvider>
+              <SocketProvider>
+                <AuthProvider>
+                  <App />
+                </AuthProvider>
+              </SocketProvider>
+            </WalletModalProvider>
+          </WalletProvider>
+        </ConnectionProvider>
+      </HelmetProvider>
     </ThemeProvider>
   );
 }

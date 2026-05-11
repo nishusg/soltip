@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /settings
+Disallow: /dashboard
+Disallow: /overlay
+
+Sitemap: https://solchat.io/sitemap.xml

@@ -1,14 +1,29 @@
 import { Link as RouterLink } from "react-router-dom";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWalletAuth } from "../hooks/useWalletAuth";
-import { AppBar, Toolbar, Button, Box, Typography, Chip, IconButton } from "@mui/material";
+import { AppBar, Toolbar, Button, Box, Typography, Chip, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider, useTheme, useMediaQuery } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
+import MenuIcon from "@mui/icons-material/Menu";
+import { useState } from "react";
 
 export default function Navbar() {
-  const { connected, isAuthenticated, login, logout, isLoading } = useWalletAuth();
+  const { connected, isAuthenticated, login, logout, isLoading, walletAddress } = useWalletAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const navItems = [
+    { label: "Home", path: "/" },
+    { label: "Leaderboard", path: "/leaderboard" },
+    ...(isAuthenticated ? [
+      { label: "Activity", path: "/activity" },
+      { label: "Dashboard", path: "/dashboard" },
+      { label: "Settings", path: "/settings" }
+    ] : [])
+  ];
 
   return (
     <AppBar 
@@ -163,8 +178,9 @@ export default function Navbar() {
         </Box>
 
         {/* Actions */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 2 } }}>
           <Box sx={{ 
+            display: { xs: "none", sm: "block" },
             "& .wallet-adapter-button": { 
               height: "42px", 
               borderRadius: "10px", 
@@ -246,8 +262,109 @@ export default function Navbar() {
               </IconButton>
             </Box>
           )}
+
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={() => setMobileOpen(true)}
+              sx={{ 
+                bgcolor: "rgba(255,255,255,0.03)", 
+                borderRadius: "10px",
+                border: "1px solid rgba(255,255,255,0.05)"
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
         </Box>
       </Toolbar>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        variant="temporary"
+        anchor="right"
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: "block", md: "none" },
+          "& .MuiDrawer-paper": { 
+            boxSizing: "border-box", 
+            width: 280,
+            background: "rgba(10, 10, 15, 0.95)",
+            backdropFilter: "blur(20px)",
+            borderLeft: "1px solid rgba(255,255,255,0.08)"
+          },
+        }}
+      >
+        <Box sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%" }}>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
+             <BoltIcon sx={{ color: "primary.main", mr: 1 }} />
+             <Typography variant="h6" sx={{ fontWeight: 800 }}>Menu</Typography>
+          </Box>
+
+          <List sx={{ flexGrow: 1 }}>
+            {navItems.map((item) => (
+              <ListItem key={item.label} disablePadding sx={{ mb: 1 }}>
+                <ListItemButton 
+                  component={RouterLink} 
+                  to={item.path}
+                  onClick={() => setMobileOpen(false)}
+                  sx={{ 
+                    borderRadius: "12px",
+                    "&:hover": { bgcolor: "rgba(255,255,255,0.05)" }
+                  }}
+                >
+                  <ListItemText 
+                    primary={item.label} 
+                    slotProps={{ primary: { sx: { fontWeight: 600 } } }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+
+          <Divider sx={{ my: 2, opacity: 0.1 }} />
+
+          {isAuthenticated && (
+            <Box sx={{ mb: 2 }}>
+               <Button 
+                component={RouterLink} 
+                to="/stream/create" 
+                variant="contained"
+                color="secondary"
+                fullWidth
+                startIcon={<BoltIcon />}
+                onClick={() => setMobileOpen(false)}
+                sx={{ 
+                  py: 1.5,
+                  borderRadius: "12px",
+                  fontWeight: 800,
+                  boxShadow: "0 0 20px rgba(112, 0, 255, 0.4)"
+                }}
+              >
+                Go Live
+              </Button>
+            </Box>
+          )}
+
+          <Box sx={{ mt: "auto" }}>
+             <WalletMultiButton />
+             {connected && !isAuthenticated && (
+                <Button 
+                  variant="contained" 
+                  fullWidth 
+                  onClick={login} 
+                  sx={{ mt: 2, py: 1.5, borderRadius: "12px" }}
+                >
+                  Sign In
+                </Button>
+             )}
+          </Box>
+        </Box>
+      </Drawer>
     </AppBar>
   );
 }

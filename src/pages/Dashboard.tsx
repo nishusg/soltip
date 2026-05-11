@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { getDashboardData } from "../services/api";
+import { getDashboardData, sendAnnouncement } from "../services/api";
+import toast from "react-hot-toast";
+import SEO from "../components/SEO";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { 
   Container, 
@@ -15,7 +17,10 @@ import {
   ListItemText,
   Chip,
   CircularProgress,
-  Button
+  Button,
+  TextField,
+  useTheme,
+  useMediaQuery
 } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
 import PeopleIcon from "@mui/icons-material/People";
@@ -39,6 +44,10 @@ export default function Dashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState("");
+  const [announcementLoading, setAnnouncementLoading] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   useEffect(() => {
     getDashboardData()
@@ -46,6 +55,20 @@ export default function Dashboard() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);
+
+  const handleSendAnnouncement = async () => {
+    if (!announcement.trim()) return;
+    setAnnouncementLoading(true);
+    try {
+      const res = await sendAnnouncement(announcement);
+      toast.success(res.message);
+      setAnnouncement("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send announcement");
+    } finally {
+      setAnnouncementLoading(false);
+    }
+  };
 
   const formatSol = (lamports: number) => (lamports / LAMPORTS_PER_SOL).toFixed(4);
 
@@ -73,12 +96,15 @@ export default function Dashboard() {
   const liveStreamsCount = streams.filter((s: any) => s.status === "live").length;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
-      <Box sx={{ mb: 6, animation: "fadeInUp 0.3s ease-out" }}>
-        <Typography variant="h3" sx={{ fontWeight: 900, mb: 1 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, md: 3 } }}>
+      <SEO title="Creator Dashboard" description="Manage your streams, track earnings, and engage with your community." />
+      <Box sx={{ mb: { xs: 4, md: 6 }, animation: "fadeInUp 0.3s ease-out" }}>
+        <Typography variant={isMobile ? "h4" : "h3"} sx={{ fontWeight: 900, mb: 1 }}>
           Creator <Box component="span" sx={{ color: "primary.main" }}>Dashboard</Box>
         </Typography>
-        <Typography color="text.secondary">Manage your content, track earnings, and engage with your community.</Typography>
+        <Typography color="text.secondary" variant={isMobile ? "body2" : "body1"}>
+          Manage your content, track earnings, and engage with your community.
+        </Typography>
       </Box>
 
       {/* Stats Overview */}
@@ -274,30 +300,67 @@ export default function Dashboard() {
 
       {/* Top Supporters Section */}
       <Box sx={{ mt: 4 }}>
-        <Paper sx={{ p: 0, overflow: "hidden", bgcolor: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.05)" }}>
-          <Box sx={{ p: 3, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-            <Typography variant="h6" sx={{ fontWeight: 800 }}>Top Supporters (Current Activity)</Typography>
-          </Box>
-          <Grid container sx={{ p: 1 }}>
-            {recentTips.slice(0, 8).map((tip: any) => (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={tip._id}>
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar src={tip.avatar} sx={{ width: 32, height: 32 }} />
-                  </ListItemAvatar>
-                  <ListItemText 
-                    primary={tip.sender_wallet.slice(0, 4) + "..." + tip.sender_wallet.slice(-4)}
-                    secondary={`${formatSol(tip.amount)} SOL`}
-                    slotProps={{
-                      primary: { variant: "caption", sx: { fontWeight: 700 } },
-                      secondary: { variant: "caption" }
-                    }}
-                  />
-                </ListItem>
+        <Grid container spacing={4}>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <Paper sx={{ p: 0, overflow: "hidden", bgcolor: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.05)" }}>
+              <Box sx={{ p: 3, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                <Typography variant="h6" sx={{ fontWeight: 800 }}>Top Supporters (Current Activity)</Typography>
+              </Box>
+              <Grid container sx={{ p: 1 }}>
+                {recentTips.slice(0, 8).map((tip: any) => (
+                  <Grid size={{ xs: 12, sm: 6, md: 3 }} key={tip._id}>
+                    <ListItem>
+                      <ListItemAvatar>
+                        <Avatar src={tip.avatar} sx={{ width: 32, height: 32 }} />
+                      </ListItemAvatar>
+                      <ListItemText 
+                        primary={tip.sender_wallet.slice(0, 4) + "..." + tip.sender_wallet.slice(-4)}
+                        secondary={`${formatSol(tip.amount)} SOL`}
+                        slotProps={{
+                          primary: { variant: "caption", sx: { fontWeight: 700 } },
+                          secondary: { variant: "caption" }
+                        }}
+                      />
+                    </ListItem>
+                  </Grid>
+                ))}
               </Grid>
-            ))}
+            </Paper>
           </Grid>
-        </Paper>
+
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Paper sx={{ p: 3, bgcolor: "rgba(112, 0, 255, 0.05)", border: "1px solid rgba(112, 0, 255, 0.1)", borderRadius: "16px" }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+                <BoltIcon color="secondary" /> Send Announcement
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 3, opacity: 0.7 }}>
+                Notify all your followers instantly. Perfect for going live or special updates!
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="What's happening?"
+                value={announcement}
+                onChange={(e) => setAnnouncement(e.target.value)}
+                disabled={announcementLoading}
+                sx={{ mb: 2 }}
+                slotProps={{ input: { sx: { borderRadius: "12px" } } }}
+              />
+              <Button 
+                variant="contained" 
+                color="secondary" 
+                fullWidth 
+                onClick={handleSendAnnouncement}
+                disabled={announcementLoading || !announcement.trim()}
+                startIcon={announcementLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
+                sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800 }}
+              >
+                {announcementLoading ? "Sending..." : "Broadcast to Followers"}
+              </Button>
+            </Paper>
+          </Grid>
+        </Grid>
       </Box>
     </Container>
   );

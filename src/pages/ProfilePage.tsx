@@ -11,6 +11,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ErrorIcon from "@mui/icons-material/Error";
 import TipForm from "../components/TipForm";
+import SEO from "../components/SEO";
 
 interface UserProfile {
   wallet_address: string;
@@ -106,6 +107,10 @@ export default function ProfilePage() {
 
       {!loading && user && (
         <Box sx={{ animation: "fadeInUp 0.6s ease-out" }}>
+          <SEO 
+            title={user.name || shorten(user.wallet_address)} 
+            description={user.bio || `Support ${user.name || shorten(user.wallet_address)} on SolChat — the premium Solana tipping platform.`}
+          />
           {/* Profile Card */}
           <Card sx={{ mb: 4, textAlign: "center", px: 4, pb: 4, pt: 0, overflow: "visible" }}>
             <Box sx={{ display: "flex", justifyContent: "center", mt: -6, mb: 2 }}>

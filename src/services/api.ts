@@ -166,3 +166,36 @@ export async function getStream(id: string) {
 export async function listActiveStreams() {
   return api("/streams/active");
 }
+
+// ---------------------------------------------------------------------------
+// Follow endpoints
+// ---------------------------------------------------------------------------
+
+/** Follow a user */
+export async function followUser(following_wallet: string) {
+  return api("/follow/follow", {
+    method: "POST",
+    body: JSON.stringify({ following_wallet }),
+  });
+}
+
+/** Unfollow a user */
+export async function unfollowUser(following_wallet: string) {
+  return api("/follow/unfollow", {
+    method: "POST",
+    body: JSON.stringify({ following_wallet }),
+  });
+}
+
+/** Check if current user is following target */
+export async function getFollowStatus(target_wallet: string) {
+  return api(`/follow/status/${target_wallet}`);
+}
+
+/** Send announcement to all followers */
+export async function sendAnnouncement(message: string) {
+  return api("/follow/announce", {
+    method: "POST",
+    body: JSON.stringify({ message }),
+  });
+}

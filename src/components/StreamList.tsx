@@ -81,12 +81,14 @@ export default function StreamList() {
               <Box sx={{ position: "relative", overflow: "hidden" }}>
                 <CardMedia
                   className="stream-thumbnail"
-                  component="div"
+                  component="img"
+                  loading="lazy"
                   sx={{ 
                     width: "100%",
                     aspectRatio: "16/9", 
                     bgcolor: "grey.900",
-                    transition: "transform 0.5s ease"
+                    transition: "transform 0.5s ease",
+                    objectFit: "cover"
                   }}
                 />
                 <Chip
@@ -103,7 +105,12 @@ export default function StreamList() {
               <CardContent sx={{ p: 2 }}>
                 <Typography variant="h6" noWrap sx={{ fontWeight: 700, mb: 0.5 }}>{stream.title}</Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Avatar sx={{ width: 24, height: 24, fontSize: "0.7rem" }}>{stream.creator_wallet.slice(0, 1)}</Avatar>
+                  <Avatar 
+                    sx={{ width: 24, height: 24, fontSize: "0.7rem" }}
+                    slotProps={{ img: { loading: "lazy" } as any }}
+                  >
+                    {stream.creator_wallet.slice(0, 1)}
+                  </Avatar>
                   <Typography variant="body2" color="text.secondary" noWrap>
                     {stream.creator_wallet.slice(0, 4)}...{stream.creator_wallet.slice(-4)}
                   </Typography>
