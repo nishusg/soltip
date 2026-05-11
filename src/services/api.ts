@@ -136,10 +136,24 @@ export async function createStream(data: { title: string; category?: string; des
   });
 }
 
-/** End an active livestream */
+/** End a livestream */
 export async function endStream(id: string) {
-  return api(`/streams/${id}/end`, {
+  return api(`/streams/${id}/end`, { method: "POST" });
+}
+
+/** Update stream settings (slow mode, etc) */
+export async function updateStreamSettings(id: string, settings: { slow_mode?: number, donation_goal?: number }) {
+  return api(`/streams/${id}/settings`, {
+    method: "PATCH",
+    body: JSON.stringify(settings),
+  });
+}
+
+/** Ban or unban a user */
+export async function toggleBan(id: string, wallet_to_ban: string, action: "ban" | "unban") {
+  return api(`/streams/${id}/ban`, {
     method: "POST",
+    body: JSON.stringify({ wallet_to_ban, action }),
   });
 }
 

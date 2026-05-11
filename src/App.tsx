@@ -23,6 +23,7 @@ import Navbar from "./components/Navbar";
 const Home = React.lazy(() => import("./pages/Home"));
 const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
+const OverlayPage = React.lazy(() => import("./pages/OverlayPage"));
 const CreatorLeaderboard = React.lazy(() => import("./components/CreatorLeaderboard"));
 const ProfileSettings = React.lazy(() => import("./pages/ProfileSettings"));
 const ActivityPage = React.lazy(() => import("./pages/ActivityPage"));
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="/settings" element={<ProfileSettings />} />
           <Route path="/stream/create" element={<CreateStream />} />
           <Route path="/stream/:id" element={<StreamPage />} />
+          <Route path="/overlay/:streamId" element={<OverlayPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </Suspense>

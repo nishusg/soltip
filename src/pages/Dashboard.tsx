@@ -22,6 +22,18 @@ import PeopleIcon from "@mui/icons-material/People";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Cell,
+  PieChart,
+  Pie
+} from "recharts";
 
 export default function Dashboard() {
   const [data, setData] = useState<any>(null);
@@ -97,6 +109,64 @@ export default function Dashboard() {
             <TrendingUpIcon sx={{ fontSize: 40, mb: 1, color: "#00ff80" }} />
             <Typography variant="h5" sx={{ fontWeight: 800 }}>{liveStreamsCount}</Typography>
             <Typography variant="caption" color="text.secondary">Active Streams</Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Revenue Charts */}
+      <Grid container spacing={3} sx={{ mb: 6 }}>
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Paper sx={{ p: 3, height: 400, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column" }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>Earnings per Stream (SOL)</Typography>
+            <Box sx={{ flexGrow: 1, minHeight: 0 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={streamEarnings.map((e: any) => ({
+                  name: streams.find((s: any) => s._id === e._id)?.title.slice(0, 10) || "Unknown",
+                  value: e.total_earned / LAMPORTS_PER_SOL
+                }))}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.5)" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="rgba(255,255,255,0.5)" fontSize={12} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: "#1a1a25", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}
+                    itemStyle={{ color: "#00f2ff" }}
+                  />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                    {streamEarnings.map((_: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "#7000ff" : "#00f2ff"} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
+          </Paper>
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Paper sx={{ p: 3, height: 400, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column" }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>Tip Distribution</Typography>
+            <Box sx={{ flexGrow: 1, minHeight: 0 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={recentTips.slice(0, 5).map((t: any, i: number) => ({ name: `Tip ${i+1}`, value: t.amount }))}
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    <Cell fill="#7000ff" />
+                    <Cell fill="#00f2ff" />
+                    <Cell fill="#ff4b4b" />
+                    <Cell fill="#00ff80" />
+                    <Cell fill="#ffb400" />
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
+            <Box sx={{ textAlign: "center", mt: 1 }}>
+              <Typography variant="caption" color="text.secondary">Top 5 recent tips</Typography>
+            </Box>
           </Paper>
         </Grid>
       </Grid>
@@ -201,6 +271,34 @@ export default function Dashboard() {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Top Supporters Section */}
+      <Box sx={{ mt: 4 }}>
+        <Paper sx={{ p: 0, overflow: "hidden", bgcolor: "rgba(255,255,255,0.01)", border: "1px solid rgba(255,255,255,0.05)" }}>
+          <Box sx={{ p: 3, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+            <Typography variant="h6" sx={{ fontWeight: 800 }}>Top Supporters (Current Activity)</Typography>
+          </Box>
+          <Grid container sx={{ p: 1 }}>
+            {recentTips.slice(0, 8).map((tip: any) => (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={tip._id}>
+                <ListItem>
+                  <ListItemAvatar>
+                    <Avatar src={tip.avatar} sx={{ width: 32, height: 32 }} />
+                  </ListItemAvatar>
+                  <ListItemText 
+                    primary={tip.sender_wallet.slice(0, 4) + "..." + tip.sender_wallet.slice(-4)}
+                    secondary={`${formatSol(tip.amount)} SOL`}
+                    slotProps={{
+                      primary: { variant: "caption", sx: { fontWeight: 700 } },
+                      secondary: { variant: "caption" }
+                    }}
+                  />
+                </ListItem>
+              </Grid>
+            ))}
+          </Grid>
+        </Paper>
+      </Box>
     </Container>
   );
 }

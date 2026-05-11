@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { SystemProgram, Transaction, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { verifyAndStoreTransaction } from "../services/api";
-import { Box, Typography, TextField, Button, CircularProgress, Paper, IconButton } from "@mui/material";
+import { Box, Typography, TextField, Button, CircularProgress, Paper, IconButton, Grid, InputAdornment } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import BoltIcon from "@mui/icons-material/Bolt";
 import toast from "react-hot-toast";
@@ -119,16 +119,43 @@ export default function SuperChatForm({ streamId, creatorWallet, onClose, onSucc
 
       <form onSubmit={handleSubmit}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <TextField
-            label="Amount (SOL)"
-            type="number"
-            slotProps={{ htmlInput: { step: 0.1, min: 0.01 } }}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            fullWidth
-            required
-            helperText="5% platform fee applies"
-          />
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" sx={{ mb: 1, opacity: 0.7 }}>Select Amount (SOL)</Typography>
+            <Grid container spacing={1} sx={{ mb: 2 }}>
+              {[0.1, 0.5, 1.0, 5.0].map((preset) => (
+                <Grid size={{ xs: 3 }} key={preset}>
+                  <Button 
+                    fullWidth 
+                    variant={amount === preset.toString() ? "contained" : "outlined"}
+                    size="small"
+                    onClick={() => setAmount(preset.toString())}
+                    sx={{ 
+                      borderRadius: "8px",
+                      fontWeight: 700,
+                      borderColor: "rgba(255,255,255,0.1)",
+                      "&:hover": { borderColor: "primary.main" }
+                    }}
+                  >
+                    {preset}
+                  </Button>
+                </Grid>
+              ))}
+            </Grid>
+            
+            <TextField
+              fullWidth
+              label="Custom Amount"
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: <InputAdornment position="start">SOL</InputAdornment>,
+                }
+              }}
+              helperText="5% platform fee applies"
+            />
+          </Box>
 
           <TextField
             label="Your Message"

@@ -2,19 +2,26 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getStream, getUserProfile } from "../services/api";
 import { useSocket } from "../context/SocketContext";
+import { useWalletAuth } from "../hooks/useWalletAuth";
 import ChatBox from "../components/ChatBox";
-import { Container, Grid, Box, Typography, Paper, Chip, Avatar, Skeleton, Button } from "@mui/material";
+import ModerationPanel from "../components/ModerationPanel";
+import ErrorBoundary from "../components/ErrorBoundary";
+import { Container, Grid, Box, Typography, Paper, Chip, Avatar, Skeleton, Button, Tabs, Tab, TextField, Switch, FormControlLabel } from "@mui/material";
 import PeopleIcon from "@mui/icons-material/People";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 
 export default function StreamPage() {
   const { id } = useParams<{ id: string }>();
+  const { walletAddress, isAuthenticated } = useWalletAuth();
   const { socket } = useSocket();
   const [stream, setStream] = useState<any>(null);
   const [viewerCount, setViewerCount] = useState(0);
   const [creator, setCreator] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  const isCreator = isAuthenticated && walletAddress === stream?.creator_wallet;
 
   useEffect(() => {
     if (!id || !socket) return;
@@ -33,26 +40,25 @@ export default function StreamPage() {
     };
   }, [id, socket]);
 
-  useEffect(() => {
+  const fetchStreamData = async () => {
     if (!id) return;
+    try {
+      const streamData = await getStream(id);
+      setStream(streamData);
+      setViewerCount(streamData.viewer_count || 0);
 
-    async function loadData() {
-      try {
-        const streamData = await getStream(id!);
-        setStream(streamData);
-        setViewerCount(streamData.viewer_count || 0);
-
-        // Fetch creator profile
-        const creatorData = await getUserProfile(streamData.creator_wallet);
-        setCreator(creatorData.user);
-      } catch (err: any) {
-        setError(err.message || "Failed to load stream");
-      } finally {
-        setLoading(false);
-      }
+      // Fetch creator profile
+      const creatorData = await getUserProfile(streamData.creator_wallet);
+      setCreator(creatorData.user);
+    } catch (err: any) {
+      setError(err.message || "Failed to load stream");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    loadData();
+  useEffect(() => {
+    fetchStreamData();
   }, [id]);
 
   if (loading) {
@@ -103,10 +109,11 @@ export default function StreamPage() {
         {/* Main Content Area */}
         <Grid size={{ xs: 12, md: 8 }}>
           {/* Video Placeholder */}
-          <Paper
-            sx={{
-              aspectRatio: "16/9",
-              background: "linear-gradient(45deg, #0a0a0f 0%, #1a1a25 100%)",
+          <ErrorBoundary>
+            <Paper
+              sx={{
+                aspectRatio: "16/9",
+                background: "linear-gradient(45deg, #0a0a0f 0%, #1a1a25 100%)",
               borderRadius: "16px",
               display: "flex",
               flexDirection: "column",
@@ -182,6 +189,7 @@ export default function StreamPage() {
               />
             )}
           </Paper>
+        </ErrorBoundary>
 
           {/* Stream Info */}
           <Box sx={{ mt: 3 }}>
@@ -233,12 +241,34 @@ export default function StreamPage() {
               overflow: "hidden"
             }}
           >
-            <Box sx={{ p: 2, borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "center" }}>
-              <Typography sx={{ fontWeight: 800, letterSpacing: "0.1em" }}>STREAM CHAT</Typography>
+            <Box sx={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+              <Tabs 
+                value={activeTab} 
+                onChange={(_, v) => setActiveTab(v)} 
+                variant="fullWidth"
+                textColor="primary"
+                indicatorColor="primary"
+              >
+                <Tab label="CHAT" />
+                {isCreator && <Tab label="MODERATION" />}
+              </Tabs>
             </Box>
 
             <Box sx={{ flexGrow: 1, overflow: "hidden" }}>
-              <ChatBox streamId={id!} creatorWallet={stream.creator_wallet} />
+              {activeTab === 0 ? (
+                <ErrorBoundary>
+                  <ChatBox streamId={id!} creatorWallet={stream.creator_wallet} />
+                </ErrorBoundary>
+              ) : (
+                <ModerationPanel 
+                  streamId={id!} 
+                  initialSlowMode={stream.slow_mode || 0}
+                  initialBlockedKeywords={stream.blocked_keywords || []}
+                  bannedWallets={stream.banned_wallets || []}
+                  initialDonationGoal={stream.donation_goal || 0}
+                  onUpdate={fetchStreamData}
+                />
+              )}
             </Box>
           </Paper>
         </Grid>

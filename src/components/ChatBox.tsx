@@ -2,9 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { useSocket } from "../context/SocketContext";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import { getUserProfile } from "../services/api";
-import { Box, Typography, TextField, IconButton, Avatar, Paper, Button, Modal } from "@mui/material";
+import { Box, Typography, TextField, IconButton, Avatar, Paper, Button, Modal, Menu, MenuItem, Divider } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import BoltIcon from "@mui/icons-material/Bolt";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import TimerIcon from "@mui/icons-material/Timer";
+import GavelIcon from "@mui/icons-material/Gavel";
+import DeleteIcon from "@mui/icons-material/Delete";
 import SuperChatForm from "./SuperChatForm";
 
 interface Message {
@@ -30,7 +34,44 @@ export default function ChatBox({ streamId, creatorWallet }: ChatBoxProps) {
   const [input, setInput] = useState("");
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [showSuperChat, setShowSuperChat] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedMsg, setSelectedMsg] = useState<Message | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const isCreator = walletAddress === creatorWallet;
+
+  const handleModOpen = (event: React.MouseEvent<HTMLElement>, msg: Message) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedMsg(msg);
+  };
+
+  const handleModClose = () => {
+    setAnchorEl(null);
+    setSelectedMsg(null);
+  };
+
+  const handleDelete = () => {
+    if (selectedMsg && socket) {
+      socket.emit("delete_message", { 
+        streamId, 
+        messageId: selectedMsg.id, 
+        wallet: walletAddress 
+      });
+    }
+    handleModClose();
+  };
+
+  const handleTimeout = (duration: number) => {
+    if (selectedMsg && socket) {
+      socket.emit("timeout_user", { 
+        streamId, 
+        walletToTimeout: selectedMsg.wallet, 
+        duration, 
+        wallet: walletAddress 
+      });
+    }
+    handleModClose();
+  };
 
   // Load current user profile for chat metadata
   useEffect(() => {
@@ -62,12 +103,34 @@ export default function ChatBox({ streamId, creatorWallet }: ChatBoxProps) {
       setMessages((prev) => [...prev, msg]);
     };
 
+    const handleHistory = (history: any[]) => {
+      const formatted = history.map(msg => ({
+        id: msg._id,
+        wallet: msg.wallet,
+        name: msg.name,
+        avatar: msg.avatar,
+        message: msg.message,
+        timestamp: msg.timestamp,
+        amount: msg.amount,
+        tx_hash: msg.tx_hash
+      }));
+      setMessages(formatted);
+    };
+
+    const handleDeleted = ({ messageId }: { messageId: string }) => {
+      setMessages((prev) => prev.map(m => m.id === messageId ? { ...m, is_deleted: true } : m));
+    };
+
     socket.on("receive_message", handleMessage);
     socket.on("new_superchat", handleSuperChat);
+    socket.on("chat_history", handleHistory);
+    socket.on("message_deleted", handleDeleted);
 
     return () => {
       socket.off("receive_message");
       socket.off("new_superchat");
+      socket.off("chat_history");
+      socket.off("message_deleted");
     };
   }, [socket]);
 
@@ -109,13 +172,13 @@ export default function ChatBox({ streamId, creatorWallet }: ChatBoxProps) {
           "&::-webkit-scrollbar-thumb": { bgcolor: "rgba(255,255,255,0.05)", borderRadius: "3px" }
         }}
       >
-        {messages.length === 0 ? (
+        {messages.filter(m => !(m as any).is_deleted).length === 0 ? (
           <Box sx={{ mt: "auto", mb: "auto", textAlign: "center", opacity: 0.5 }}>
             <Typography variant="body2">Welcome to the chat!</Typography>
             <Typography variant="caption">Be respectful and have fun.</Typography>
           </Box>
         ) : (
-          messages.map((msg) => (
+          messages.filter(m => !(m as any).is_deleted).map((msg) => (
             <Box 
               key={msg.id} 
               sx={{ 
@@ -126,16 +189,36 @@ export default function ChatBox({ streamId, creatorWallet }: ChatBoxProps) {
                 borderRadius: "12px",
                 bgcolor: msg.amount ? "rgba(112, 0, 255, 0.15)" : "transparent",
                 border: msg.amount ? "1px solid rgba(112, 0, 255, 0.3)" : "none",
-                boxShadow: msg.amount ? "0 0 15px rgba(112, 0, 255, 0.1)" : "none"
+                boxShadow: msg.amount ? "0 0 15px rgba(112, 0, 255, 0.1)" : "none",
+                position: "relative",
+                "&:hover .mod-btn": { opacity: 1 }
               }}
             >
               <Avatar src={msg.avatar} sx={{ width: 32, height: 32, mt: 0.5 }} />
               <Box sx={{ flexGrow: 1 }}>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5 }}>
-                  <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 800, color: msg.amount ? "secondary.light" : "primary.main" }}>
-                      {msg.name}
-                    </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.2 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: msg.amount ? "primary.light" : "rgba(255,255,255,0.6)" }}>
+                    {msg.name}
+                  </Typography>
+                  
+                  {isCreator && msg.wallet !== walletAddress && (
+                    <IconButton 
+                      className="mod-btn"
+                      size="small" 
+                      onClick={(e) => handleModOpen(e, msg)}
+                      sx={{ 
+                        opacity: 0, 
+                        transition: "opacity 0.2s", 
+                        p: 0.2,
+                        color: "rgba(255,255,255,0.4)",
+                        "&:hover": { color: "error.main" }
+                      }}
+                    >
+                      <MoreVertIcon fontSize="inherit" />
+                    </IconButton>
+                  )}
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
                     <Typography variant="caption" sx={{ fontSize: "0.6rem", opacity: 0.4 }}>
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </Typography>
@@ -158,8 +241,7 @@ export default function ChatBox({ streamId, creatorWallet }: ChatBoxProps) {
                   {msg.message}
                 </Typography>
               </Box>
-            </Box>
-          ))
+            ))
         )}
       </Box>
 
@@ -206,6 +288,40 @@ export default function ChatBox({ streamId, creatorWallet }: ChatBoxProps) {
           </Paper>
         )}
       </Box>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleModClose}
+        slotProps={{
+          paper: {
+            sx: { 
+              bgcolor: "#1a1a25", 
+              border: "1px solid rgba(255,255,255,0.1)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
+            }
+          }
+        }}
+      >
+        <MenuItem onClick={handleDelete} sx={{ color: "error.main", gap: 1.5 }}>
+          <DeleteIcon fontSize="small" /> Delete Message
+        </MenuItem>
+        <MenuItem onClick={() => handleTimeout(60)} sx={{ gap: 1.5 }}>
+          <TimerIcon fontSize="small" /> Timeout (1 min)
+        </MenuItem>
+        <MenuItem onClick={() => handleTimeout(300)} sx={{ gap: 1.5 }}>
+          <TimerIcon fontSize="small" /> Timeout (5 min)
+        </MenuItem>
+        <Divider sx={{ opacity: 0.1 }} />
+        <MenuItem onClick={() => {
+          if (selectedMsg && socket) {
+            socket.emit("ban_user", { streamId, walletToBan: selectedMsg.wallet, wallet: walletAddress });
+          }
+          handleModClose();
+        }} sx={{ color: "error.main", gap: 1.5 }}>
+          <GavelIcon fontSize="small" /> Ban User
+        </MenuItem>
+      </Menu>
 
       {/* Super Chat Modal */}
       <Modal
