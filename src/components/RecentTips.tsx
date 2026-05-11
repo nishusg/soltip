@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import { useRealtimeTips } from "../hooks/useRealtimeTips";
 import { listTransactions } from "../services/api";
@@ -131,7 +132,11 @@ export default function RecentTips() {
                             {formatSol(tx.amount)} SOL
                           </Typography>
                           <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
-                            {isSent ? `To ${shorten(tx.creator_wallet)}` : `From ${shorten(tx.sender_wallet)}`}
+                            {isSent ? (
+                              <>To <Link component={RouterLink} to={`/profile/${tx.creator_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{shorten(tx.creator_wallet)}</Link></>
+                            ) : (
+                              <>From <Link component={RouterLink} to={`/profile/${tx.sender_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{shorten(tx.sender_wallet)}</Link></>
+                            )}
                           </Typography>
                         </Box>
                       </Box>

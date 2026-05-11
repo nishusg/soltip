@@ -21,10 +21,12 @@ import Navbar from "./components/Navbar";
 
 // Lazy loaded components
 const Home = React.lazy(() => import("./pages/Home"));
-const CreatorPage = React.lazy(() => import("./pages/CreatorPage"));
+const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
 const CreatorLeaderboard = React.lazy(() => import("./components/CreatorLeaderboard"));
 const ProfileSettings = React.lazy(() => import("./pages/ProfileSettings"));
 const ActivityPage = React.lazy(() => import("./pages/ActivityPage"));
+const CreateStream = React.lazy(() => import("./pages/CreateStream"));
+const StreamPage = React.lazy(() => import("./pages/StreamPage"));
 
 export default function App() {
   return (
@@ -47,8 +49,10 @@ export default function App() {
             }
           />
           <Route path="/activity" element={<ActivityPage />} />
-          <Route path="/creator/:wallet" element={<CreatorPage />} />
+          <Route path="/profile/:wallet" element={<ProfilePage />} />
           <Route path="/settings" element={<ProfileSettings />} />
+          <Route path="/stream/create" element={<CreateStream />} />
+          <Route path="/stream/:id" element={<StreamPage />} />
         </Routes>
       </Suspense>
 

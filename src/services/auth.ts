@@ -22,6 +22,8 @@ import { getNonce, verifySignature } from "./api";
 
 /** localStorage key for the JWT token */
 const TOKEN_KEY = "superchat_token";
+/** localStorage key for the wallet address associated with the token */
+const ADDRESS_KEY = "superchat_wallet";
 
 /**
  * Full authentication flow: nonce → sign → verify → store JWT.
@@ -58,9 +60,10 @@ export async function authenticate(
   const { token } = await verifySignature(walletAddress, signatureBase58);
 
   // -------------------------------------------------------------------
-  // 5. Store token in localStorage
+  // 5. Store token and wallet in localStorage
   // -------------------------------------------------------------------
   localStorage.setItem(TOKEN_KEY, token);
+  localStorage.setItem(ADDRESS_KEY, walletAddress);
 
   return token;
 }
@@ -70,9 +73,15 @@ export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
 }
 
-/** Remove the stored JWT token (logout) */
+/** Remove the stored JWT token and wallet (logout) */
 export function removeToken(): void {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(ADDRESS_KEY);
+}
+
+/** Get the stored wallet address */
+export function getStoredAddress(): string | null {
+  return localStorage.getItem(ADDRESS_KEY);
 }
 
 /** Check if the user has a stored token */

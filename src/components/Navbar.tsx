@@ -105,6 +105,22 @@ export default function Navbar() {
             <>
               <Button 
                 component={RouterLink} 
+                to="/stream/create" 
+                variant="contained"
+                color="secondary"
+                startIcon={<BoltIcon />}
+                sx={{ 
+                  px: 3,
+                  mr: 1,
+                  borderRadius: "10px",
+                  fontWeight: 800,
+                  boxShadow: "0 0 20px rgba(112, 0, 255, 0.4)"
+                }}
+              >
+                Go Live
+              </Button>
+              <Button 
+                component={RouterLink} 
                 to="/activity" 
                 color="inherit" 
                 sx={{ 
@@ -170,7 +186,7 @@ export default function Navbar() {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <Button
                 component={RouterLink}
-                to={`/creator/${useWalletAuth().walletAddress}`}
+                to={`/profile/${useWalletAuth().walletAddress}`}
                 variant="outlined"
                 color="primary"
                 size="small"

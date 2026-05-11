@@ -10,7 +10,12 @@ import ReactDOM from "react-dom/client";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
+import { 
+  PhantomWalletAdapter, 
+  SolflareWalletAdapter 
+} from "@solana/wallet-adapter-wallets";
 import { AuthProvider } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext";
 import App from "./App";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -24,7 +29,13 @@ function Root() {
     []
   );
 
-  const wallets = useMemo(() => [], []);
+  const wallets = useMemo(
+    () => [
+      new PhantomWalletAdapter(),
+      new SolflareWalletAdapter(),
+    ],
+    []
+  );
 
   return (
     <ThemeProvider theme={theme}>
@@ -33,9 +44,11 @@ function Root() {
       <ConnectionProvider endpoint={endpoint}>
         <WalletProvider wallets={wallets} autoConnect>
           <WalletModalProvider>
-            <AuthProvider>
-              <App />
-            </AuthProvider>
+            <SocketProvider>
+              <AuthProvider>
+                <App />
+              </AuthProvider>
+            </SocketProvider>
           </WalletModalProvider>
         </WalletProvider>
       </ConnectionProvider>

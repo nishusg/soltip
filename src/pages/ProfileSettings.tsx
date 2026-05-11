@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useWalletAuth } from "../hooks/useWalletAuth";
-import { getCreatorStats, updateProfile } from "../services/api";
+import { getUserProfile, updateProfile } from "../services/api";
 import toast from "react-hot-toast";
 import { Container, Card, CardContent, Typography, TextField, Button, Box, CircularProgress, Avatar } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
@@ -16,12 +16,12 @@ export default function ProfileSettings() {
 
   useEffect(() => {
     if (isAuthenticated && walletAddress) {
-      getCreatorStats(walletAddress)
+      getUserProfile(walletAddress)
         .then((data) => {
-          if (data.creator) {
-            setName(data.creator.name || "");
-            setBio(data.creator.bio || "");
-            setAvatarUrl(data.creator.avatar_url || "");
+          if (data.user) {
+            setName(data.user.name || "");
+            setBio(data.user.bio || "");
+            setAvatarUrl(data.user.avatar_url || "");
           }
         })
         .catch((err) => {

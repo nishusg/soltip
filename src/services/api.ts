@@ -105,9 +105,9 @@ export async function getDailyStats() {
   return api("/stats/daily");
 }
 
-/** Get a creator's profile and recent tips */
-export async function getCreatorStats(wallet: string) {
-  return api(`/stats/creator/${wallet}`);
+/** Get a user's profile and recent tips (both sent and received) */
+export async function getUserProfile(wallet: string) {
+  return api(`/stats/user/${wallet}`);
 }
 
 /** Update the creator profile for the authenticated user */
@@ -116,4 +116,33 @@ export async function updateProfile(data: { name?: string; bio?: string; avatar_
     method: "PUT",
     body: JSON.stringify(data),
   });
+}
+
+// ---------------------------------------------------------------------------
+// Stream endpoints
+// ---------------------------------------------------------------------------
+
+/** Start a new livestream */
+export async function createStream(data: { title: string; category?: string; description?: string }) {
+  return api("/streams/create", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+/** End an active livestream */
+export async function endStream(id: string) {
+  return api(`/streams/${id}/end`, {
+    method: "POST",
+  });
+}
+
+/** Get details for a specific stream */
+export async function getStream(id: string) {
+  return api(`/streams/${id}`);
+}
+
+/** List all currently live streams */
+export async function listActiveStreams() {
+  return api("/streams/active");
 }

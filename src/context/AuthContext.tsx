@@ -17,7 +17,7 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { authenticate, getToken, removeToken } from "../services/auth";
+import { authenticate, getToken, removeToken, getStoredAddress } from "../services/auth";
 
 // ---------------------------------------------------------------------------
 // Type definitions
@@ -94,13 +94,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // -------------------------------------------------------------------
-  // Auto-logout when wallet disconnects
+  // Auto-logout only when wallet is definitely disconnected
   // -------------------------------------------------------------------
+  const { connecting } = useWallet();
+
   useEffect(() => {
-    if (!connected) {
+    // 1. If wallet is definitely disconnected, clear session
+    if (!connected && !connecting && token) {
       logout();
+      return;
     }
-  }, [connected, logout]);
+
+    // 2. If wallet is connected, ensure it matches the stored session
+    if (connected && publicKey && token) {
+      const currentWallet = publicKey.toString();
+      const sessionWallet = getStoredAddress();
+
+      if (sessionWallet && currentWallet !== sessionWallet) {
+        console.log("Wallet switch detected. Logging out...");
+        logout();
+      }
+    }
+  }, [connected, connecting, publicKey, logout, token]);
 
   useEffect(() => {
     const handleAuthExpired = () => {

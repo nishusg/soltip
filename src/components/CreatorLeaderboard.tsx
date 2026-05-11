@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useRealtimeTips } from "../hooks/useRealtimeTips";
 import { Box, Typography, Card, CardContent, CircularProgress, List, Avatar } from "@mui/material";
@@ -135,12 +136,22 @@ export default function CreatorLeaderboard() {
               <Card 
                 key={creator.wallet_address} 
                 className="fade-in-up"
+                component={RouterLink}
+                to={`/profile/${creator.wallet_address}`}
                 sx={{ 
                   display: "flex", 
                   alignItems: "center", 
                   p: { xs: 2, sm: 3 },
                   position: "relative",
                   overflow: "hidden",
+                  textDecoration: "none",
+                  color: "inherit",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    background: "rgba(255,255,255,0.06)",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.3)"
+                  },
                   animationDelay: `${index * 0.1}s`,
                   ...(isTop3 && {
                     background: `linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)`,

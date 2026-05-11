@@ -1,61 +1,64 @@
 import { useState, useEffect } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
-import { getCreatorStats } from "../services/api";
+import { getUserProfile } from "../services/api";
 import { getExplorerUrl } from "../services/solana";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWalletAuth } from "../hooks/useWalletAuth";
-import { Container, Card, CardContent, Typography, Box, CircularProgress, Button, Avatar, List, ListItem, Divider, Link, Chip } from "@mui/material";
+import { Container, Card, CardContent, Typography, Box, CircularProgress, Button, Avatar, List, ListItem, Divider, Link, Chip, Tabs, Tab } from "@mui/material";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
+import CallMadeIcon from "@mui/icons-material/CallMade";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import FlashOnIcon from "@mui/icons-material/FlashOn";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ErrorIcon from "@mui/icons-material/Error";
 import TipForm from "../components/TipForm";
 
-interface CreatorProfile {
+interface UserProfile {
   wallet_address: string;
   name: string;
   bio?: string;
   avatar_url?: string;
   total_received: number;
+  total_sent: number;
 }
 
 interface Tip {
   tx_hash: string;
   sender_wallet: string;
+  creator_wallet: string;
   amount: number;
   fee: number;
   message: string;
   timestamp: string;
 }
 
-export default function CreatorPage() {
+export default function ProfilePage() {
   const { wallet } = useParams<{ wallet: string }>();
   const { walletAddress } = useWalletAuth();
 
-  const [creator, setCreator] = useState<CreatorProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [tips, setTips] = useState<Tip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     if (!wallet) return;
 
-    async function fetchCreator() {
+    async function fetchProfile() {
       setLoading(true);
       setError(null);
       try {
-        const data = await getCreatorStats(wallet!);
-        setCreator(data.creator);
+        const data = await getUserProfile(wallet!);
+        setUser(data.user);
         setTips(data.recent_tips || []);
       } catch (err: any) {
-        setError(err.message || "Creator not found");
+        setError(err.message || "User not found");
       } finally {
         setLoading(false);
       }
     }
 
-    fetchCreator();
+    fetchProfile();
   }, [wallet]);
 
   function shorten(addr: string): string {
@@ -75,12 +78,15 @@ export default function CreatorPage() {
     return date.toLocaleDateString();
   }
 
+  const receivedTips = tips.filter(t => t.creator_wallet === wallet);
+  const sentTips = tips.filter(t => t.sender_wallet === wallet);
+
   return (
     <Container maxWidth="md" sx={{ py: 10, minHeight: "calc(100vh - 64px)" }}>
       {loading && (
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", py: 10 }}>
           <CircularProgress size={40} sx={{ mb: 2 }} />
-          <Typography color="text.secondary">Loading creator profile...</Typography>
+          <Typography color="text.secondary">Loading profile...</Typography>
         </Box>
       )}
 
@@ -98,13 +104,13 @@ export default function CreatorPage() {
         </Card>
       )}
 
-      {!loading && creator && (
+      {!loading && user && (
         <Box sx={{ animation: "fadeInUp 0.6s ease-out" }}>
           {/* Profile Card */}
           <Card sx={{ mb: 4, textAlign: "center", px: 4, pb: 4, pt: 0, overflow: "visible" }}>
             <Box sx={{ display: "flex", justifyContent: "center", mt: -6, mb: 2 }}>
               <Avatar
-                src={creator.avatar_url}
+                src={user.avatar_url}
                 sx={{
                   width: 120,
                   height: 120,
@@ -114,66 +120,101 @@ export default function CreatorPage() {
                   bgcolor: "primary.dark"
                 }}
               >
-                {!creator.avatar_url && (creator.name || creator.wallet_address)[0]?.toUpperCase()}
+                {!user.avatar_url && (user.name || user.wallet_address)[0]?.toUpperCase()}
               </Avatar>
             </Box>
             
             <CardContent sx={{ pt: 0 }}>
               <Typography variant="h4" gutterBottom sx={{ fontWeight: 800 }}>
-                {creator.name || shorten(creator.wallet_address)}
+                {user.name || shorten(user.wallet_address)}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {creator.wallet_address}
+                {user.wallet_address}
               </Typography>
 
-              {creator.bio && (
+              {user.bio && (
                 <Typography variant="body1" sx={{ mb: 3, fontStyle: "italic", color: "text.secondary", maxWidth: 500, mx: "auto" }}>
-                  "{creator.bio}"
+                  "{user.bio}"
                 </Typography>
               )}
 
-              <Box sx={{ my: 4, py: 3, borderTop: "1px solid rgba(255,255,255,0.1)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                <Typography variant="overline" color="text.secondary" sx={{ display: "block" }}>
-                  Total Received
-                </Typography>
-                <Typography variant="h3" sx={{ fontWeight: 800, background: "linear-gradient(90deg, #00e5ff 0%, #b400ff 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                  {formatSol(creator.total_received)} SOL
-                </Typography>
+              <Box sx={{ 
+                display: "grid", 
+                gridTemplateColumns: "1fr 1fr", 
+                gap: 2,
+                my: 4, 
+                py: 3, 
+                borderTop: "1px solid rgba(255,255,255,0.1)", 
+                borderBottom: "1px solid rgba(255,255,255,0.1)" 
+              }}>
+                <Box>
+                  <Typography variant="overline" color="text.secondary" sx={{ display: "block" }}>
+                    Total Received
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 800, background: "linear-gradient(90deg, #00e5ff 0%, #b400ff 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                    {formatSol(user.total_received)} SOL
+                  </Typography>
+                </Box>
+                <Box sx={{ borderLeft: "1px solid rgba(255,255,255,0.1)" }}>
+                  <Typography variant="overline" color="text.secondary" sx={{ display: "block" }}>
+                    Total Sent
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 800, color: "secondary.light" }}>
+                    {formatSol(user.total_sent)} SOL
+                  </Typography>
+                </Box>
               </Box>
               
-              {walletAddress === creator.wallet_address ? (
+              {walletAddress === user.wallet_address ? (
                 <Button component={RouterLink} to="/settings" variant="outlined" color="secondary" size="large" startIcon={<SettingsIcon />}>
                   Edit Profile
                 </Button>
               ) : (
                 <Box sx={{ mt: 4, textAlign: "left" }}>
-                  <TipForm defaultCreatorAddress={creator.wallet_address} />
+                  <TipForm defaultCreatorAddress={user.wallet_address} />
                 </Box>
               )}
             </CardContent>
           </Card>
 
 
-          {/* Recent Tips */}
-          {tips.length > 0 && (
-            <Card>
-              <CardContent sx={{ p: 4 }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, mb: 3 }}>
-                  Recent Tips
-                </Typography>
-                <List disablePadding>
-                  {tips.map((tip, idx) => (
+          {/* Activity Tabs */}
+          <Card>
+            <Box sx={{ borderBottom: 1, borderColor: "rgba(255,255,255,0.1)" }}>
+              <Tabs value={activeTab} onChange={(_, val) => setActiveTab(val)} centered textColor="primary" indicatorColor="primary">
+                <Tab label={`Received (${receivedTips.length})`} sx={{ fontWeight: 700 }} />
+                <Tab label={`Sent (${sentTips.length})`} sx={{ fontWeight: 700 }} />
+              </Tabs>
+            </Box>
+            <CardContent sx={{ p: 4 }}>
+              <List disablePadding>
+                {(activeTab === 0 ? receivedTips : sentTips).length === 0 ? (
+                  <Typography sx={{ textAlign: "center", py: 4, color: "text.secondary", fontStyle: "italic" }}>
+                    No activity found
+                  </Typography>
+                ) : (
+                  (activeTab === 0 ? receivedTips : sentTips).map((tip, idx, arr) => (
                     <Box key={tip.tx_hash}>
                       <ListItem sx={{ flexDirection: "column", alignItems: "stretch", px: 0, py: 2 }}>
                         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <Chip icon={<CallReceivedIcon fontSize="small" />} label="Received" color="primary" size="small" variant="outlined" />
+                            <Chip 
+                              icon={activeTab === 0 ? <CallReceivedIcon fontSize="small" /> : <CallMadeIcon fontSize="small" />} 
+                              label={activeTab === 0 ? "Received" : "Sent"} 
+                              color={activeTab === 0 ? "primary" : "secondary"} 
+                              size="small" 
+                              variant="outlined" 
+                            />
                             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                               {formatSol(tip.amount)} SOL
                             </Typography>
                           </Box>
                           <Typography variant="body2" color="text.secondary">
-                            from {shorten(tip.sender_wallet)}
+                            {activeTab === 0 ? (
+                              <>from <Link component={RouterLink} to={`/profile/${tip.sender_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{shorten(tip.sender_wallet)}</Link></>
+                            ) : (
+                              <>to <Link component={RouterLink} to={`/profile/${tip.creator_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{shorten(tip.creator_wallet)}</Link></>
+                            )}
                           </Typography>
                         </Box>
 
@@ -192,13 +233,13 @@ export default function CreatorPage() {
                           </Link>
                         </Box>
                       </ListItem>
-                      {idx < tips.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.05)" }} />}
+                      {idx < arr.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.05)" }} />}
                     </Box>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          )}
+                  ))
+                )}
+              </List>
+            </CardContent>
+          </Card>
         </Box>
       )}
     </Container>
