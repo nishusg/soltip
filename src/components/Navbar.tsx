@@ -120,22 +120,6 @@ export default function Navbar() {
             <>
               <Button 
                 component={RouterLink} 
-                to="/stream/create" 
-                variant="contained"
-                color="secondary"
-                startIcon={<BoltIcon />}
-                sx={{ 
-                  px: 3,
-                  mr: 1,
-                  borderRadius: "10px",
-                  fontWeight: 800,
-                  boxShadow: "0 0 20px rgba(112, 0, 255, 0.4)"
-                }}
-              >
-                Go Live
-              </Button>
-              <Button 
-                component={RouterLink} 
                 to="/activity" 
                 color="inherit" 
                 sx={{ 
@@ -327,28 +311,6 @@ export default function Navbar() {
           </List>
 
           <Divider sx={{ my: 2, opacity: 0.1 }} />
-
-          {isAuthenticated && (
-            <Box sx={{ mb: 2 }}>
-               <Button 
-                component={RouterLink} 
-                to="/stream/create" 
-                variant="contained"
-                color="secondary"
-                fullWidth
-                startIcon={<BoltIcon />}
-                onClick={() => setMobileOpen(false)}
-                sx={{ 
-                  py: 1.5,
-                  borderRadius: "12px",
-                  fontWeight: 800,
-                  boxShadow: "0 0 20px rgba(112, 0, 255, 0.4)"
-                }}
-              >
-                Go Live
-              </Button>
-            </Box>
-          )}
 
           <Box sx={{ mt: "auto" }}>
              <WalletMultiButton />

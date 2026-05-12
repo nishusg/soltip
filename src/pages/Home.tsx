@@ -1,7 +1,7 @@
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import WalletConnect from "../components/WalletConnect";
 import TipForm from "../components/TipForm";
-import StreamList from "../components/StreamList";
+import RecentTips from "../components/RecentTips";
 import { Container, Box, Divider } from "@mui/material";
 import SEO from "../components/SEO";
 
@@ -15,8 +15,7 @@ export default function Home() {
       {!connected && <WalletConnect />}
 
       <Box sx={{ animation: "fadeInUp 0.6s ease-out" }}>
-        <StreamList />
-        
+
         {connected && (
           <>
             <Divider sx={{ my: 6, opacity: 0.1 }} />

@@ -8,9 +8,9 @@ interface SEOProps {
 }
 
 export default function SEO({ 
-  title = "SolChat — Premium Solana Livestreaming", 
-  description = "The future of creator engagement on Solana. Send Super Chats, follow creators, and join the community.",
-  image = "/og-image.png", // We should ideally have a real OG image
+  title = "SolChat — Super Chat Tipping on Solana", 
+  description = "The future of creator support on Solana. Send Super Chats, tip creators with SOL, and join the community.",
+  image = "/og-image.png",
   url = "https://solchat.io" 
 }: SEOProps) {
   const fullTitle = title.includes("SolChat") ? title : `${title} | SolChat`;

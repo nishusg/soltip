@@ -84,7 +84,6 @@ export async function verifyAndStoreTransaction(data: {
   sender_wallet: string;
   creator_wallet: string;
   message?: string;
-  stream_id?: string;
 }) {
   return api("/tx/verify", {
     method: "POST",
@@ -125,46 +124,17 @@ export async function updateProfile(data: { name?: string; bio?: string; avatar_
 }
 
 // ---------------------------------------------------------------------------
-// Stream endpoints
+// Overlay token endpoints
 // ---------------------------------------------------------------------------
 
-/** Start a new livestream */
-export async function createStream(data: { title: string; category?: string; description?: string }) {
-  return api("/streams/create", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+/** Get the current overlay token (auth required) */
+export async function getOverlayToken() {
+  return api("/creators/overlay-token");
 }
 
-/** End a livestream */
-export async function endStream(id: string) {
-  return api(`/streams/${id}/end`, { method: "POST" });
-}
-
-/** Update stream settings (slow mode, etc) */
-export async function updateStreamSettings(id: string, settings: { slow_mode?: number, donation_goal?: number }) {
-  return api(`/streams/${id}/settings`, {
-    method: "PATCH",
-    body: JSON.stringify(settings),
-  });
-}
-
-/** Ban or unban a user */
-export async function toggleBan(id: string, wallet_to_ban: string, action: "ban" | "unban") {
-  return api(`/streams/${id}/ban`, {
-    method: "POST",
-    body: JSON.stringify({ wallet_to_ban, action }),
-  });
-}
-
-/** Get details for a specific stream */
-export async function getStream(id: string) {
-  return api(`/streams/${id}`);
-}
-
-/** List all currently live streams */
-export async function listActiveStreams() {
-  return api("/streams/active");
+/** Generate or regenerate the overlay token (auth required) */
+export async function generateOverlayToken() {
+  return api("/creators/overlay-token", { method: "POST" });
 }
 
 // ---------------------------------------------------------------------------

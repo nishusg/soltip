@@ -1,290 +1,259 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { Box, Typography, Paper, keyframes } from "@mui/material";
 import { useSocket } from "../context/SocketContext";
 import BoltIcon from "@mui/icons-material/Bolt";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import LockIcon from "@mui/icons-material/Lock";
 
-// Animation for the alert entry
-const slideIn = keyframes`
-  0% { transform: translateX(100%); opacity: 0; }
-  10% { transform: translateX(0); opacity: 1; }
-  90% { transform: translateX(0); opacity: 1; }
-  100% { transform: translateX(100%); opacity: 0; }
+// Animation for new tip entry
+const slideInLeft = keyframes`
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 `;
 
-interface Alert {
+interface TipEntry {
   id: string;
   sender: string;
   amount: number;
   message: string;
+  timestamp: string;
+}
+
+// Color tiers based on amount
+function getTierColor(amount: number): string {
+  if (amount >= 5) return "#ff2d55";     // 5+ SOL — red/pink (legendary)
+  if (amount >= 1) return "#ff9500";     // 1-5 SOL — orange (epic)
+  if (amount >= 0.5) return "#ffcc00";   // 0.5-1 SOL — gold
+  if (amount >= 0.1) return "#00f2ff";   // 0.1-0.5 SOL — cyan
+  return "#8e8e93";                       // < 0.1 SOL — grey
+}
+
+function getTierGlow(amount: number): string {
+  if (amount >= 5) return "0 0 20px rgba(255, 45, 85, 0.5)";
+  if (amount >= 1) return "0 0 15px rgba(255, 149, 0, 0.4)";
+  if (amount >= 0.5) return "0 0 12px rgba(255, 204, 0, 0.3)";
+  return "none";
 }
 
 const OverlayPage: React.FC = () => {
-  const { streamId } = useParams<{ streamId: string }>();
+  const { walletAddress } = useParams<{ walletAddress: string }>();
+  const [searchParams] = useSearchParams();
+  const overlayKey = searchParams.get("key");
   const { socket } = useSocket();
-  const [currentAlert, setCurrentAlert] = useState<Alert | null>(null);
-  const [stream, setStream] = useState<any>(null);
-  const [recentDonors, setRecentDonors] = useState<any[]>([]);
-  const [topDonors, setTopDonors] = useState<any[]>([]);
-  const queue = useRef<Alert[]>([]);
-  const isProcessing = useRef(false);
+  const [tips, setTips] = useState<TipEntry[]>([]);
+  const [authStatus, setAuthStatus] = useState<"loading" | "ok" | "denied">("loading");
+  const feedRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Preload audio
   useEffect(() => {
-    if (!socket || !streamId) return;
+    audioRef.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2436/2436-preview.mp3");
+  }, []);
 
-    // Fetch initial stream data for goals
-    const fetchStream = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/streams/${streamId}`);
-        const data = await res.json();
-        setStream(data);
-      } catch (err) {}
-    };
-    fetchStream();
+  // Step 1: Verify the overlay key
+  useEffect(() => {
+    if (!walletAddress || !overlayKey) {
+      setAuthStatus("denied");
+      return;
+    }
 
-    socket.emit("join_room", streamId);
+    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+    fetch(`${API_BASE}/creators/overlay-verify?wallet=${walletAddress}&key=${overlayKey}`)
+      .then(res => {
+        if (res.ok) setAuthStatus("ok");
+        else setAuthStatus("denied");
+      })
+      .catch(() => setAuthStatus("denied"));
+  }, [walletAddress, overlayKey]);
+
+  // Step 2: Load existing tips on mount
+  useEffect(() => {
+    if (authStatus !== "ok" || !walletAddress) return;
+
+    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+    fetch(`${API_BASE}/stats/user/${walletAddress}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.recent_tips && data.recent_tips.length > 0) {
+          const received = data.recent_tips
+            .filter((t: any) => t.creator_wallet === walletAddress)
+            .slice(0, 20)
+            .reverse() // oldest first so newest is at bottom
+            .map((t: any) => ({
+              id: t._id || t.tx_hash,
+              sender: t.sender_wallet.slice(0, 4) + "..." + t.sender_wallet.slice(-4),
+              amount: t.amount / 1e9,
+              message: t.message || "",
+              timestamp: t.timestamp
+            }));
+          setTips(received);
+        }
+      })
+      .catch(() => {});
+  }, [authStatus, walletAddress]);
+
+  // Step 3: Subscribe to real-time tips
+  useEffect(() => {
+    if (authStatus !== "ok" || !socket || !walletAddress || !overlayKey) return;
+
+    socket.emit("subscribe_overlay", { walletAddress, key: overlayKey });
 
     const handleSuperChat = (data: any) => {
-      // Update local stream state for goal
-      setStream((prev: any) => ({
-        ...prev,
-        donation_current: (prev?.donation_current || 0) + data.amount
-      }));
-
-      // Add to recent donors
-      const donorInfo = {
-        name: data.name || (data.wallet.slice(0, 4) + "..." + data.wallet.slice(-4)),
-        amount: data.amount / 1000000000,
+      const newTip: TipEntry = {
+        id: data._id || data.tx_hash || Math.random().toString(),
+        sender: data.name || (data.wallet.slice(0, 4) + "..." + data.wallet.slice(-4)),
+        amount: data.amount / 1e9,
+        message: data.message || "",
         timestamp: new Date().toISOString()
       };
-      setRecentDonors(prev => [donorInfo, ...prev].slice(0, 5));
 
-      // Update top donors (aggregate by wallet)
-      setTopDonors(prev => {
-        const existing = prev.find(d => d.wallet === data.wallet);
-        let newTop;
-        if (existing) {
-          newTop = prev.map(d => d.wallet === data.wallet ? { ...d, amount: d.amount + (data.amount / 1000000000) } : d);
-        } else {
-          newTop = [...prev, { wallet: data.wallet, name: data.name || (data.wallet.slice(0, 4) + "..." + data.wallet.slice(-4)), amount: data.amount / 1000000000 }];
-        }
-        return newTop.sort((a, b) => b.amount - a.amount).slice(0, 3);
-      });
+      setTips(prev => [...prev, newTip].slice(-50)); // Keep last 50
 
-      const newAlert: Alert = {
-        id: data._id || Math.random().toString(),
-        sender: data.wallet.slice(0, 4) + "..." + data.wallet.slice(-4),
-        amount: data.amount / 1000000000,
-        message: data.message,
-      };
-      queue.current.push(newAlert);
-      processQueue();
+      // Play sound
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      }
     };
 
     socket.on("new_superchat", handleSuperChat);
 
     return () => {
       socket.off("new_superchat", handleSuperChat);
+      socket.emit("unsubscribe_overlay", walletAddress);
     };
-  }, [socket, streamId]);
+  }, [authStatus, socket, walletAddress, overlayKey]);
 
-  const processQueue = () => {
-    if (isProcessing.current || queue.current.length === 0) return;
+  // Auto-scroll to bottom when new tips arrive
+  useEffect(() => {
+    if (feedRef.current) {
+      feedRef.current.scrollTop = feedRef.current.scrollHeight;
+    }
+  }, [tips]);
 
-    isProcessing.current = true;
-    const alert = queue.current.shift()!;
-    setCurrentAlert(alert);
+  if (!walletAddress) return null;
 
-    // Play sound (optional, creators can add their own)
-    const audio = new Audio("https://assets.mixkit.co/active_storage/sfx/2436/2436-preview.mp3");
-    audio.play().catch(() => {});
+  if (authStatus === "loading") {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", bgcolor: "transparent" }}>
+        <Typography sx={{ color: "rgba(255,255,255,0.5)" }}>Verifying overlay access...</Typography>
+      </Box>
+    );
+  }
 
-    // Duration of the alert (7 seconds)
-    setTimeout(() => {
-      setCurrentAlert(null);
-      isProcessing.current = false;
-      setTimeout(processQueue, 500); // Small gap between alerts
-    }, 7000);
-  };
-
-  if (!streamId) return null;
+  if (authStatus === "denied") {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh", gap: 2 }}>
+        <LockIcon sx={{ fontSize: 48, color: "rgba(255,75,75,0.7)" }} />
+        <Typography variant="h6" sx={{ color: "rgba(255,75,75,0.9)", fontWeight: 800 }}>
+          Invalid Overlay Key
+        </Typography>
+        <Typography sx={{ color: "rgba(255,255,255,0.5)", textAlign: "center", maxWidth: 400 }}>
+          This overlay URL requires a valid key. Generate one from your Creator Dashboard.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
-    <Box 
-      sx={{ 
-        width: "100vw", 
-        height: "100vh", 
-        bgcolor: "transparent", 
+    <Box
+      sx={{
+        width: "100vw",
+        height: "100vh",
+        bgcolor: "transparent",
         overflow: "hidden",
-        position: "relative",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
-        p: 6
+        justifyContent: "flex-end",
+        p: 2
       }}
     >
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        {/* Recent Donors Feed (Left) */}
-        <Box sx={{ width: 250 }}>
-          {recentDonors.length > 0 && (
-            <Paper 
-              sx={{ 
-                p: 2, 
-                bgcolor: "rgba(0,0,0,0.6)", 
-                borderRadius: "12px", 
-                border: "1px solid rgba(255,255,255,0.1)",
-                backdropFilter: "blur(10px)"
-              }}
-            >
-              <Typography variant="caption" sx={{ color: "#00f2ff", fontWeight: 900, mb: 1, display: "block" }}>
-                RECENT SUPPORTERS
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {recentDonors.map((donor, i) => (
-                  <Box 
-                    key={i} 
-                    sx={{ 
-                      display: "flex", 
-                      justifyContent: "space-between", 
-                      alignItems: "center",
-                      animation: "fadeIn 0.5s ease-out"
-                    }}
-                  >
-                    <Typography variant="body2" sx={{ color: "white", fontWeight: 600, maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {donor.name}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: "#7000ff", fontWeight: 900 }}>
-                      {donor.amount}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
-            </Paper>
-          )}
+      {/* Tip Feed — scrolls from bottom, newest at the end */}
+      <Box
+        ref={feedRef}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+          overflowY: "auto",
+          maxHeight: "100%",
+          // Hide scrollbar for OBS
+          "&::-webkit-scrollbar": { display: "none" },
+          scrollbarWidth: "none",
+        }}
+      >
+        {tips.map((tip, i) => {
+          const tierColor = getTierColor(tip.amount);
+          const isNew = i >= tips.length - 1; // Animate only the latest one
 
-          {/* Top Donors Leaderboard (Below Recent) */}
-          {topDonors.length > 0 && (
-            <Paper 
-              sx={{ 
-                p: 2, 
-                mt: 2,
-                bgcolor: "rgba(112, 0, 255, 0.4)", 
-                borderRadius: "12px", 
-                border: "1px solid rgba(0, 242, 255, 0.3)",
-                backdropFilter: "blur(10px)",
-                boxShadow: "0 0 20px rgba(112, 0, 255, 0.3)"
-              }}
-            >
-              <Typography variant="caption" sx={{ color: "#fff", fontWeight: 900, mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-                <TrendingUpIcon sx={{ fontSize: 14 }} /> TOP SUPPORTERS
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {topDonors.map((donor, i) => (
-                  <Box 
-                    key={i} 
-                    sx={{ 
-                      display: "flex", 
-                      justifyContent: "space-between", 
-                      alignItems: "center"
-                    }}
-                  >
-                    <Typography variant="body2" sx={{ color: "white", fontWeight: 700 }}>
-                      #{i+1} {donor.name}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: "#00f2ff", fontWeight: 900 }}>
-                      {donor.amount.toFixed(2)}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
-            </Paper>
-          )}
-        </Box>
-
-        {/* Super Chat Alert Area (Right) */}
-        <Box>
-          {currentAlert && (
-            <Paper
-              elevation={24}
+          return (
+            <Box
+              key={tip.id}
               sx={{
-                width: 400,
-                p: 3,
-                borderRadius: "16px",
-                background: "linear-gradient(135deg, #7000ff 0%, #00f2ff 100%)",
-                color: "white",
-                animation: `${slideIn} 7s ease-in-out forwards`,
+                animation: isNew ? `${slideInLeft} 0.4s ease-out` : undefined,
                 display: "flex",
                 flexDirection: "column",
-                gap: 1,
-                boxShadow: "0 0 40px rgba(112, 0, 255, 0.4)",
-                border: "2px solid rgba(255,255,255,0.2)"
+                maxWidth: 420,
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <BoltIcon sx={{ fontSize: 32 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 900 }}>SUPER CHAT!</Typography>
-                </Box>
-                <Typography variant="h4" sx={{ fontWeight: 900 }}>{currentAlert.amount} SOL</Typography>
-              </Box>
-              
-              <Typography variant="h6" sx={{ fontWeight: 700, mt: 1 }}>
-                {currentAlert.sender}
-              </Typography>
-              
-              <Typography 
-                variant="body1" 
-                sx={{ 
-                  mt: 1, 
-                  p: 2, 
-                  bgcolor: "rgba(0,0,0,0.2)", 
-                  borderRadius: "8px", 
-                  fontStyle: "italic",
-                  fontSize: "1.1rem"
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 1.5,
+                  borderRadius: "10px",
+                  bgcolor: "rgba(0, 0, 0, 0.7)",
+                  backdropFilter: "blur(10px)",
+                  borderLeft: `3px solid ${tierColor}`,
+                  boxShadow: getTierGlow(tip.amount),
+                  transition: "all 0.3s ease",
                 }}
               >
-                "{currentAlert.message}"
-              </Typography>
-            </Paper>
-          )}
-        </Box>
-      </Box>
+                {/* Header: Sender + Amount */}
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: tip.message ? 0.5 : 0 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <BoltIcon sx={{ fontSize: 14, color: tierColor }} />
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 800,
+                        color: tierColor,
+                        fontSize: "0.85rem"
+                      }}
+                    >
+                      {tip.sender}
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 900,
+                      color: tierColor,
+                      fontSize: "0.9rem"
+                    }}
+                  >
+                    {tip.amount.toFixed(tip.amount >= 1 ? 2 : 4)} SOL
+                  </Typography>
+                </Box>
 
-      {/* Donation Goal Area (Bottom) */}
-      {stream && stream.donation_goal > 0 && (
-        <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
-          <Box sx={{ width: "80%", maxWidth: 800 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1, color: "white", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
-              <Typography sx={{ fontWeight: 900, fontSize: "1.2rem" }}>DONATION GOAL</Typography>
-              <Typography sx={{ fontWeight: 900, fontSize: "1.2rem" }}>
-                {stream.donation_current / 1000000000} / {stream.donation_goal / 1000000000} SOL
-              </Typography>
+                {/* Message */}
+                {tip.message && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "rgba(255,255,255,0.9)",
+                      fontSize: "0.85rem",
+                      lineHeight: 1.4,
+                      pl: 2.5,
+                    }}
+                  >
+                    {tip.message}
+                  </Typography>
+                )}
+              </Paper>
             </Box>
-            <Box 
-              sx={{ 
-                height: 30, 
-                width: "100%", 
-                bgcolor: "rgba(0,0,0,0.5)", 
-                borderRadius: "15px", 
-                overflow: "hidden",
-                border: "2px solid rgba(255,255,255,0.2)",
-                boxShadow: "0 0 20px rgba(0,0,0,0.3)"
-              }}
-            >
-              <Box 
-                sx={{ 
-                  height: "100%", 
-                  width: `${Math.min(100, (stream.donation_current / stream.donation_goal) * 100)}%`,
-                  background: "linear-gradient(90deg, #7000ff, #00f2ff)",
-                  transition: "width 1s cubic-bezier(0.4, 0, 0.2, 1)",
-                  boxShadow: "0 0 20px #00f2ff",
-                }} 
-              />
-            </Box>
-          </Box>
-        </Box>
-      )}
+          );
+        })}
+      </Box>
     </Box>
   );
 };
