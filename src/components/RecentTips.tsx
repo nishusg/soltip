@@ -5,7 +5,7 @@ import { useRealtimeTips } from "../hooks/useRealtimeTips";
 import { listTransactions } from "../services/api";
 import { getExplorerUrl } from "../services/solana";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { Card, CardContent, Typography, List, ListItem, Box, CircularProgress, Link, Chip, Divider } from "@mui/material";
+import { Card, CardContent, Typography, List, ListItem, Box, CircularProgress, Link, Chip } from "@mui/material";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -87,115 +87,158 @@ export default function RecentTips() {
   }
 
   return (
-    <Card sx={{ mt: 6 }} className="fade-in-up">
-      <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-        <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 800, mb: 4 }}>
-          Activity Log
-        </Typography>
+    <Card 
+      sx={{ 
+        bgcolor: "rgba(255,255,255,0.03)", 
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(255,255,255,0.05)",
+        borderRadius: "24px",
+        boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+        overflow: "hidden"
+      }}
+    >
+      <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4, px: 1 }}>
+          <Typography variant="h5" component="h3" sx={{ fontWeight: 800 }}>
+            Activity Log
+          </Typography>
+        </Box>
 
         {loading && (
-          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", py: 6 }}>
-            <CircularProgress size={32} sx={{ mb: 2 }} />
-            <Typography variant="body2" color="text.secondary">Loading activity...</Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", py: 8 }}>
+            <CircularProgress size={40} thickness={4} sx={{ mb: 3, color: "primary.main" }} />
+            <Typography variant="body2" color="text.secondary" sx={{ letterSpacing: "0.1em", fontWeight: 700, textTransform: "uppercase" }}>
+              Syncing ledger...
+            </Typography>
           </Box>
         )}
 
         {!loading && transactions.length === 0 && (
-          <Box sx={{ textAlign: "center", py: 6, bgcolor: "rgba(255,255,255,0.01)", borderRadius: "14px", border: "1px dashed rgba(255,255,255,0.1)" }}>
-            <Typography variant="body1" color="text.secondary">No transactions found. Ready for your first tip? 🚀</Typography>
+          <Box sx={{ textAlign: "center", py: 8, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "16px", border: "1px dashed rgba(255,255,255,0.1)" }}>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>No transactions found.</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>Ready for your first tip? 🚀</Typography>
           </Box>
         )}
 
         {!loading && transactions.length > 0 && (
-          <List disablePadding>
-            {transactions.map((tx, idx) => {
+          <List disablePadding sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {transactions.map((tx) => {
               const isSent = tx.sender_wallet === walletAddress;
               return (
-                <Box key={tx._id || tx.tx_hash}>
-                  <ListItem sx={{ flexDirection: "column", alignItems: "stretch", px: 0, py: 3 }}>
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <Box sx={{ 
-                          width: 40, 
-                          height: 40, 
-                          borderRadius: "10px", 
-                          bgcolor: isSent ? "rgba(0, 242, 255, 0.1)" : "rgba(112, 0, 255, 0.1)",
-                          display: "flex", 
-                          alignItems: "center", 
-                          justifyContent: "center",
-                          color: isSent ? "primary.main" : "secondary.main"
-                        }}>
-                          {isSent ? <CallMadeIcon fontSize="small" /> : <CallReceivedIcon fontSize="small" />}
-                        </Box>
-                        <Box>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                            {formatSol(tx.amount)} SOL
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace" }}>
-                            {isSent ? (
-                              <>To <Link component={RouterLink} to={`/profile/${tx.creator_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{shorten(tx.creator_wallet)}</Link></>
-                            ) : (
-                              <>From <Link component={RouterLink} to={`/profile/${tx.sender_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{shorten(tx.sender_wallet)}</Link></>
-                            )}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <Chip
-                        label={isSent ? "Sent" : "Received"}
-                        size="small"
-                        sx={{ 
-                          fontWeight: 700, 
-                          fontSize: "0.7rem", 
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                          bgcolor: isSent ? "rgba(0, 242, 255, 0.05)" : "rgba(112, 0, 255, 0.05)",
-                          color: isSent ? "primary.main" : "secondary.main",
-                          borderColor: isSent ? "rgba(0, 242, 255, 0.2)" : "rgba(112, 0, 255, 0.2)",
-                          borderRadius: "6px"
-                        }}
-                        variant="outlined"
-                      />
-                    </Box>
-
-                    {tx.message && (
+                <ListItem 
+                  key={tx._id || tx.tx_hash}
+                  sx={{ 
+                    flexDirection: "column", 
+                    alignItems: "stretch", 
+                    px: 3, 
+                    py: 3,
+                    bgcolor: "rgba(255,255,255,0.02)",
+                    borderRadius: "16px",
+                    border: "1px solid rgba(255,255,255,0.03)",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      bgcolor: "rgba(255,255,255,0.04)",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+                      borderColor: isSent ? "rgba(0, 242, 255, 0.2)" : "rgba(112, 0, 255, 0.2)"
+                    }
+                  }}
+                >
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 2, sm: 3 } }}>
                       <Box sx={{ 
-                        my: 1.5, 
-                        p: 2, 
-                        bgcolor: "rgba(255,255,255,0.02)", 
-                        borderRadius: "12px",
-                        borderLeft: `3px solid ${isSent ? "#00f2ff" : "#7000ff"}`
+                        width: { xs: 44, sm: 52 }, 
+                        height: { xs: 44, sm: 52 }, 
+                        borderRadius: "14px", 
+                        bgcolor: isSent ? "rgba(0, 242, 255, 0.1)" : "rgba(112, 0, 255, 0.1)",
+                        display: "flex", 
+                        alignItems: "center", 
+                        justifyContent: "center",
+                        color: isSent ? "primary.main" : "secondary.main",
+                        boxShadow: isSent ? "0 0 15px rgba(0, 242, 255, 0.15)" : "0 0 15px rgba(112, 0, 255, 0.15)"
                       }}>
-                        <Typography variant="body2" sx={{ fontStyle: "italic", color: "text.primary", opacity: 0.9 }}>
-                          "{tx.message}"
+                        {isSent ? <CallMadeIcon /> : <CallReceivedIcon />}
+                      </Box>
+                      <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2, mb: 0.5 }}>
+                          {formatSol(tx.amount)} <Box component="span" sx={{ fontSize: "0.8em", opacity: 0.7 }}>SOL</Box>
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "monospace", opacity: 0.8 }}>
+                          {isSent ? (
+                            <>To <Link component={RouterLink} to={`/profile/${tx.creator_wallet}`} color="inherit" sx={{ fontWeight: 700 }}>{shorten(tx.creator_wallet)}</Link></>
+                          ) : (
+                            <>From <Link component={RouterLink} to={`/profile/${tx.sender_wallet}`} color="inherit" sx={{ fontWeight: 700 }}>{shorten(tx.sender_wallet)}</Link></>
+                          )}
                         </Typography>
                       </Box>
-                    )}
-
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
-                      <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>
-                        {formatTime(tx.timestamp)}
-                      </Typography>
-                      <Link
-                        href={getExplorerUrl(tx.tx_hash)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        sx={{ 
-                          display: "flex", 
-                          alignItems: "center", 
-                          fontSize: "0.8rem", 
-                          gap: 0.5,
-                          color: "primary.main",
-                          textDecoration: "none",
-                          fontWeight: 600,
-                          "&:hover": { textDecoration: "underline" }
-                        }}
-                      >
-                        Ledger Proof <OpenInNewIcon sx={{ fontSize: 14 }} />
-                      </Link>
                     </Box>
-                  </ListItem>
-                  {idx < transactions.length - 1 && <Divider sx={{ opacity: 0.5 }} />}
-                </Box>
+                    <Chip
+                      label={isSent ? "Sent" : "Received"}
+                      size="small"
+                      sx={{ 
+                        fontWeight: 800, 
+                        fontSize: "0.7rem", 
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                        bgcolor: isSent ? "rgba(0, 242, 255, 0.1)" : "rgba(112, 0, 255, 0.1)",
+                        color: isSent ? "primary.main" : "secondary.main",
+                        borderColor: isSent ? "rgba(0, 242, 255, 0.3)" : "rgba(112, 0, 255, 0.3)",
+                        borderRadius: "8px",
+                        boxShadow: isSent ? "0 0 10px rgba(0, 242, 255, 0.2)" : "0 0 10px rgba(112, 0, 255, 0.2)"
+                      }}
+                      variant="outlined"
+                    />
+                  </Box>
+
+                  {tx.message && (
+                    <Box sx={{ 
+                      my: 2, 
+                      p: 2.5, 
+                      bgcolor: "rgba(255,255,255,0.03)", 
+                      borderRadius: "12px",
+                      borderLeft: `4px solid ${isSent ? "#00f2ff" : "#7000ff"}`,
+                      position: "relative",
+                      overflow: "hidden"
+                    }}>
+                      <Box sx={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        background: `linear-gradient(90deg, ${isSent ? "rgba(0,242,255,0.05)" : "rgba(112,0,255,0.05)"} 0%, transparent 100%)`,
+                        pointerEvents: "none"
+                      }} />
+                      <Typography variant="body1" sx={{ fontStyle: "italic", color: "text.primary", opacity: 0.9, position: "relative", zIndex: 1 }}>
+                        "{tx.message}"
+                      </Typography>
+                    </Box>
+                  )}
+
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1, pt: 2, borderTop: "1px dashed rgba(255,255,255,0.05)" }}>
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, letterSpacing: "0.05em" }}>
+                      {formatTime(tx.timestamp)}
+                    </Typography>
+                    <Link
+                      href={getExplorerUrl(tx.tx_hash)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        fontSize: "0.8rem", 
+                        gap: 0.5,
+                        color: "primary.main",
+                        textDecoration: "none",
+                        fontWeight: 700,
+                        transition: "all 0.2s",
+                        "&:hover": { color: "#fff", textShadow: "0 0 10px rgba(0,242,255,0.5)" }
+                      }}
+                    >
+                      Ledger Proof <OpenInNewIcon sx={{ fontSize: 14 }} />
+                    </Link>
+                  </Box>
+                </ListItem>
               );
             })}
           </List>

@@ -110,7 +110,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-        <CircularProgress />
+        <CircularProgress size={48} thickness={4} sx={{ color: "primary.main" }} />
       </Box>
     );
   }
@@ -118,8 +118,8 @@ export default function Dashboard() {
   if (error) {
     return (
       <Container sx={{ py: 10, textAlign: "center" }}>
-        <Typography color="error" variant="h5">{error}</Typography>
-        <Button variant="outlined" sx={{ mt: 2 }} onClick={() => window.location.reload()}>Retry</Button>
+        <Typography color="error" variant="h5" sx={{ fontWeight: 800 }}>{error}</Typography>
+        <Button variant="outlined" sx={{ mt: 3, borderRadius: "12px", fontWeight: 700 }} onClick={() => window.location.reload()}>Retry</Button>
       </Container>
     );
   }
@@ -135,273 +135,347 @@ export default function Dashboard() {
     : 0;
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, md: 3 } }}>
-      <SEO title="Creator Dashboard" description="Track your earnings, view recent tips, and manage your creator profile." />
-      <Box sx={{ mb: { xs: 4, md: 6 }, animation: "fadeInUp 0.3s ease-out" }}>
-        <Typography variant={isMobile ? "h4" : "h3"} sx={{ fontWeight: 900, mb: 1 }}>
-          Creator <Box component="span" sx={{ color: "primary.main" }}>Dashboard</Box>
-        </Typography>
-        <Typography color="text.secondary" variant={isMobile ? "body2" : "body1"}>
-          Track your earnings, view recent tips, and engage with your community.
-        </Typography>
-      </Box>
+    <Box sx={{ position: "relative", minHeight: "calc(100vh - 64px)", overflow: "hidden" }}>
+      {/* Decorative Blur Backgrounds */}
+      <Box 
+        sx={{ 
+          position: "absolute", top: "10%", left: "-10%", width: "40%", height: "40%", 
+          background: "radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, transparent 70%)", 
+          zIndex: -1, filter: "blur(80px)" 
+        }} 
+      />
+      <Box 
+        sx={{ 
+          position: "absolute", bottom: "10%", right: "-10%", width: "40%", height: "40%", 
+          background: "radial-gradient(circle, rgba(112, 0, 255, 0.15) 0%, transparent 70%)", 
+          zIndex: -1, filter: "blur(80px)" 
+        }} 
+      />
 
-      {/* Stats Overview */}
-      <Grid container spacing={3} sx={{ mb: 6 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Paper sx={{ p: 3, textAlign: "center", bgcolor: "rgba(0, 242, 255, 0.05)", border: "1px solid rgba(0, 242, 255, 0.1)" }}>
-            <AccountBalanceWalletIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h5" sx={{ fontWeight: 800 }}>{formatSol(totalEarned)} SOL</Typography>
-            <Typography variant="caption" color="text.secondary">Total Earnings</Typography>
-          </Paper>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Paper sx={{ p: 3, textAlign: "center", bgcolor: "rgba(112, 0, 255, 0.05)", border: "1px solid rgba(112, 0, 255, 0.1)" }}>
-            <BoltIcon color="secondary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h5" sx={{ fontWeight: 800 }}>{totalTips}</Typography>
-            <Typography variant="caption" color="text.secondary">Recent Super Chats</Typography>
-          </Paper>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Paper sx={{ p: 3, textAlign: "center", bgcolor: "rgba(255, 75, 75, 0.05)", border: "1px solid rgba(255, 75, 75, 0.1)" }}>
-            <TrendingUpIcon sx={{ fontSize: 40, mb: 1, color: "#ff4b4b" }} />
-            <Typography variant="h5" sx={{ fontWeight: 800 }}>{formatSol(avgPerDay)}</Typography>
-            <Typography variant="caption" color="text.secondary">Avg. Daily Earnings</Typography>
-          </Paper>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Paper 
-            sx={{ p: 3, textAlign: "center", bgcolor: "rgba(0, 255, 128, 0.05)", border: "1px solid rgba(0, 255, 128, 0.1)", cursor: "pointer", transition: "all 0.2s", "&:hover": { borderColor: "rgba(0, 255, 128, 0.3)" } }}
-            onClick={copyOverlayUrl}
+      <Container maxWidth="lg" sx={{ py: { xs: 4, md: 8 }, px: { xs: 2, md: 3 } }}>
+        <SEO title="Creator Dashboard" description="Track your earnings, view recent tips, and manage your creator profile." />
+        
+        <Box sx={{ mb: { xs: 5, md: 8 }, animation: "fadeInUp 0.3s ease-out" }}>
+          <Typography 
+            variant={isMobile ? "h3" : "h2"} 
+            sx={{ 
+              fontWeight: 900, 
+              mb: 1,
+              background: "linear-gradient(135deg, #fff 0%, #a0a0b0 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent"
+            }}
           >
-            <ContentCopyIcon sx={{ fontSize: 40, mb: 1, color: "#00ff80" }} />
-            <Typography variant="body2" sx={{ fontWeight: 800 }}>OBS Overlay</Typography>
-            <Typography variant="caption" color="text.secondary">Click to copy URL</Typography>
-          </Paper>
-        </Grid>
-      </Grid>
+            Creator <Box component="span" sx={{ 
+              background: "linear-gradient(135deg, #00f2ff 0%, #7000ff 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent"
+            }}>Dashboard</Box>
+          </Typography>
+          <Typography color="text.secondary" variant="h6" sx={{ fontWeight: 400 }}>
+            Track your earnings, view recent tips, and engage with your community.
+          </Typography>
+        </Box>
 
-      {/* Revenue Charts */}
-      <Grid container spacing={3} sx={{ mb: 6 }}>
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Paper sx={{ p: 3, height: 400, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column" }}>
-            <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>Daily Earnings (SOL)</Typography>
-            <Box sx={{ flexGrow: 1, minHeight: 0 }}>
-              {dailyEarnings && dailyEarnings.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={[...dailyEarnings].reverse().map((e: any) => ({
-                    date: e._id.slice(5), // MM-DD format
-                    value: e.total_earned / LAMPORTS_PER_SOL,
-                    tips: e.tips_count
-                  }))}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="date" stroke="rgba(255,255,255,0.5)" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="rgba(255,255,255,0.5)" fontSize={12} tickLine={false} axisLine={false} />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: "#1a1a25", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}
-                      itemStyle={{ color: "#00f2ff" }}
-                      formatter={(value: any) => [`${Number(value).toFixed(4)} SOL`, "Earned"]}
-                    />
-                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                      {dailyEarnings.map((_: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "#7000ff" : "#00f2ff"} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", opacity: 0.5 }}>
-                  <Typography>No earnings data yet. Tips will appear here.</Typography>
-                </Box>
-              )}
-            </Box>
-          </Paper>
+        {/* Stats Overview */}
+        <Grid container spacing={3} sx={{ mb: 6 }} className="fade-in-up">
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Paper sx={{ 
+              p: 3, textAlign: "center", bgcolor: "rgba(0, 242, 255, 0.05)", border: "1px solid rgba(0, 242, 255, 0.15)", borderRadius: "20px", backdropFilter: "blur(10px)",
+              boxShadow: "0 8px 32px rgba(0, 242, 255, 0.05)", transition: "all 0.3s ease", "&:hover": { transform: "translateY(-4px)", boxShadow: "0 12px 40px rgba(0, 242, 255, 0.1)" }
+            }}>
+              <AccountBalanceWalletIcon sx={{ fontSize: 48, mb: 1.5, color: "#00f2ff", filter: "drop-shadow(0 0 10px rgba(0,242,255,0.4))" }} />
+              <Typography variant="h4" sx={{ fontWeight: 900, color: "#00f2ff" }}>{formatSol(totalEarned)} <Box component="span" sx={{ fontSize: "1rem", opacity: 0.8 }}>SOL</Box></Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", mt: 1 }}>Total Earnings</Typography>
+            </Paper>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Paper sx={{ 
+              p: 3, textAlign: "center", bgcolor: "rgba(112, 0, 255, 0.05)", border: "1px solid rgba(112, 0, 255, 0.15)", borderRadius: "20px", backdropFilter: "blur(10px)",
+              boxShadow: "0 8px 32px rgba(112, 0, 255, 0.05)", transition: "all 0.3s ease", "&:hover": { transform: "translateY(-4px)", boxShadow: "0 12px 40px rgba(112, 0, 255, 0.1)" }
+            }}>
+              <BoltIcon sx={{ fontSize: 48, mb: 1.5, color: "#7000ff", filter: "drop-shadow(0 0 10px rgba(112,0,255,0.4))" }} />
+              <Typography variant="h4" sx={{ fontWeight: 900, color: "#7000ff" }}>{totalTips}</Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", mt: 1 }}>Recent Super Chats</Typography>
+            </Paper>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Paper sx={{ 
+              p: 3, textAlign: "center", bgcolor: "rgba(255, 75, 75, 0.05)", border: "1px solid rgba(255, 75, 75, 0.15)", borderRadius: "20px", backdropFilter: "blur(10px)",
+              boxShadow: "0 8px 32px rgba(255, 75, 75, 0.05)", transition: "all 0.3s ease", "&:hover": { transform: "translateY(-4px)", boxShadow: "0 12px 40px rgba(255, 75, 75, 0.1)" }
+            }}>
+              <TrendingUpIcon sx={{ fontSize: 48, mb: 1.5, color: "#ff4b4b", filter: "drop-shadow(0 0 10px rgba(255,75,75,0.4))" }} />
+              <Typography variant="h4" sx={{ fontWeight: 900, color: "#ff4b4b" }}>{formatSol(avgPerDay)}</Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", mt: 1 }}>Avg. Daily Earnings</Typography>
+            </Paper>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Paper 
+              sx={{ 
+                p: 3, textAlign: "center", bgcolor: "rgba(0, 255, 128, 0.05)", border: "1px solid rgba(0, 255, 128, 0.2)", borderRadius: "20px", backdropFilter: "blur(10px)", cursor: "pointer", 
+                boxShadow: "0 8px 32px rgba(0, 255, 128, 0.05)", transition: "all 0.3s ease", "&:hover": { transform: "translateY(-4px)", boxShadow: "0 12px 40px rgba(0, 255, 128, 0.15)", borderColor: "rgba(0, 255, 128, 0.4)" } 
+              }}
+              onClick={copyOverlayUrl}
+            >
+              <ContentCopyIcon sx={{ fontSize: 48, mb: 1.5, color: "#00ff80", filter: "drop-shadow(0 0 10px rgba(0,255,128,0.4))" }} />
+              <Typography variant="h6" sx={{ fontWeight: 900, color: "#00ff80" }}>OBS Overlay</Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", mt: 1 }}>Click to copy URL</Typography>
+            </Paper>
+          </Grid>
         </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Paper sx={{ p: 3, height: 400, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.05)", display: "flex", flexDirection: "column" }}>
-            <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>Tip Distribution</Typography>
-            <Box sx={{ flexGrow: 1, minHeight: 0 }}>
-              {recentTips && recentTips.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={recentTips.slice(0, 5).map((t: any, i: number) => ({ name: `Tip ${i+1}`, value: t.amount / LAMPORTS_PER_SOL }))}
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      <Cell fill="#7000ff" />
-                      <Cell fill="#00f2ff" />
-                      <Cell fill="#ff4b4b" />
-                      <Cell fill="#00ff80" />
-                      <Cell fill="#ffb400" />
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", opacity: 0.5 }}>
-                  <Typography>No tips yet.</Typography>
-                </Box>
-              )}
-            </Box>
-            <Box sx={{ textAlign: "center", mt: 1 }}>
-              <Typography variant="caption" color="text.secondary">Top 5 recent tips</Typography>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
 
-      <Grid container spacing={4}>
-        {/* Recent Activity */}
-        <Grid size={{ xs: 12, md: 7 }}>
-          <Paper sx={{ p: 0, overflow: "hidden" }}>
-            <Box sx={{ p: 3, borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <Typography variant="h6" sx={{ fontWeight: 800 }}>Recent Super Chats</Typography>
-              <Chip label="Real-time" size="small" color="primary" variant="outlined" />
-            </Box>
-            <List disablePadding>
-              {!recentTips || recentTips.length === 0 ? (
-                <Box sx={{ p: 6, textAlign: "center", opacity: 0.5 }}>
-                  <Typography>No transactions yet.</Typography>
-                </Box>
-              ) : (
-                recentTips.map((tip: any, idx: number) => (
-                  <Box key={tip._id}>
-                    <ListItem sx={{ py: 2 }}>
-                      <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: "rgba(112, 0, 255, 0.1)", color: "secondary.main" }}>
-                          <BoltIcon />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText 
-                        primary={
-                          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                              {tip.sender_wallet.slice(0, 4)}...{tip.sender_wallet.slice(-4)}
-                            </Typography>
-                            <Typography variant="subtitle2" color="primary.main" sx={{ fontWeight: 900 }}>
-                              +{formatSol(tip.amount)} SOL
-                            </Typography>
-                          </Box>
-                        }
-                        secondary={
-                          <Typography variant="body2" color="text.secondary" noWrap sx={{ fontStyle: "italic" }}>
-                            "{tip.message || "No message"}"
-                          </Typography>
-                        }
+        {/* Revenue Charts */}
+        <Grid container spacing={4} sx={{ mb: 6 }} className="fade-in-up" style={{ animationDelay: "0.1s" }}>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <Paper sx={{ p: { xs: 2, sm: 4 }, height: 420, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", display: "flex", flexDirection: "column" }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 4, display: "flex", alignItems: "center" }}>
+                <TrendingUpIcon sx={{ color: "primary.main", mr: 1.5 }} /> Daily Earnings <Box component="span" sx={{ fontSize: "0.9rem", color: "text.secondary", ml: 1, fontWeight: 500 }}>(SOL)</Box>
+              </Typography>
+              <Box sx={{ flexGrow: 1, minHeight: 0 }}>
+                {dailyEarnings && dailyEarnings.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={[...dailyEarnings].reverse().map((e: any) => ({
+                      date: e._id.slice(5), // MM-DD format
+                      value: e.total_earned / LAMPORTS_PER_SOL,
+                      tips: e.tips_count
+                    }))}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                      <XAxis dataKey="date" stroke="rgba(255,255,255,0.5)" fontSize={12} tickLine={false} axisLine={false} dy={10} />
+                      <YAxis stroke="rgba(255,255,255,0.5)" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: "rgba(10, 10, 15, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", backdropFilter: "blur(10px)" }}
+                        itemStyle={{ color: "#00f2ff", fontWeight: 700 }}
+                        formatter={(value: any) => [`${Number(value).toFixed(4)} SOL`, "Earned"]}
                       />
-                    </ListItem>
-                    {idx < recentTips.length - 1 && <Divider sx={{ mx: 2, opacity: 0.1 }} />}
+                      <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                        {dailyEarnings.map((_: any, index: number) => (
+                          <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "url(#colorPurple)" : "url(#colorCyan)"} />
+                        ))}
+                      </Bar>
+                      <defs>
+                        <linearGradient id="colorCyan" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#00f2ff" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#00f2ff" stopOpacity={0.2}/>
+                        </linearGradient>
+                        <linearGradient id="colorPurple" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#7000ff" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#7000ff" stopOpacity={0.2}/>
+                        </linearGradient>
+                      </defs>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", opacity: 0.5, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "12px", border: "1px dashed rgba(255,255,255,0.1)" }}>
+                    <Typography sx={{ fontWeight: 600 }}>No earnings data yet. Keep streaming! 🚀</Typography>
                   </Box>
-                ))
-              )}
-            </List>
-          </Paper>
+                )}
+              </Box>
+            </Paper>
+          </Grid>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Paper sx={{ p: { xs: 2, sm: 4 }, height: 420, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", display: "flex", flexDirection: "column" }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 2, display: "flex", alignItems: "center" }}>
+                <BoltIcon sx={{ color: "secondary.main", mr: 1 }} /> Tip Distribution
+              </Typography>
+              <Box sx={{ flexGrow: 1, minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {recentTips && recentTips.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={recentTips.slice(0, 5).map((t: any, i: number) => ({ name: `Tip ${i+1}`, value: t.amount / LAMPORTS_PER_SOL }))}
+                        innerRadius={isMobile ? 60 : 75}
+                        outerRadius={isMobile ? 80 : 100}
+                        paddingAngle={5}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        <Cell fill="#7000ff" />
+                        <Cell fill="#00f2ff" />
+                        <Cell fill="#ff4b4b" />
+                        <Cell fill="#00ff80" />
+                        <Cell fill="#ffb400" />
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: "rgba(10, 10, 15, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", backdropFilter: "blur(10px)" }}
+                        itemStyle={{ fontWeight: 700 }}
+                        formatter={(value: any) => [`${Number(value).toFixed(4)} SOL`]}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", width: "100%", opacity: 0.5, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "12px", border: "1px dashed rgba(255,255,255,0.1)" }}>
+                    <Typography sx={{ fontWeight: 600 }}>No tips yet.</Typography>
+                  </Box>
+                )}
+              </Box>
+              <Box sx={{ textAlign: "center", mt: 2 }}>
+                <Chip label="Top 5 Recent Tips" size="small" sx={{ bgcolor: "rgba(255,255,255,0.05)", fontWeight: 700, borderRadius: "8px" }} />
+              </Box>
+            </Paper>
+          </Grid>
         </Grid>
 
-        {/* Announcement + OBS Overlay */}
-        <Grid size={{ xs: 12, md: 5 }}>
-          {/* OBS Overlay Card */}
-          <Paper sx={{ p: 3, mb: 3, bgcolor: "rgba(0, 242, 255, 0.03)", border: "1px solid rgba(0, 242, 255, 0.1)", borderRadius: "16px" }}>
-            <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-              🎬 OBS Overlay
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2, opacity: 0.7 }}>
-              Add this URL as a Browser Source in OBS to display Super Chat alerts. The secret key prevents others from using your overlay.
-            </Typography>
+        <Grid container spacing={4} className="fade-in-up" style={{ animationDelay: "0.2s" }}>
+          {/* Recent Activity */}
+          <Grid size={{ xs: 12, md: 7 }}>
+            <Paper sx={{ p: 0, overflow: "hidden", bgcolor: "rgba(255,255,255,0.02)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(20px)" }}>
+              <Box sx={{ p: { xs: 3, sm: 4 }, borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Typography variant="h5" sx={{ fontWeight: 800 }}>Recent Super Chats</Typography>
+                <Chip label="Real-time" size="small" color="primary" variant="outlined" sx={{ fontWeight: 700, borderRadius: "8px", borderWidth: "2px" }} />
+              </Box>
+              <List disablePadding>
+                {!recentTips || recentTips.length === 0 ? (
+                  <Box sx={{ p: 8, textAlign: "center", opacity: 0.5 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>No transactions yet.</Typography>
+                  </Box>
+                ) : (
+                  recentTips.map((tip: any, idx: number) => (
+                    <Box key={tip._id}>
+                      <ListItem sx={{ py: 3, px: { xs: 3, sm: 4 }, transition: "all 0.2s ease", "&:hover": { bgcolor: "rgba(255,255,255,0.02)" } }}>
+                        <ListItemAvatar sx={{ mr: 2 }}>
+                          <Avatar sx={{ 
+                            width: 48, height: 48, borderRadius: "14px", 
+                            bgcolor: "rgba(112, 0, 255, 0.1)", color: "secondary.main",
+                            boxShadow: "0 0 15px rgba(112, 0, 255, 0.2)"
+                          }}>
+                            <BoltIcon />
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText 
+                          primary={
+                            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
+                              <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                                {tip.sender_wallet.slice(0, 4)}...{tip.sender_wallet.slice(-4)}
+                              </Typography>
+                              <Typography variant="subtitle1" color="primary.main" sx={{ fontWeight: 900, textShadow: "0 0 10px rgba(0, 242, 255, 0.3)" }}>
+                                +{formatSol(tip.amount)} SOL
+                              </Typography>
+                            </Box>
+                          }
+                          secondary={
+                            <Typography variant="body2" sx={{ color: "text.primary", opacity: 0.8, fontStyle: "italic" }}>
+                              "{tip.message || "No message"}"
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                      {idx < recentTips.length - 1 && <Divider sx={{ mx: 4, opacity: 0.1 }} />}
+                    </Box>
+                  ))
+                )}
+              </List>
+            </Paper>
+          </Grid>
 
-            {overlayToken ? (
-              <>
-                <Box 
-                  sx={{ 
-                    p: 2, 
-                    bgcolor: "rgba(0,0,0,0.3)", 
-                    borderRadius: "10px", 
-                    fontFamily: "monospace", 
-                    fontSize: "0.75rem",
-                    wordBreak: "break-all",
-                    color: "#00f2ff",
-                    mb: 2
-                  }}
+          {/* Announcement + OBS Overlay */}
+          <Grid size={{ xs: 12, md: 5 }}>
+            {/* OBS Overlay Card */}
+            <Paper sx={{ p: { xs: 3, sm: 4 }, mb: 4, bgcolor: "rgba(0, 242, 255, 0.03)", border: "1px solid rgba(0, 242, 255, 0.2)", borderRadius: "24px", backdropFilter: "blur(20px)" }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, display: "flex", alignItems: "center", gap: 1.5, color: "#00f2ff" }}>
+                🎬 OBS Overlay
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 3, opacity: 0.8, lineHeight: 1.6 }}>
+                Add this URL as a Browser Source in OBS to display real-time Super Chat alerts on your stream. The secret key ensures only you can use your overlay.
+              </Typography>
+
+              {overlayToken ? (
+                <>
+                  <Box 
+                    sx={{ 
+                      p: 2.5, 
+                      bgcolor: "rgba(0,0,0,0.4)", 
+                      borderRadius: "14px", 
+                      fontFamily: "monospace", 
+                      fontSize: "0.8rem",
+                      wordBreak: "break-all",
+                      color: "#00f2ff",
+                      border: "1px solid rgba(0, 242, 255, 0.2)",
+                      mb: 3
+                    }}
+                  >
+                    {getOverlayUrl()}
+                  </Box>
+                  <Box sx={{ display: "flex", gap: 2 }}>
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      fullWidth 
+                      onClick={copyOverlayUrl}
+                      startIcon={<ContentCopyIcon />}
+                      sx={{ borderRadius: "14px", py: 1.5, fontWeight: 800, boxShadow: "0 8px 20px rgba(0, 242, 255, 0.3)" }}
+                    >
+                      Copy URL
+                    </Button>
+                    <Button 
+                      variant="outlined" 
+                      color="warning" 
+                      onClick={handleGenerateToken}
+                      disabled={tokenLoading}
+                      sx={{ borderRadius: "14px", fontWeight: 800, minWidth: { xs: 60, sm: 140 } }}
+                    >
+                      {tokenLoading ? <CircularProgress size={20} color="inherit" /> : (isMobile ? <RefreshIcon /> : "Regenerate")}
+                    </Button>
+                  </Box>
+                  <Typography variant="caption" sx={{ display: "block", mt: 2, opacity: 0.6, fontWeight: 500 }}>
+                    ⚠️ Regenerating invalidates your current overlay URL. You will need to update it in OBS.
+                  </Typography>
+                </>
+              ) : (
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  fullWidth 
+                  onClick={handleGenerateToken}
+                  disabled={tokenLoading}
+                  startIcon={tokenLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
+                  sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, boxShadow: "0 8px 20px rgba(0, 242, 255, 0.3)" }}
                 >
-                  {getOverlayUrl()}
-                </Box>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Button 
-                    variant="outlined" 
-                    color="primary" 
-                    fullWidth 
-                    onClick={copyOverlayUrl}
-                    startIcon={<ContentCopyIcon />}
-                    sx={{ borderRadius: "12px", fontWeight: 700 }}
-                  >
-                    Copy URL
-                  </Button>
-                  <Button 
-                    variant="outlined" 
-                    color="warning" 
-                    onClick={handleGenerateToken}
-                    disabled={tokenLoading}
-                    startIcon={tokenLoading ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon />}
-                    sx={{ borderRadius: "12px", fontWeight: 700, minWidth: 140 }}
-                  >
-                    Regenerate
-                  </Button>
-                </Box>
-                <Typography variant="caption" sx={{ display: "block", mt: 1.5, opacity: 0.5 }}>
-                  ⚠️ Regenerating will invalidate your current overlay URL. You'll need to update it in OBS.
-                </Typography>
-              </>
-            ) : (
+                  {tokenLoading ? "Generating..." : "Generate Overlay URL"}
+                </Button>
+              )}
+            </Paper>
+
+            {/* Announcement Card */}
+            <Paper sx={{ p: { xs: 3, sm: 4 }, bgcolor: "rgba(112, 0, 255, 0.05)", border: "1px solid rgba(112, 0, 255, 0.2)", borderRadius: "24px", backdropFilter: "blur(20px)" }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, display: "flex", alignItems: "center", gap: 1.5, color: "#7000ff" }}>
+                <BoltIcon /> Broadcast
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 3, opacity: 0.8, lineHeight: 1.6 }}>
+                Send an instant notification to all your followers. Perfect for going live or special updates!
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                placeholder="What's happening? (e.g. Going live in 5 mins!)"
+                value={announcement}
+                onChange={(e) => setAnnouncement(e.target.value)}
+                disabled={announcementLoading}
+                sx={{ 
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    bgcolor: "rgba(0,0,0,0.2)",
+                    borderRadius: "14px",
+                    "&:hover fieldset": { borderColor: "rgba(112, 0, 255, 0.4)" },
+                    "&.Mui-focused fieldset": { borderColor: "rgba(112, 0, 255, 0.8)" }
+                  }
+                }}
+              />
               <Button 
                 variant="contained" 
-                color="primary" 
+                color="secondary" 
                 fullWidth 
-                onClick={handleGenerateToken}
-                disabled={tokenLoading}
-                startIcon={tokenLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
-                sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800 }}
+                onClick={handleSendAnnouncement}
+                disabled={announcementLoading || !announcement.trim()}
+                startIcon={announcementLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
+                sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, boxShadow: "0 8px 20px rgba(112, 0, 255, 0.3)" }}
               >
-                {tokenLoading ? "Generating..." : "Generate Overlay URL"}
+                {announcementLoading ? "Sending..." : "Broadcast to Followers"}
               </Button>
-            )}
-          </Paper>
-
-          {/* Announcement Card */}
-          <Paper sx={{ p: 3, bgcolor: "rgba(112, 0, 255, 0.05)", border: "1px solid rgba(112, 0, 255, 0.1)", borderRadius: "16px" }}>
-            <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
-              <BoltIcon color="secondary" /> Send Announcement
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 3, opacity: 0.7 }}>
-              Notify all your followers instantly. Perfect for special updates!
-            </Typography>
-            <TextField
-              fullWidth
-              multiline
-              rows={3}
-              placeholder="What's happening?"
-              value={announcement}
-              onChange={(e) => setAnnouncement(e.target.value)}
-              disabled={announcementLoading}
-              sx={{ mb: 2 }}
-              slotProps={{ input: { sx: { borderRadius: "12px" } } }}
-            />
-            <Button 
-              variant="contained" 
-              color="secondary" 
-              fullWidth 
-              onClick={handleSendAnnouncement}
-              disabled={announcementLoading || !announcement.trim()}
-              startIcon={announcementLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
-              sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800 }}
-            >
-              {announcementLoading ? "Sending..." : "Broadcast to Followers"}
-            </Button>
-          </Paper>
+            </Paper>
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    </Box>
   );
 }
