@@ -3,9 +3,9 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Use npm ci instead of npm install for faster, deterministic builds
+# Use npm install to avoid strict peer-dependency errors that fail npm ci
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm install
 
 COPY . .
 RUN npm run build
