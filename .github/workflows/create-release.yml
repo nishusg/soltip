@@ -1,0 +1,62 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get the latest tag
+        id: get_tag
+        run: |
+          # Get latest tag or default 0.0.0
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+          
+          # Remove leading 'v' if exists
+          latest_tag=${latest_tag#v}
+          
+          IFS='.' read -r major minor patch <<< "$latest_tag"
+          
+          # Increment patch
+          new_patch=$((patch + 1))
+          
+          # Construct new tag with 'v' prefix
+          new_tag="v$major.$minor.$new_patch"
+          echo "New tag: $new_tag"
+          
+          # Save to environment
+          echo "new_tag=$new_tag" >> $GITHUB_ENV
+
+      - name: Create new tag
+        run: |
+          git tag ${{ env.new_tag }}
+          git push origin ${{ env.new_tag }}
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ env.new_tag }}
+          release_name: ${{ env.new_tag }}
+          body: Auto-generated release for commit on main.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
