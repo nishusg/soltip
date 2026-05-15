@@ -23,15 +23,7 @@ import { AnchorProvider, Program, Idl } from "@coral-xyz/anchor";
 import BN from "bn.js";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 
-// ---------------------------------------------------------------------------
-// Environment configuration
-// ---------------------------------------------------------------------------
-const PROGRAM_ID = new PublicKey(
-  import.meta.env.VITE_PROGRAM_ID || "11111111111111111111111111111111"
-);
-const PLATFORM_WALLET = new PublicKey(
-  import.meta.env.VITE_PLATFORM_WALLET || "11111111111111111111111111111111"
-);
+import { PROGRAM_ID, PLATFORM_WALLET, FEE_PERCENTAGE } from "../config/constants";
 
 // ---------------------------------------------------------------------------
 // Minimal IDL for the tipping program
@@ -131,7 +123,7 @@ export function getExplorerUrl(txHash: string): string {
  * @returns { total, fee, creatorAmount } all in SOL
  */
 export function calculateFeeBreakdown(amountSol: number) {
-  const fee = amountSol * 0.05;
+  const fee = amountSol * FEE_PERCENTAGE;
   const creatorAmount = amountSol - fee;
   return {
     total: amountSol,

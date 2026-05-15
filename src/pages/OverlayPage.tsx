@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Box, Typography, Paper, keyframes } from "@mui/material";
 import { useSocket } from "../context/SocketContext";
+import { API_BASE } from "../config/constants";
 import BoltIcon from "@mui/icons-material/Bolt";
 import LockIcon from "@mui/icons-material/Lock";
 
@@ -57,7 +58,6 @@ const OverlayPage: React.FC = () => {
       return;
     }
 
-    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
     fetch(`${API_BASE}/creators/overlay-verify?wallet=${walletAddress}&key=${overlayKey}`)
       .then(res => {
         if (res.ok) setAuthStatus("ok");
@@ -70,7 +70,6 @@ const OverlayPage: React.FC = () => {
   useEffect(() => {
     if (authStatus !== "ok" || !walletAddress) return;
 
-    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
     fetch(`${API_BASE}/stats/user/${walletAddress}`)
       .then(res => res.json())
       .then(data => {

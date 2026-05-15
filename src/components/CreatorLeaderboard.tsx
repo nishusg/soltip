@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { API_BASE } from "../config/constants";
 import { useRealtimeTips } from "../hooks/useRealtimeTips";
 import { Box, Typography, Card, CardContent, CircularProgress, List, Avatar, Chip } from "@mui/material";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -47,7 +48,7 @@ export default function CreatorLeaderboard() {
       setLoading(true);
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL || "http://localhost:3001/api"}/stats/leaderboard`
+          `${API_BASE}/stats/leaderboard`
         );
         if (res.ok) {
           const data = await res.json();
@@ -74,27 +75,27 @@ export default function CreatorLeaderboard() {
   return (
     <Box sx={{ maxWidth: 900, mx: "auto", py: { xs: 4, md: 8 }, px: 2, position: "relative" }}>
       {/* Decorative Blur Backgrounds */}
-      <Box 
-        sx={{ 
-          position: "absolute", top: "10%", left: "-10%", width: "40%", height: "40%", 
-          background: "radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, transparent 70%)", 
-          zIndex: -1, filter: "blur(80px)" 
-        }} 
+      <Box
+        sx={{
+          position: "absolute", top: "10%", left: "-10%", width: "40%", height: "40%",
+          background: "radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, transparent 70%)",
+          zIndex: -1, filter: "blur(80px)"
+        }}
       />
-      <Box 
-        sx={{ 
-          position: "absolute", bottom: "10%", right: "-10%", width: "40%", height: "40%", 
-          background: "radial-gradient(circle, rgba(112, 0, 255, 0.15) 0%, transparent 70%)", 
-          zIndex: -1, filter: "blur(80px)" 
-        }} 
+      <Box
+        sx={{
+          position: "absolute", bottom: "10%", right: "-10%", width: "40%", height: "40%",
+          background: "radial-gradient(circle, rgba(112, 0, 255, 0.15) 0%, transparent 70%)",
+          zIndex: -1, filter: "blur(80px)"
+        }}
       />
 
       <Box sx={{ textAlign: "center", mb: 8 }} className="fade-in-up">
-        <Typography 
-          variant="h2" 
-          component="h2" 
-          gutterBottom 
-          sx={{ 
+        <Typography
+          variant="h2"
+          component="h2"
+          gutterBottom
+          sx={{
             fontWeight: 800,
             background: "linear-gradient(135deg, #00f2ff 0%, #7000ff 100%)",
             WebkitBackgroundClip: "text",
@@ -105,7 +106,7 @@ export default function CreatorLeaderboard() {
           Top Creators
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400, maxWidth: 600, mx: "auto" }}>
-          The absolute legends leading the Solana tipping ecosystem. 
+          The absolute legends leading the Solana tipping ecosystem.
           Support your favorites to push them up the ranks!
         </Typography>
       </Box>
@@ -145,21 +146,21 @@ export default function CreatorLeaderboard() {
             ];
 
             return (
-              <Card 
-                key={creator.wallet_address} 
+              <Card
+                key={creator.wallet_address}
                 className="fade-in-up"
                 component={RouterLink}
                 to={`/profile/${creator.wallet_address}`}
-                sx={{ 
-                  display: "flex", 
-                  alignItems: "center", 
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
                   p: { xs: 2.5, sm: 3.5 },
                   position: "relative",
                   overflow: "hidden",
                   textDecoration: "none",
                   color: "inherit",
-                  background: isTop3 
-                    ? `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)` 
+                  background: isTop3
+                    ? `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)`
                     : "rgba(255,255,255,0.03)",
                   backdropFilter: "blur(16px)",
                   border: isTop3 ? `1px solid ${rankColors[index]}66` : "1px solid rgba(255,255,255,0.05)",
@@ -168,8 +169,8 @@ export default function CreatorLeaderboard() {
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                   "&:hover": {
                     transform: "translateY(-6px) scale(1.01)",
-                    background: isTop3 
-                      ? `linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)` 
+                    background: isTop3
+                      ? `linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)`
                       : "rgba(255,255,255,0.06)",
                     boxShadow: isTop3 ? `0 15px 40px rgba(0,0,0,0.4), ${rankGlows[index]}` : "0 15px 30px rgba(0,0,0,0.3)"
                   },
@@ -178,26 +179,26 @@ export default function CreatorLeaderboard() {
               >
                 {/* Accent Line for Top 3 */}
                 {isTop3 && (
-                  <Box 
-                    sx={{ 
-                      position: "absolute", 
-                      top: 0, 
-                      left: 0, 
-                      width: 6, 
-                      height: "100%", 
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: 6,
+                      height: "100%",
                       bgcolor: rankColors[index],
                       boxShadow: `0 0 10px ${rankColors[index]}`
-                    }} 
+                    }}
                   />
                 )}
 
                 {/* Rank Badge */}
-                <Box 
-                  sx={{ 
-                    width: { xs: 45, sm: 60 }, 
+                <Box
+                  sx={{
+                    width: { xs: 45, sm: 60 },
                     height: { xs: 45, sm: 60 },
-                    display: "flex", 
-                    alignItems: "center", 
+                    display: "flex",
+                    alignItems: "center",
                     justifyContent: "center",
                     borderRadius: "50%",
                     bgcolor: isTop3 ? `${rankColors[index]}15` : "rgba(255,255,255,0.04)",
@@ -211,12 +212,12 @@ export default function CreatorLeaderboard() {
                 >
                   {index === 0 ? "👑" : index + 1}
                 </Box>
-                
+
                 {/* Avatar */}
-                <Avatar 
-                  sx={{ 
-                    width: { xs: 45, sm: 55 }, 
-                    height: { xs: 45, sm: 55 }, 
+                <Avatar
+                  sx={{
+                    width: { xs: 45, sm: 55 },
+                    height: { xs: 45, sm: 55 },
                     mr: { xs: 2, sm: 3 },
                     bgcolor: isTop3 ? `${rankColors[index]}33` : 'rgba(255,255,255,0.1)',
                     color: isTop3 ? rankColors[index] : '#fff',
@@ -236,19 +237,19 @@ export default function CreatorLeaderboard() {
                       {creator.name || "Anonymous Creator"}
                     </Typography>
                     {isTop3 && (
-                      <Chip 
-                        label={["Champion", "Runner-up", "Bronze"][index]} 
-                        size="small" 
-                        sx={{ 
-                          height: 20, 
-                          fontSize: "0.65rem", 
-                          fontWeight: 800, 
+                      <Chip
+                        label={["Champion", "Runner-up", "Bronze"][index]}
+                        size="small"
+                        sx={{
+                          height: 20,
+                          fontSize: "0.65rem",
+                          fontWeight: 800,
                           textTransform: "uppercase",
                           bgcolor: `${rankColors[index]}22`,
                           color: rankColors[index],
                           border: `1px solid ${rankColors[index]}44`,
                           display: { xs: "none", sm: "flex" }
-                        }} 
+                        }}
                       />
                     )}
                   </Box>
@@ -256,12 +257,12 @@ export default function CreatorLeaderboard() {
                     {shorten(creator.wallet_address)}
                   </Typography>
                 </Box>
-                
+
                 {/* Amount */}
                 <Box sx={{ textAlign: "right", pl: 2 }}>
-                  <Typography 
-                    variant="h5" 
-                    sx={{ 
+                  <Typography
+                    variant="h5"
+                    sx={{
                       fontWeight: 900,
                       fontSize: { xs: "1.2rem", sm: "1.7rem" },
                       color: isTop3 ? rankColors[index] : "primary.main",

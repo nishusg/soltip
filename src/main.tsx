@@ -8,6 +8,7 @@ import "./polyfills";
 import React, { useMemo } from "react";
 import ReactDOM from "react-dom/client";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
+import { SOLANA_RPC_URL } from "./config/constants";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 import { 
@@ -26,7 +27,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 
 function Root() {
   const endpoint = useMemo(
-    () => import.meta.env.VITE_SOLANA_RPC_URL || clusterApiUrl("devnet"),
+    () => SOLANA_RPC_URL || clusterApiUrl("devnet"),
     []
   );
 

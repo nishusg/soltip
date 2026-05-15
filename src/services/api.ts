@@ -13,7 +13,7 @@
 // Each function maps to a specific backend endpoint.
 // ============================================================================
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+import { API_BASE } from "../config/constants";
 
 // ---------------------------------------------------------------------------
 // Generic fetch wrapper

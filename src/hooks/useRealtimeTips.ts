@@ -8,17 +8,14 @@
 
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-
-// Get the base URL (remove /api from VITE_API_URL if present)
-const rawApiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
-const API_BASE = rawApiUrl.endsWith("/api") ? rawApiUrl.slice(0, -4) : rawApiUrl;
+import { SOCKET_URL } from "../config/constants";
 
 export function useRealtimeTips() {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [newTip, setNewTip] = useState<any | null>(null);
 
   useEffect(() => {
-    const socketInstance = io(API_BASE, {
+    const socketInstance = io(SOCKET_URL, {
       withCredentials: true,
     });
 
