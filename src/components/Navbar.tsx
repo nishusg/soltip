@@ -9,7 +9,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import { useState } from "react";
-import TipForm from "./TipForm";
+import TipForm from "../forms/TipForm";
 
 export default function Navbar() {
   const { connected, isAuthenticated, login, logout, isLoading, walletAddress } = useWalletAuth();

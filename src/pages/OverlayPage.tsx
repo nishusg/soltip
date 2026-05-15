@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Box, Typography, Paper, keyframes } from "@mui/material";
 import { useSocket } from "../context/SocketContext";
-import { API_BASE } from "../config/constants";
+import { API_BASE } from "../shared/constants";
 import BoltIcon from "@mui/icons-material/Bolt";
 import LockIcon from "@mui/icons-material/Lock";
 

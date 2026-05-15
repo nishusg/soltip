@@ -23,7 +23,7 @@ import { AnchorProvider, Program, Idl } from "@coral-xyz/anchor";
 import BN from "bn.js";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 
-import { PROGRAM_ID, PLATFORM_WALLET, FEE_PERCENTAGE } from "../config/constants";
+import { PROGRAM_ID, PLATFORM_WALLET, FEE_PERCENTAGE } from "../shared/constants";
 
 // ---------------------------------------------------------------------------
 // Minimal IDL for the tipping program

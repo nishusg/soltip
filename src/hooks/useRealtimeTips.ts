@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { SOCKET_URL } from "../config/constants";
+import { SOCKET_URL } from "../shared/constants";
 
 export function useRealtimeTips() {
   const [socket, setSocket] = useState<Socket | null>(null);

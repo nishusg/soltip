@@ -13,7 +13,7 @@
 // Each function maps to a specific backend endpoint.
 // ============================================================================
 
-import { API_BASE } from "../config/constants";
+import { API_BASE } from "../shared/constants";
 
 // ---------------------------------------------------------------------------
 // Generic fetch wrapper

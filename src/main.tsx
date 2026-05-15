@@ -3,12 +3,12 @@
 // ============================================================================
 
 // Polyfills for Solana libraries — must be first import
-import "./polyfills";
+import "./utils/polyfills";
 
 import React, { useMemo } from "react";
 import ReactDOM from "react-dom/client";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
-import { SOLANA_RPC_URL } from "./config/constants";
+import { SOLANA_RPC_URL } from "./shared/constants";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 import { 
@@ -21,7 +21,7 @@ import { HelmetProvider } from "react-helmet-async";
 import App from "./App";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import theme from "./theme";
+import theme from "./shared/theme";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 

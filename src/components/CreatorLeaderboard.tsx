@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { API_BASE } from "../config/constants";
+import { API_BASE } from "../shared/constants";
 import { useRealtimeTips } from "../hooks/useRealtimeTips";
 import { Box, Typography, Card, CardContent, CircularProgress, List, Avatar, Chip } from "@mui/material";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";

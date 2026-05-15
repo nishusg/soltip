@@ -15,7 +15,7 @@ const SocketContext = createContext<SocketContextType>({
 
 export const useSocket = () => useContext(SocketContext);
 
-import { SOCKET_URL } from "../config/constants";
+import { SOCKET_URL } from "../shared/constants";
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);

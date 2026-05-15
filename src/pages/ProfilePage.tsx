@@ -10,7 +10,7 @@ import CallMadeIcon from "@mui/icons-material/CallMade";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ErrorIcon from "@mui/icons-material/Error";
-import TipForm from "../components/TipForm";
+import TipForm from "../forms/TipForm";
 import SEO from "../components/SEO";
 
 interface UserProfile {
