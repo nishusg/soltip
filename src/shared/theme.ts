@@ -4,14 +4,14 @@ const theme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#00f2ff", // Electric Cyan
-      light: "#66faff",
-      dark: "#00a3ad",
+      main: "#14F195", // Solana Green
+      light: "#66ffc2",
+      dark: "#0da263",
     },
     secondary: {
-      main: "#7000ff", // Vivid Purple
-      light: "#a35cff",
-      dark: "#4a00b3",
+      main: "#9945FF", // Solana Purple
+      light: "#b87dff",
+      dark: "#6820cc",
     },
     background: {
       default: "#050508",
@@ -29,7 +29,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Outfit", "Inter", "system-ui", sans-serif',
+    fontFamily: '"Space Grotesk", "system-ui", sans-serif',
     h1: {
       fontWeight: 800,
       letterSpacing: "-0.02em",
@@ -68,54 +68,35 @@ const theme = createTheme({
         :root {
           --glass-bg: rgba(255, 255, 255, 0.03);
           --glass-border: rgba(255, 255, 255, 0.08);
-          --neon-primary: #00f2ff;
-          --neon-secondary: #7000ff;
+          --neon-primary: #14F195;
+          --neon-secondary: #9945FF;
         }
 
         body {
           margin: 0;
-          font-family: 'Outfit', sans-serif;
+          font-family: 'Space Grotesk', sans-serif;
           background-color: #050508;
           color: #f8f9fa;
           overflow-x: hidden;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
+          
+          /* Subtle Purple Grid */
+          background-image: 
+            linear-gradient(rgba(153, 69, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(153, 69, 255, 0.05) 1px, transparent 1px);
+          background-size: 40px 40px;
+          background-position: center top;
         }
 
-        /* Mesh Gradient Background */
+        /* Overlay gradient to fade the grid at the bottom */
         body::before {
           content: "";
           position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: -1;
-          background: 
-            radial-gradient(circle at 0% 0%, rgba(0, 242, 255, 0.08) 0%, transparent 40%),
-            radial-gradient(circle at 100% 100%, rgba(112, 0, 255, 0.08) 0%, transparent 40%),
-            radial-gradient(circle at 50% 50%, rgba(5, 5, 8, 1) 0%, rgba(5, 5, 8, 1) 100%);
+          top: 0; left: 0; width: 100%; height: 100%;
+          background: radial-gradient(circle at 50% 0%, rgba(5,5,8,0) 0%, rgba(5,5,8,1) 80%);
           pointer-events: none;
-        }
-
-        .mesh-gradient {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: -2;
-          filter: blur(100px);
-          opacity: 0.4;
-          background: linear-gradient(45deg, #050508, #110022, #001122, #050508);
-          background-size: 400% 400%;
-          animation: meshGradientAnim 15s ease infinite;
-        }
-
-        @keyframes meshGradientAnim {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+          z-index: -1;
         }
 
         @keyframes fadeInUp {
@@ -175,9 +156,9 @@ const theme = createTheme({
           boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.5)",
           transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           "&:hover": {
-            border: "1px solid rgba(0, 242, 255, 0.2)",
+            border: "1px solid rgba(20, 241, 149, 0.2)",
             transform: "translateY(-4px)",
-            boxShadow: "0 30px 60px -12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 242, 255, 0.05)",
+            boxShadow: "0 30px 60px -12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(20, 241, 149, 0.05)",
           },
         },
       },
@@ -192,25 +173,25 @@ const theme = createTheme({
           fontSize: "0.95rem",
           transition: "all 0.2s ease",
           "&.MuiButton-containedPrimary": {
-            background: "linear-gradient(135deg, #00f2ff 0%, #7000ff 100%)",
+            background: "linear-gradient(135deg, #9945FF 0%, #14F195 100%)",
             color: "#ffffff",
-            boxShadow: "0 4px 15px rgba(0, 242, 255, 0.2)",
+            boxShadow: "0 4px 15px rgba(20, 241, 149, 0.2)",
             "&:hover": {
               transform: "scale(1.02)",
-              boxShadow: "0 8px 25px rgba(0, 242, 255, 0.4)",
-              background: "linear-gradient(135deg, #33f5ff 0%, #8c33ff 100%)",
+              boxShadow: "0 8px 25px rgba(20, 241, 149, 0.4)",
+              background: "linear-gradient(135deg, #a85eff 0%, #35f3a5 100%)",
             },
             "&:active": {
               transform: "scale(0.98)",
             },
           },
           "&.MuiButton-outlinedPrimary": {
-            borderColor: "rgba(0, 242, 255, 0.5)",
+            borderColor: "rgba(20, 241, 149, 0.5)",
             borderWidth: "1.5px",
             "&:hover": {
               borderWidth: "1.5px",
-              backgroundColor: "rgba(0, 242, 255, 0.05)",
-              borderColor: "#00f2ff",
+              backgroundColor: "rgba(20, 241, 149, 0.05)",
+              borderColor: "#14F195",
             },
           },
         },
@@ -231,15 +212,15 @@ const theme = createTheme({
               borderColor: "rgba(255, 255, 255, 0.3)",
             },
             "&.Mui-focused fieldset": {
-              borderColor: "#00f2ff",
+              borderColor: "#14F195",
               borderWidth: "1.5px",
-              boxShadow: "0 0 15px rgba(0, 242, 255, 0.1)",
+              boxShadow: "0 0 15px rgba(20, 241, 149, 0.1)",
             },
           },
           "& .MuiInputLabel-root": {
             color: "#94a3b8",
             "&.Mui-focused": {
-              color: "#00f2ff",
+              color: "#14F195",
             },
           },
         },

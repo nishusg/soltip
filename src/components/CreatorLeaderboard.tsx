@@ -78,14 +78,14 @@ export default function CreatorLeaderboard() {
       <Box
         sx={{
           position: "absolute", top: "10%", left: "-10%", width: "40%", height: "40%",
-          background: "radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(20, 241, 149, 0.15) 0%, transparent 70%)",
           zIndex: -1, filter: "blur(80px)"
         }}
       />
       <Box
         sx={{
           position: "absolute", bottom: "10%", right: "-10%", width: "40%", height: "40%",
-          background: "radial-gradient(circle, rgba(112, 0, 255, 0.15) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(153, 69, 255, 0.15) 0%, transparent 70%)",
           zIndex: -1, filter: "blur(80px)"
         }}
       />
@@ -97,7 +97,7 @@ export default function CreatorLeaderboard() {
           gutterBottom
           sx={{
             fontWeight: 800,
-            background: "linear-gradient(135deg, #00f2ff 0%, #7000ff 100%)",
+            background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             mb: 2
@@ -266,7 +266,7 @@ export default function CreatorLeaderboard() {
                       fontWeight: 900,
                       fontSize: { xs: "1.2rem", sm: "1.7rem" },
                       color: isTop3 ? rankColors[index] : "primary.main",
-                      textShadow: isTop3 ? `0 0 20px ${rankColors[index]}66` : "0 0 10px rgba(0, 242, 255, 0.4)",
+                      textShadow: isTop3 ? `0 0 20px ${rankColors[index]}66` : "0 0 10px rgba(20, 241, 149, 0.4)",
                       display: "flex",
                       alignItems: "baseline",
                       justifyContent: "flex-end"

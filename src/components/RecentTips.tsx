@@ -140,7 +140,7 @@ export default function RecentTips() {
                       bgcolor: "rgba(255,255,255,0.04)",
                       transform: "translateY(-2px)",
                       boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-                      borderColor: isSent ? "rgba(0, 242, 255, 0.2)" : "rgba(112, 0, 255, 0.2)"
+                      borderColor: isSent ? "rgba(20, 241, 149, 0.2)" : "rgba(153, 69, 255, 0.2)"
                     }
                   }}
                 >
@@ -150,12 +150,12 @@ export default function RecentTips() {
                         width: { xs: 44, sm: 52 }, 
                         height: { xs: 44, sm: 52 }, 
                         borderRadius: "14px", 
-                        bgcolor: isSent ? "rgba(0, 242, 255, 0.1)" : "rgba(112, 0, 255, 0.1)",
+                        bgcolor: isSent ? "rgba(20, 241, 149, 0.1)" : "rgba(153, 69, 255, 0.1)",
                         display: "flex", 
                         alignItems: "center", 
                         justifyContent: "center",
                         color: isSent ? "primary.main" : "secondary.main",
-                        boxShadow: isSent ? "0 0 15px rgba(0, 242, 255, 0.15)" : "0 0 15px rgba(112, 0, 255, 0.15)"
+                        boxShadow: isSent ? "0 0 15px rgba(20, 241, 149, 0.15)" : "0 0 15px rgba(153, 69, 255, 0.15)"
                       }}>
                         {isSent ? <CallMadeIcon /> : <CallReceivedIcon />}
                       </Box>
@@ -180,11 +180,11 @@ export default function RecentTips() {
                         fontSize: "0.7rem", 
                         textTransform: "uppercase",
                         letterSpacing: "0.05em",
-                        bgcolor: isSent ? "rgba(0, 242, 255, 0.1)" : "rgba(112, 0, 255, 0.1)",
+                        bgcolor: isSent ? "rgba(20, 241, 149, 0.1)" : "rgba(153, 69, 255, 0.1)",
                         color: isSent ? "primary.main" : "secondary.main",
-                        borderColor: isSent ? "rgba(0, 242, 255, 0.3)" : "rgba(112, 0, 255, 0.3)",
+                        borderColor: isSent ? "rgba(20, 241, 149, 0.3)" : "rgba(153, 69, 255, 0.3)",
                         borderRadius: "8px",
-                        boxShadow: isSent ? "0 0 10px rgba(0, 242, 255, 0.2)" : "0 0 10px rgba(112, 0, 255, 0.2)"
+                        boxShadow: isSent ? "0 0 10px rgba(20, 241, 149, 0.2)" : "0 0 10px rgba(153, 69, 255, 0.2)"
                       }}
                       variant="outlined"
                     />
@@ -196,7 +196,7 @@ export default function RecentTips() {
                       p: 2.5, 
                       bgcolor: "rgba(255,255,255,0.03)", 
                       borderRadius: "12px",
-                      borderLeft: `4px solid ${isSent ? "#00f2ff" : "#7000ff"}`,
+                      borderLeft: `4px solid ${isSent ? "#14F195" : "#9945FF"}`,
                       position: "relative",
                       overflow: "hidden"
                     }}>
@@ -206,7 +206,7 @@ export default function RecentTips() {
                         left: 0,
                         width: "100%",
                         height: "100%",
-                        background: `linear-gradient(90deg, ${isSent ? "rgba(0,242,255,0.05)" : "rgba(112,0,255,0.05)"} 0%, transparent 100%)`,
+                        background: `linear-gradient(90deg, ${isSent ? "rgba(20,241,149,0.05)" : "rgba(153,69,255,0.05)"} 0%, transparent 100%)`,
                         pointerEvents: "none"
                       }} />
                       <Typography variant="body1" sx={{ fontStyle: "italic", color: "text.primary", opacity: 0.9, position: "relative", zIndex: 1 }}>
@@ -232,7 +232,7 @@ export default function RecentTips() {
                         textDecoration: "none",
                         fontWeight: 700,
                         transition: "all 0.2s",
-                        "&:hover": { color: "#fff", textShadow: "0 0 10px rgba(0,242,255,0.5)" }
+                        "&:hover": { color: "#fff", textShadow: "0 0 10px rgba(20,241,149,0.5)" }
                       }}
                     >
                       Ledger Proof <OpenInNewIcon sx={{ fontSize: 14 }} />

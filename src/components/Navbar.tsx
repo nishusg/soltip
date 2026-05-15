@@ -65,12 +65,12 @@ export default function Navbar() {
               width: 44,
               height: 44,
               borderRadius: "14px",
-              background: "linear-gradient(135deg, #00f2ff 0%, #7000ff 100%)",
+              background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               mr: 2,
-              boxShadow: "0 0 20px rgba(0, 242, 255, 0.4)",
+              boxShadow: "0 0 20px rgba(20, 241, 149, 0.4)",
               position: "relative",
               "&::after": {
                 content: '""',
@@ -146,14 +146,14 @@ export default function Navbar() {
               height: 44,
               borderRadius: "14px",
               fontWeight: 800,
-              background: "linear-gradient(135deg, #00f2ff 0%, #7000ff 100%)",
+              background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
               color: "#fff",
               display: { xs: "none", md: "flex" },
-              boxShadow: "0 4px 15px rgba(0, 242, 255, 0.3)",
+              boxShadow: "0 4px 15px rgba(20, 241, 149, 0.3)",
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               "&:hover": { 
                 transform: "translateY(-2px)",
-                boxShadow: "0 8px 25px rgba(0, 242, 255, 0.5)",
+                boxShadow: "0 8px 25px rgba(20, 241, 149, 0.5)",
               }
             }}
           >
@@ -216,8 +216,8 @@ export default function Navbar() {
                   borderRadius: "10px", 
                   fontWeight: 700, 
                   px: 2,
-                  borderColor: "rgba(0, 242, 255, 0.3)",
-                  "&:hover": { borderColor: "#00f2ff", bgcolor: "rgba(0, 242, 255, 0.05)" }
+                  borderColor: "rgba(20, 241, 149, 0.3)",
+                  "&:hover": { borderColor: "#14F195", bgcolor: "rgba(20, 241, 149, 0.05)" }
                 }}
               >
                 My Profile
@@ -302,7 +302,7 @@ export default function Navbar() {
         <Box sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" }}>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 4 }}>
              <Box sx={{ display: "flex", alignItems: "center" }}>
-               <Box sx={{ width: 32, height: 32, borderRadius: "8px", background: "linear-gradient(135deg, #00f2ff 0%, #7000ff 100%)", display: "flex", alignItems: "center", justifyContent: "center", mr: 1.5 }}>
+               <Box sx={{ width: 32, height: 32, borderRadius: "8px", background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)", display: "flex", alignItems: "center", justifyContent: "center", mr: 1.5 }}>
                  <BoltIcon sx={{ color: "#fff", fontSize: 20 }} />
                </Box>
                <Typography variant="h6" sx={{ fontWeight: 900 }}>Menu</Typography>
@@ -349,7 +349,7 @@ export default function Navbar() {
                  color="primary"
                  fullWidth
                  onClick={() => setMobileOpen(false)}
-                 sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, borderColor: "rgba(0, 242, 255, 0.3)", color: "#00f2ff" }}
+                 sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, borderColor: "rgba(20, 241, 149, 0.3)", color: "#14F195" }}
                  startIcon={<PersonIcon />}
                >
                  My Profile
@@ -365,9 +365,9 @@ export default function Navbar() {
                 }}
                 sx={{
                   py: 1.5, borderRadius: "14px", fontWeight: 800,
-                  background: "linear-gradient(135deg, #00f2ff 0%, #7000ff 100%)",
+                  background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
                   color: "#fff",
-                  boxShadow: "0 4px 15px rgba(0, 242, 255, 0.3)"
+                  boxShadow: "0 4px 15px rgba(20, 241, 149, 0.3)"
                 }}
              >
                 Send Tip

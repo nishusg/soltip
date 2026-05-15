@@ -107,7 +107,7 @@ export default function ProfileSettings() {
             }}
           >
             Profile <Box component="span" sx={{ 
-              background: "linear-gradient(135deg, #00f2ff 0%, #7000ff 100%)",
+              background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent"
             }}>Settings</Box>
@@ -134,8 +134,8 @@ export default function ProfileSettings() {
                       sx={{ 
                         width: 160, 
                         height: 160, 
-                        border: "4px solid rgba(0, 242, 255, 0.2)",
-                        boxShadow: "0 0 30px rgba(0, 242, 255, 0.15)",
+                        border: "4px solid rgba(20, 241, 149, 0.2)",
+                        boxShadow: "0 0 30px rgba(20, 241, 149, 0.15)",
                         bgcolor: "rgba(255,255,255,0.05)",
                         fontSize: "4rem"
                       }} 

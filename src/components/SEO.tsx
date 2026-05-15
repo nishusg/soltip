@@ -8,8 +8,8 @@ interface SEOProps {
 }
 
 export default function SEO({ 
-  title = "SolChat — Super Chat Tipping on Solana", 
-  description = "The future of creator support on Solana. Send Super Chats, tip creators with SOL, and join the community.",
+  title = "SolChat — Web3 Interactions on Solana", 
+  description = "The premier Solana dApp for Web3 interactions, DeFi integrations, and smart contract tipping.",
   image = "/og-image.png",
   url = "https://solchat.io" 
 }: SEOProps) {

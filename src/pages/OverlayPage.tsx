@@ -25,7 +25,7 @@ function getTierColor(amount: number): string {
   if (amount >= 5) return "#ff2d55";     // 5+ SOL — red/pink (legendary)
   if (amount >= 1) return "#ff9500";     // 1-5 SOL — orange (epic)
   if (amount >= 0.5) return "#ffcc00";   // 0.5-1 SOL — gold
-  if (amount >= 0.1) return "#00f2ff";   // 0.1-0.5 SOL — cyan
+  if (amount >= 0.1) return "#14F195";   // 0.1-0.5 SOL — cyan
   return "#8e8e93";                       // < 0.1 SOL — grey
 }
 

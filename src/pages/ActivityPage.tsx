@@ -8,14 +8,14 @@ export default function ActivityPage() {
       <Box 
         sx={{ 
           position: "absolute", top: "5%", left: "-10%", width: "50%", height: "50%", 
-          background: "radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, transparent 70%)", 
+          background: "radial-gradient(circle, rgba(20, 241, 149, 0.1) 0%, transparent 70%)", 
           zIndex: -1, filter: "blur(80px)" 
         }} 
       />
       <Box 
         sx={{ 
           position: "absolute", bottom: "10%", right: "-10%", width: "50%", height: "50%", 
-          background: "radial-gradient(circle, rgba(112, 0, 255, 0.1) 0%, transparent 70%)", 
+          background: "radial-gradient(circle, rgba(153, 69, 255, 0.1) 0%, transparent 70%)", 
           zIndex: -1, filter: "blur(80px)" 
         }} 
       />
@@ -33,7 +33,7 @@ export default function ActivityPage() {
             }}
           >
             Your <Box component="span" sx={{ 
-              background: "linear-gradient(135deg, #00f2ff 0%, #7000ff 100%)",
+              background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent"
             }}>Activity</Box>
