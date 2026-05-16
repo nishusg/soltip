@@ -42,6 +42,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [showTipForm, setShowTipForm] = useState(false);
 
   useEffect(() => {
     if (!wallet) return;
@@ -176,8 +177,33 @@ export default function ProfilePage() {
                   Edit Profile
                 </Button>
               ) : (
-                <Box sx={{ mt: 4, textAlign: "left" }}>
-                  <TipForm defaultCreatorAddress={user.wallet_address} />
+                <Box sx={{ mt: 4 }}>
+                  {!showTipForm ? (
+                    <Button 
+                      variant="contained" 
+                      size="large" 
+                      onClick={() => setShowTipForm(true)}
+                      sx={{ 
+                        px: 6, 
+                        py: 2, 
+                        borderRadius: "14px", 
+                        fontWeight: 800,
+                        background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
+                        boxShadow: "0 8px 25px rgba(20, 241, 149, 0.3)",
+                        "&:hover": { transform: "translateY(-2px)", boxShadow: "0 12px 30px rgba(20, 241, 149, 0.4)" }
+                      }}
+                    >
+                      Send Super Chat
+                    </Button>
+                  ) : (
+                    <Box sx={{ textAlign: "left", animation: "fadeInUp 0.4s ease-out" }}>
+                      <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Typography variant="h6" sx={{ fontWeight: 800 }}>Send Tip</Typography>
+                        <Button size="small" onClick={() => setShowTipForm(false)} sx={{ color: "text.secondary" }}>Cancel</Button>
+                      </Box>
+                      <TipForm defaultCreatorAddress={user.wallet_address} />
+                    </Box>
+                  )}
                 </Box>
               )}
             </CardContent>

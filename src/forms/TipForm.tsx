@@ -371,33 +371,33 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
             </Stack>
 
             <Box sx={{ mt: 3, pt: 2, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+              <Box sx={{ display: "flex", justifyContent: "flex-start", alignItems: "center", gap: 1.5, mb: 2 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700, opacity: 0.8 }}>
                   Backend Verification Status:
                 </Typography>
                 {verificationStatus === "verified" ? (
-                  <Chip 
-                    icon={<CheckCircleIcon />} 
-                    label="Verified" 
-                    color="success" 
-                    size="small" 
-                    sx={{ fontWeight: 800, borderRadius: "8px" }} 
+                  <Chip
+                    icon={<CheckCircleIcon />}
+                    label="Verified"
+                    color="success"
+                    size="small"
+                    sx={{ fontWeight: 800, borderRadius: "8px" }}
                   />
                 ) : verificationStatus === "failed" ? (
-                  <Chip 
-                    icon={<ErrorIcon />} 
-                    label="Failed" 
-                    color="error" 
-                    size="small" 
-                    sx={{ fontWeight: 800, borderRadius: "8px" }} 
+                  <Chip
+                    icon={<ErrorIcon />}
+                    label="Failed"
+                    color="error"
+                    size="small"
+                    sx={{ fontWeight: 800, borderRadius: "8px" }}
                   />
                 ) : (
-                  <Chip 
-                    label="Pending" 
-                    color="warning" 
-                    size="small" 
+                  <Chip
+                    label="Pending"
+                    color="warning"
+                    size="small"
                     variant="outlined"
-                    sx={{ fontWeight: 800, borderRadius: "8px" }} 
+                    sx={{ fontWeight: 800, borderRadius: "8px" }}
                   />
                 )}
               </Box>
@@ -409,8 +409,8 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
                   onClick={handleCheckStatus}
                   disabled={checkingStatus}
                   startIcon={checkingStatus ? <CircularProgress size={14} color="inherit" /> : <RefreshIcon />}
-                  sx={{ 
-                    borderRadius: "10px", 
+                  sx={{
+                    borderRadius: "10px",
                     fontWeight: 700,
                     borderColor: "rgba(255,255,255,0.2)",
                     "&:hover": { borderColor: "primary.main", bgcolor: "rgba(20, 241, 149, 0.05)" }
