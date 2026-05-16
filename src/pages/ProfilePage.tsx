@@ -111,7 +111,7 @@ export default function ProfilePage() {
         <Box sx={{ animation: "fadeInUp 0.6s ease-out" }}>
           <SEO 
             title={user.name || shorten(user.wallet_address)} 
-            description={user.bio || `Interact with ${user.name || shorten(user.wallet_address)} on SolChat — the premier Solana Web3 platform.`}
+            description={user.bio || `Send a superchat to ${user.name || shorten(user.wallet_address)} on SolChat — the ultimate Solana engagement platform.`}
           />
           {/* Profile Card */}
           <Card sx={{ mb: 4, textAlign: "center", px: 4, pb: 4, pt: 0, overflow: "visible" }}>

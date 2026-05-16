@@ -78,7 +78,7 @@ export default function WalletConnect() {
             WebkitTextFillColor: "transparent"
           }}
         >
-          Let's Build Your <br/>
+          Real-Time Engagement <br/>
           <Box
             component="span"
             sx={{
@@ -87,23 +87,22 @@ export default function WalletConnect() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Solana-Powered
-          </Box>{" "}
-          Future Together
+            Powered by Solana
+          </Box>
         </Typography>
         <Typography
           variant="h6"
           color="text.secondary"
           sx={{
             mb: 6,
-            maxWidth: 700,
+            maxWidth: 750,
             mx: "auto",
             fontSize: "1.1rem",
             fontWeight: 400,
             lineHeight: 1.8
           }}
         >
-          Experience lightning-fast dApps, DeFi integrations, NFTs, and secure smart contracts on-chain.
+          Elevate your stream with instant on-chain alerts, ultra-low fees, and direct-to-wallet superchats. The ultimate engagement layer for the next generation of creators.
         </Typography>
         
         <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
@@ -123,9 +122,12 @@ export default function WalletConnect() {
               "&:hover": { transform: "translateY(-2px)", boxShadow: "0 12px 30px rgba(20, 241, 149, 0.4)" }
             }}
           >
-            Get Started
+            Connect Phantom
           </Button>
         </Box>
+        <Typography variant="caption" sx={{ display: "block", mt: 2, opacity: 0.6, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+          Optimized for Phantom Wallet
+        </Typography>
       </Box>
 
       <Box
@@ -152,10 +154,10 @@ export default function WalletConnect() {
               <FlashOnIcon sx={{ fontSize: 32, color: "primary.main" }} />
             </Box>
             <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
-              Instant
+              Live Alerts
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Transactions settle in seconds, not minutes.
+              Real-time on-stream notifications via OBS and Streamlabs.
             </Typography>
           </CardContent>
         </Card>
@@ -176,10 +178,10 @@ export default function WalletConnect() {
               <LockIcon sx={{ fontSize: 32, color: "secondary.main" }} />
             </Box>
             <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
-              Secure
+              Direct & Secure
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Directly peer-to-peer using your own wallet.
+              Non-custodial. Tips go directly from fans to your wallet.
             </Typography>
           </CardContent>
         </Card>
@@ -200,10 +202,10 @@ export default function WalletConnect() {
               <Typography sx={{ fontSize: 28, fontWeight: 800, color: '#14F195', fontFamily: "'Space Mono', monospace" }}>$</Typography>
             </Box>
             <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>
-              ~$0.00025
+              Zero Middleman
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Avg. Transaction Fee
+              No 30% cuts. Only the minimal Solana network fees.
             </Typography>
           </CardContent>
         </Card>

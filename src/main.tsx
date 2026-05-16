@@ -12,8 +12,7 @@ import { SOLANA_RPC_URL } from "./shared/constants";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 import {
-  PhantomWalletAdapter,
-  SolflareWalletAdapter
+  PhantomWalletAdapter
 } from "@solana/wallet-adapter-wallets";
 import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
@@ -34,7 +33,6 @@ function Root() {
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
-      new SolflareWalletAdapter(),
     ],
     []
   );

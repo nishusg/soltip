@@ -170,10 +170,10 @@ export default function Dashboard() {
               background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent"
-            }}>Dashboard</Box>
+            }}>Hub</Box>
           </Typography>
           <Typography color="text.secondary" variant="h6" sx={{ fontWeight: 400 }}>
-            Track your earnings, view recent tips, and engage with your community.
+            Manage your alerts, track earnings, and engage with your community in real-time.
           </Typography>
         </Box>
 
@@ -266,7 +266,7 @@ export default function Dashboard() {
                   </ResponsiveContainer>
                 ) : (
                   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", opacity: 0.5, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "12px", border: "1px dashed rgba(255,255,255,0.1)" }}>
-                    <Typography sx={{ fontWeight: 600 }}>No earnings data yet. Keep streaming! 🚀</Typography>
+                    <Typography sx={{ fontWeight: 600 }}>No superchats yet. Your fans are waiting! 🚀</Typography>
                   </Box>
                 )}
               </Box>

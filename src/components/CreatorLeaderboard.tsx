@@ -103,10 +103,10 @@ export default function CreatorLeaderboard() {
             mb: 2
           }}
         >
-          Top Creators
+          Ecosystem Leaders
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400, maxWidth: 600, mx: "auto" }}>
-          The absolute legends leading the Solana tipping ecosystem.
+          The absolute legends driving the Solana superchat economy. 
           Support your favorites to push them up the ranks!
         </Typography>
       </Box>
