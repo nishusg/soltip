@@ -21,8 +21,8 @@ export default function Navbar() {
 
   const navItems = [
     { label: "Home", path: "/" },
-    { label: "Leaderboard", path: "/leaderboard" },
     ...(isAuthenticated ? [
+      { label: "Leaderboard", path: "/leaderboard" },
       { label: "Activity", path: "/activity" },
       { label: "Dashboard", path: "/dashboard" },
       { label: "Settings", path: "/settings" }
@@ -195,6 +195,7 @@ export default function Navbar() {
                 border: "1px solid rgba(255,255,255,0.2)",
                 backdropFilter: "blur(10px)",
                 display: { xs: "none", md: "flex" },
+                color: "#fff",
                 "&:hover": { background: "rgba(255,255,255,0.15)" }
               }}
             >
@@ -378,7 +379,7 @@ export default function Navbar() {
                   variant="contained" 
                   fullWidth 
                   onClick={login} 
-                  sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, bgcolor: "rgba(255,255,255,0.1)" }}
+                  sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, bgcolor: "rgba(255,255,255,0.1)", color: "#fff" }}
                 >
                   Sign In
                 </Button>

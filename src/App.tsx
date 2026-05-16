@@ -17,9 +17,10 @@
 // ============================================================================
 
 import React, { Suspense } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
+import { useWalletAuth } from "./hooks/useWalletAuth";
 
 // Lazy loaded components
 const Home = React.lazy(() => import("./pages/Home"));
@@ -29,6 +30,19 @@ const OverlayPage = React.lazy(() => import("./pages/OverlayPage"));
 const CreatorLeaderboard = React.lazy(() => import("./components/CreatorLeaderboard"));
 const ProfileSettings = React.lazy(() => import("./pages/ProfileSettings"));
 const ActivityPage = React.lazy(() => import("./pages/ActivityPage"));
+const UnauthorizedPage = React.lazy(() => import("./pages/UnauthorizedPage"));
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useWalletAuth();
+  const location = useLocation();
+  
+  if (isLoading) return null;
+  if (!isAuthenticated) {
+    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+  }
+  
+  return <>{children}</>;
+}
 
 function AppLayout() {
   const location = useLocation();
@@ -43,21 +57,24 @@ function AppLayout() {
       <Suspense fallback={<div className="page-wrapper container"><div className="spinner"></div></div>}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route
             path="/leaderboard"
             element={
-              <div className="page-wrapper">
-                <div className="container">
-                  <CreatorLeaderboard />
+              <ProtectedRoute>
+                <div className="page-wrapper">
+                  <div className="container">
+                    <CreatorLeaderboard />
+                  </div>
                 </div>
-              </div>
+              </ProtectedRoute>
             }
           />
-          <Route path="/activity" element={<ActivityPage />} />
-          <Route path="/profile/:wallet" element={<ProfilePage />} />
-          <Route path="/settings" element={<ProfileSettings />} />
+          <Route path="/activity" element={<ProtectedRoute><ActivityPage /></ProtectedRoute>} />
+          <Route path="/profile/:wallet" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
           <Route path="/overlay/:walletAddress" element={<OverlayPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         </Routes>
       </Suspense>
 

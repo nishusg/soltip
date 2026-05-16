@@ -30,6 +30,7 @@ interface Tip {
   fee: number;
   message: string;
   timestamp: string;
+  status: string;
 }
 
 export default function ProfilePage() {
@@ -213,6 +214,15 @@ export default function ProfilePage() {
                             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                               {formatSol(tip.amount)} SOL
                             </Typography>
+                            {tip.status && (
+                              <Chip 
+                                label={tip.status} 
+                                color={tip.status === "verified" ? "success" : tip.status === "failed" ? "error" : "warning"} 
+                                size="small" 
+                                variant="outlined" 
+                                sx={{ fontWeight: 800, fontSize: "0.65rem", height: 20, borderRadius: "6px" }}
+                              />
+                            )}
                           </Box>
                           <Typography variant="body2" color="text.secondary">
                             {activeTab === 0 ? (

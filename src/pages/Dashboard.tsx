@@ -350,6 +350,15 @@ export default function Dashboard() {
                               <Typography variant="subtitle1" color="primary.main" sx={{ fontWeight: 900, textShadow: "0 0 10px rgba(20, 241, 149, 0.3)" }}>
                                 +{formatSol(tip.amount)} SOL
                               </Typography>
+                              {tip.status && (
+                                <Chip 
+                                  label={tip.status} 
+                                  size="small" 
+                                  variant="outlined"
+                                  color={tip.status === "verified" ? "success" : tip.status === "failed" ? "error" : "warning"}
+                                  sx={{ ml: 1, height: 20, fontSize: "0.65rem", fontWeight: 800, borderRadius: "6px" }}
+                                />
+                              )}
                             </Box>
                           }
                           secondary={

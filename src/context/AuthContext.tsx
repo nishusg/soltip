@@ -18,6 +18,7 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { authenticate, getToken, removeToken, getStoredAddress } from "../services/auth";
+import toast from "react-hot-toast";
 
 // ---------------------------------------------------------------------------
 // Type definitions
@@ -65,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Login: run the full nonce → sign → verify flow
   // -------------------------------------------------------------------
   const login = useCallback(async () => {
+    if (isLoading) return;
     if (!publicKey || !signMessage) {
       setError("Please connect your wallet first");
       return;
@@ -121,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const handleAuthExpired = () => {
       logout();
       setError("Session expired. Please sign in again.");
+      toast.error("Session expired. Please sign in again.", { id: "auth-expired" });
     };
 
     window.addEventListener("auth:expired", handleAuthExpired);

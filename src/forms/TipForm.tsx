@@ -1,14 +1,17 @@
 import type { FormEvent } from "react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useAuth } from "../context/AuthContext";
 import { sendTip, getExplorerUrl, calculateFeeBreakdown } from "../services/solana";
-import { verifyAndStoreTransaction } from "../services/api";
+import { verifyAndStoreTransaction, getTransactionStatus } from "../services/api";
 import { PublicKey } from "@solana/web3.js";
 import toast from "react-hot-toast";
-import { Card, CardContent, Typography, TextField, Button, Box, CircularProgress, Link, Alert, Stack } from "@mui/material";
+import { Card, CardContent, Typography, TextField, Button, Box, CircularProgress, Link, Alert, Stack, Chip } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
 import SendIcon from "@mui/icons-material/Send";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 type TxStatus = "idle" | "sending" | "verifying" | "success" | "error";
@@ -30,6 +33,11 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
   const [txStatus, setTxStatus] = useState<TxStatus>("idle");
   const [txHash, setTxHash] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // New verification status tracking
+  const [verificationStatus, setVerificationStatus] = useState<"pending" | "verified" | "failed" | null>(null);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const isSubmitting = useRef(false);
 
   const feeBreakdown = useMemo(() => {
     const parsed = parseFloat(amount);
@@ -55,10 +63,13 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
 
     if (!wallet.publicKey || !isAuthenticated) return;
     if (txStatus === "sending" || txStatus === "verifying") return;
+    if (isSubmitting.current) return;
 
+    isSubmitting.current = true;
     setTxStatus("sending");
     setErrorMsg(null);
     setTxHash(null);
+    setVerificationStatus(null);
 
     try {
       const signature = await sendTip(
@@ -77,6 +88,7 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
           creator_wallet: creatorAddress,
           message: message
         });
+        setVerificationStatus("pending");
       } catch (verifyErr) {
         console.warn("Backend verification failed:", verifyErr);
         toast.error("Transaction sent, but backend verification failed");
@@ -94,8 +106,30 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
       setErrorMsg(msg);
       toast.error(msg);
       console.error("Tip error:", err);
+    } finally {
+      isSubmitting.current = false;
     }
   }
+
+  const handleCheckStatus = async () => {
+    if (!txHash) return;
+    setCheckingStatus(true);
+    try {
+      const res = await getTransactionStatus(txHash);
+      setVerificationStatus(res.status);
+      if (res.status === "verified") {
+        toast.success("Transaction verified on backend!");
+      } else if (res.status === "failed") {
+        toast.error(`Verification failed: ${res.error || "Unknown error"}`);
+      } else {
+        toast.loading("Verification still in progress...", { duration: 2000 });
+      }
+    } catch (err: any) {
+      toast.error("Failed to check status");
+    } finally {
+      setCheckingStatus(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -129,7 +163,7 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
                 onClick={login}
                 disabled={isLoading}
                 size="large"
-                sx={{ px: 6 }}
+                sx={{ px: 6, color: "#fff" }}
               >
                 {isLoading ? "Signing In..." : "Sign In & Verify"}
               </Button>
@@ -305,7 +339,7 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
           </Stack>
         </form>
 
-        {txStatus === "success" && txHash && (
+        {(txStatus === "success" || (txStatus === "idle" && txHash)) && txHash && (
           <Alert
             severity="success"
             sx={{
@@ -317,23 +351,75 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
               "& .MuiAlert-icon": { color: "success.main" }
             }}
           >
-            <Typography sx={{ fontWeight: 600 }}>Tip sent successfully!</Typography>
-            <Link
-              href={getExplorerUrl(txHash)}
-              target="_blank"
-              rel="noopener noreferrer"
-              sx={{
-                color: "primary.main",
-                textDecoration: "none",
-                fontWeight: 700,
-                display: "inline-flex",
-                alignItems: "center",
-                mt: 0.5,
-                "&:hover": { textDecoration: "underline" }
-              }}
-            >
-              View on Solana Explorer →
-            </Link>
+            <Typography sx={{ fontWeight: 600 }}>On-chain transaction successful!</Typography>
+            <Stack direction="row" spacing={2} sx={{ mt: 1, alignItems: "center" }}>
+              <Link
+                href={getExplorerUrl(txHash)}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{
+                  color: "primary.main",
+                  textDecoration: "none",
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  "&:hover": { textDecoration: "underline" }
+                }}
+              >
+                View on Solana Explorer →
+              </Link>
+            </Stack>
+
+            <Box sx={{ mt: 3, pt: 2, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700, opacity: 0.8 }}>
+                  Backend Verification Status:
+                </Typography>
+                {verificationStatus === "verified" ? (
+                  <Chip 
+                    icon={<CheckCircleIcon />} 
+                    label="Verified" 
+                    color="success" 
+                    size="small" 
+                    sx={{ fontWeight: 800, borderRadius: "8px" }} 
+                  />
+                ) : verificationStatus === "failed" ? (
+                  <Chip 
+                    icon={<ErrorIcon />} 
+                    label="Failed" 
+                    color="error" 
+                    size="small" 
+                    sx={{ fontWeight: 800, borderRadius: "8px" }} 
+                  />
+                ) : (
+                  <Chip 
+                    label="Pending" 
+                    color="warning" 
+                    size="small" 
+                    variant="outlined"
+                    sx={{ fontWeight: 800, borderRadius: "8px" }} 
+                  />
+                )}
+              </Box>
+
+              {verificationStatus !== "verified" && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={handleCheckStatus}
+                  disabled={checkingStatus}
+                  startIcon={checkingStatus ? <CircularProgress size={14} color="inherit" /> : <RefreshIcon />}
+                  sx={{ 
+                    borderRadius: "10px", 
+                    fontWeight: 700,
+                    borderColor: "rgba(255,255,255,0.2)",
+                    "&:hover": { borderColor: "primary.main", bgcolor: "rgba(20, 241, 149, 0.05)" }
+                  }}
+                >
+                  {checkingStatus ? "Checking..." : "Verify Final Status"}
+                </Button>
+              )}
+            </Box>
           </Alert>
         )}
 

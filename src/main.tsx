@@ -11,9 +11,9 @@ import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react
 import { SOLANA_RPC_URL } from "./shared/constants";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
-import { 
-  PhantomWalletAdapter, 
-  SolflareWalletAdapter 
+import {
+  PhantomWalletAdapter,
+  SolflareWalletAdapter
 } from "@solana/wallet-adapter-wallets";
 import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";

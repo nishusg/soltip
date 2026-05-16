@@ -1,5 +1,5 @@
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { Box, Typography, Card, CardContent } from "@mui/material";
+import { Box, Typography, Card, CardContent, Button } from "@mui/material";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
 import LockIcon from "@mui/icons-material/Lock";
 import DiamondIcon from "@mui/icons-material/Diamond";
@@ -103,9 +103,29 @@ export default function WalletConnect() {
             lineHeight: 1.8
           }}
         >
-          The most seamless platform for Web3 creators. 
           Experience lightning-fast dApps, DeFi integrations, NFTs, and secure smart contracts on-chain.
         </Typography>
+        
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => document.querySelector<HTMLButtonElement>(".wallet-adapter-button")?.click()}
+            sx={{ 
+              px: 6, 
+              py: 2, 
+              borderRadius: "14px", 
+              fontWeight: 800, 
+              fontSize: "1.1rem",
+              background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
+              boxShadow: "0 8px 25px rgba(20, 241, 149, 0.3)",
+              "&:hover": { transform: "translateY(-2px)", boxShadow: "0 12px 30px rgba(20, 241, 149, 0.4)" }
+            }}
+          >
+            Get Started
+          </Button>
+        </Box>
       </Box>
 
       <Box

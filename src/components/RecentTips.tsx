@@ -19,6 +19,7 @@ interface Transaction {
   fee: number;
   message: string;
   timestamp: string;
+  status: string;
 }
 
 export default function RecentTips() {
@@ -188,6 +189,21 @@ export default function RecentTips() {
                       }}
                       variant="outlined"
                     />
+                    {tx.status && (
+                      <Chip
+                        label={tx.status}
+                        size="small"
+                        color={tx.status === "verified" ? "success" : tx.status === "failed" ? "error" : "warning"}
+                        variant="outlined"
+                        sx={{ 
+                          fontWeight: 800, 
+                          fontSize: "0.7rem", 
+                          textTransform: "uppercase",
+                          borderRadius: "8px",
+                          ml: 1
+                        }}
+                      />
+                    )}
                   </Box>
 
                   {tx.message && (

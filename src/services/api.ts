@@ -96,6 +96,11 @@ export async function listTransactions(wallet: string) {
   return api(`/tx/list?wallet=${wallet}`);
 }
 
+/** Get the verification status of a specific transaction */
+export async function getTransactionStatus(tx_hash: string) {
+  return api(`/tx/status/${tx_hash}`);
+}
+
 // ---------------------------------------------------------------------------
 // Stats endpoints
 // ---------------------------------------------------------------------------
