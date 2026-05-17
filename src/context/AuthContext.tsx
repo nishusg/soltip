@@ -29,6 +29,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   /** The current JWT token (or null) */
   token: string | null;
+  /** The current user profile data */
+  user: any | null;
   /** Whether an auth operation is in progress */
   isLoading: boolean;
   /** Error message from the last auth attempt (or null) */
@@ -37,30 +39,55 @@ interface AuthContextType {
   login: () => Promise<void>;
   /** Clear auth state and logout */
   logout: () => void;
+  /** Manually refresh the user profile */
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   token: null,
+  user: null,
   isLoading: false,
   error: null,
   login: async () => {},
   logout: () => {},
+  refreshUser: async () => {},
 });
 
 // ---------------------------------------------------------------------------
 // Provider component
 // ---------------------------------------------------------------------------
 
+import { getMe } from "../services/api";
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { publicKey, signMessage, connected } = useWallet();
 
   // Auth state
   const [token, setToken] = useState<string | null>(getToken());
+  const [user, setUser] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isAuthenticated = !!token;
+
+  const refreshUser = useCallback(async () => {
+    if (!token) return;
+    try {
+      const data = await getMe();
+      setUser(data.user);
+    } catch (err) {
+      console.error("Failed to fetch user profile:", err);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      refreshUser();
+    } else {
+      setUser(null);
+    }
+  }, [token, refreshUser]);
 
   // -------------------------------------------------------------------
   // Login: run the full nonce → sign → verify flow
@@ -84,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [publicKey, signMessage]);
+  }, [publicKey, signMessage, isLoading]);
 
   // -------------------------------------------------------------------
   // Logout: clear JWT and state
@@ -92,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     removeToken();
     setToken(null);
+    setUser(null);
     setError(null);
   }, []);
 
@@ -134,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, token, isLoading, error, login, logout }}
+      value={{ isAuthenticated, token, user, isLoading, error, login, logout, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

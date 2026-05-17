@@ -185,12 +185,12 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
                   fontWeight: 600,
                   px: 4,
                   fontSize: "1rem",
-                  background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%) !important",
-                  boxShadow: "0 8px 20px rgba(20, 241, 149, 0.2) !important",
+                  background: (theme: any) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%) !important`,
+                  boxShadow: (theme: any) => `0 8px 20px ${theme.palette.primary.main}33 !important`,
                   transition: "all 0.2s ease !important",
                   "&:hover": {
                     transform: "translateY(-2px)",
-                    boxShadow: "0 12px 25px rgba(20, 241, 149, 0.3) !important",
+                    boxShadow: (theme: any) => `0 12px 25px ${theme.palette.primary.main}4d !important`,
                   }
                 }
               }}>
@@ -212,7 +212,7 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
         left: "10%",
         right: "10%",
         height: "2px",
-        background: "linear-gradient(90deg, transparent, #14F195, #9945FF, transparent)",
+        background: (theme: any) => `linear-gradient(90deg, transparent, ${theme.palette.primary.main}, ${theme.palette.secondary?.main || theme.palette.primary.main}, transparent)`,
         opacity: 0.5
       }} />
 
@@ -223,7 +223,7 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
             <Box
               component="span"
               sx={{
-                background: "linear-gradient(90deg, #14F195 0%, #9945FF 100%)",
+                background: (theme: any) => `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary?.main || theme.palette.primary.main} 100%)`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -413,7 +413,7 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
                     borderRadius: "10px",
                     fontWeight: 700,
                     borderColor: "rgba(255,255,255,0.2)",
-                    "&:hover": { borderColor: "primary.main", bgcolor: "rgba(20, 241, 149, 0.05)" }
+                    "&:hover": { borderColor: "primary.main", bgcolor: (theme: any) => `${theme.palette.primary.main}0d` }
                   }}
                 >
                   {checkingStatus ? "Checking..." : "Verify Final Status"}

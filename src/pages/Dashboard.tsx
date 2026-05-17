@@ -140,14 +140,14 @@ export default function Dashboard() {
       <Box 
         sx={{ 
           position: "absolute", top: "10%", left: "-10%", width: "40%", height: "40%", 
-          background: "radial-gradient(circle, rgba(20, 241, 149, 0.15) 0%, transparent 70%)", 
+          background: (theme: any) => `radial-gradient(circle, ${theme.palette.primary.main}26 0%, transparent 70%)`, 
           zIndex: -1, filter: "blur(80px)" 
         }} 
       />
       <Box 
         sx={{ 
           position: "absolute", bottom: "10%", right: "-10%", width: "40%", height: "40%", 
-          background: "radial-gradient(circle, rgba(153, 69, 255, 0.15) 0%, transparent 70%)", 
+          background: (theme: any) => `radial-gradient(circle, ${theme.palette.secondary?.main || theme.palette.primary.main}26 0%, transparent 70%)`, 
           zIndex: -1, filter: "blur(80px)" 
         }} 
       />
@@ -167,7 +167,7 @@ export default function Dashboard() {
             }}
           >
             Creator <Box component="span" sx={{ 
-              background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
+              background: (theme: any) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary?.main || theme.palette.primary.main} 100%)`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent"
             }}>Hub</Box>
@@ -181,21 +181,21 @@ export default function Dashboard() {
         <Grid container spacing={3} sx={{ mb: 6 }} className="fade-in-up">
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Paper sx={{ 
-              p: 3, textAlign: "center", bgcolor: "rgba(20, 241, 149, 0.05)", border: "1px solid rgba(20, 241, 149, 0.15)", borderRadius: "20px", backdropFilter: "blur(10px)",
-              boxShadow: "0 8px 32px rgba(20, 241, 149, 0.05)", transition: "all 0.3s ease", "&:hover": { transform: "translateY(-4px)", boxShadow: "0 12px 40px rgba(20, 241, 149, 0.1)" }
+              p: 3, textAlign: "center", bgcolor: (theme: any) => `${theme.palette.primary.main}0d`, border: (theme: any) => `1px solid ${theme.palette.primary.main}26`, borderRadius: "20px", backdropFilter: "blur(10px)",
+              boxShadow: (theme: any) => `0 8px 32px ${theme.palette.primary.main}0d`, transition: "all 0.3s ease", "&:hover": { transform: "translateY(-4px)", boxShadow: (theme: any) => `0 12px 40px ${theme.palette.primary.main}1a` }
             }}>
-              <AccountBalanceWalletIcon sx={{ fontSize: 48, mb: 1.5, color: "#14F195", filter: "drop-shadow(0 0 10px rgba(20,241,149,0.4))" }} />
-              <Typography variant="h4" sx={{ fontWeight: 900, color: "#14F195" }}>{formatSol(totalEarned)} <Box component="span" sx={{ fontSize: "1rem", opacity: 0.8 }}>SOL</Box></Typography>
+              <AccountBalanceWalletIcon sx={{ fontSize: 48, mb: 1.5, color: (theme: any) => theme.palette.primary.main, filter: (theme: any) => `drop-shadow(0 0 10px ${theme.palette.primary.main}66)` }} />
+              <Typography variant="h4" sx={{ fontWeight: 900, color: (theme: any) => theme.palette.primary.main }}>{formatSol(totalEarned)} <Box component="span" sx={{ fontSize: "1rem", opacity: 0.8 }}>SOL</Box></Typography>
               <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", mt: 1 }}>Total Earnings</Typography>
             </Paper>
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Paper sx={{ 
-              p: 3, textAlign: "center", bgcolor: "rgba(153, 69, 255, 0.05)", border: "1px solid rgba(153, 69, 255, 0.15)", borderRadius: "20px", backdropFilter: "blur(10px)",
-              boxShadow: "0 8px 32px rgba(153, 69, 255, 0.05)", transition: "all 0.3s ease", "&:hover": { transform: "translateY(-4px)", boxShadow: "0 12px 40px rgba(153, 69, 255, 0.1)" }
+              p: 3, textAlign: "center", bgcolor: (theme: any) => `${theme.palette.secondary?.main || theme.palette.primary.main}0d`, border: (theme: any) => `1px solid ${theme.palette.secondary?.main || theme.palette.primary.main}26`, borderRadius: "20px", backdropFilter: "blur(10px)",
+              boxShadow: (theme: any) => `0 8px 32px ${theme.palette.secondary?.main || theme.palette.primary.main}0d`, transition: "all 0.3s ease", "&:hover": { transform: "translateY(-4px)", boxShadow: (theme: any) => `0 12px 40px ${theme.palette.secondary?.main || theme.palette.primary.main}1a` }
             }}>
-              <BoltIcon sx={{ fontSize: 48, mb: 1.5, color: "#9945FF", filter: "drop-shadow(0 0 10px rgba(153,69,255,0.4))" }} />
-              <Typography variant="h4" sx={{ fontWeight: 900, color: "#9945FF" }}>{totalTips}</Typography>
+              <BoltIcon sx={{ fontSize: 48, mb: 1.5, color: (theme: any) => theme.palette.secondary?.main || theme.palette.primary.main, filter: (theme: any) => `drop-shadow(0 0 10px ${theme.palette.secondary?.main || theme.palette.primary.main}66)` }} />
+              <Typography variant="h4" sx={{ fontWeight: 900, color: (theme: any) => theme.palette.secondary?.main || theme.palette.primary.main }}>{totalTips}</Typography>
               <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", mt: 1 }}>Recent Super Chats</Typography>
             </Paper>
           </Grid>
@@ -244,7 +244,7 @@ export default function Dashboard() {
                       <YAxis stroke="rgba(255,255,255,0.5)" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: "rgba(10, 10, 15, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", backdropFilter: "blur(10px)" }}
-                        itemStyle={{ color: "#14F195", fontWeight: 700 }}
+                        itemStyle={{ color: theme.palette.primary.main, fontWeight: 700 }}
                         formatter={(value: any) => [`${Number(value).toFixed(4)} SOL`, "Earned"]}
                       />
                       <Bar dataKey="value" radius={[6, 6, 0, 0]}>
@@ -254,12 +254,12 @@ export default function Dashboard() {
                       </Bar>
                       <defs>
                         <linearGradient id="colorCyan" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#14F195" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#14F195" stopOpacity={0.2}/>
+                          <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0.2}/>
                         </linearGradient>
                         <linearGradient id="colorPurple" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#9945FF" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#9945FF" stopOpacity={0.2}/>
+                          <stop offset="5%" stopColor={theme.palette.secondary?.main || theme.palette.primary.main} stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor={theme.palette.secondary?.main || theme.palette.primary.main} stopOpacity={0.2}/>
                         </linearGradient>
                       </defs>
                     </BarChart>
@@ -289,11 +289,11 @@ export default function Dashboard() {
                         dataKey="value"
                         stroke="none"
                       >
-                        <Cell fill="#9945FF" />
-                        <Cell fill="#14F195" />
-                        <Cell fill="#ff4b4b" />
-                        <Cell fill="#00ff80" />
-                        <Cell fill="#ffb400" />
+                        <Cell fill={theme.palette.secondary?.main || theme.palette.primary.main} />
+                        <Cell fill={theme.palette.primary.main} />
+                        <Cell fill={theme.palette.error.main} />
+                        <Cell fill={theme.palette.success.main} />
+                        <Cell fill={theme.palette.warning.main} />
                       </Pie>
                       <Tooltip 
                         contentStyle={{ backgroundColor: "rgba(10, 10, 15, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", backdropFilter: "blur(10px)" }}
@@ -335,8 +335,8 @@ export default function Dashboard() {
                         <ListItemAvatar sx={{ mr: 2 }}>
                           <Avatar sx={{ 
                             width: 48, height: 48, borderRadius: "14px", 
-                            bgcolor: "rgba(153, 69, 255, 0.1)", color: "secondary.main",
-                            boxShadow: "0 0 15px rgba(153, 69, 255, 0.2)"
+                            bgcolor: (theme: any) => `${theme.palette.secondary?.main || theme.palette.primary.main}1a`, color: "secondary.main",
+                            boxShadow: (theme: any) => `0 0 15px ${theme.palette.secondary?.main || theme.palette.primary.main}33`
                           }}>
                             <BoltIcon />
                           </Avatar>
@@ -347,7 +347,7 @@ export default function Dashboard() {
                               <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
                                 {tip.sender_wallet.slice(0, 4)}...{tip.sender_wallet.slice(-4)}
                               </Typography>
-                              <Typography variant="subtitle1" color="primary.main" sx={{ fontWeight: 900, textShadow: "0 0 10px rgba(20, 241, 149, 0.3)" }}>
+                              <Typography variant="subtitle1" color="primary.main" sx={{ fontWeight: 900, textShadow: (theme: any) => `0 0 10px ${theme.palette.primary.main}4d` }}>
                                 +{formatSol(tip.amount)} SOL
                               </Typography>
                               {tip.status && (
@@ -379,8 +379,8 @@ export default function Dashboard() {
           {/* Announcement + OBS Overlay */}
           <Grid size={{ xs: 12, md: 5 }}>
             {/* OBS Overlay Card */}
-            <Paper sx={{ p: { xs: 3, sm: 4 }, mb: 4, bgcolor: "rgba(20, 241, 149, 0.03)", border: "1px solid rgba(20, 241, 149, 0.2)", borderRadius: "24px", backdropFilter: "blur(20px)" }}>
-              <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, display: "flex", alignItems: "center", gap: 1.5, color: "#14F195" }}>
+            <Paper sx={{ p: { xs: 3, sm: 4 }, mb: 4, bgcolor: (theme: any) => `${theme.palette.primary.main}08`, border: (theme: any) => `1px solid ${theme.palette.primary.main}33`, borderRadius: "24px", backdropFilter: "blur(20px)" }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, display: "flex", alignItems: "center", gap: 1.5, color: "primary.main" }}>
                 🎬 OBS Overlay
               </Typography>
               <Typography variant="body2" sx={{ mb: 3, opacity: 0.8, lineHeight: 1.6 }}>
@@ -391,15 +391,15 @@ export default function Dashboard() {
                 <>
                   <Box 
                     sx={{ 
-                      p: 2.5, 
-                      bgcolor: "rgba(0,0,0,0.4)", 
-                      borderRadius: "14px", 
-                      fontFamily: "monospace", 
-                      fontSize: "0.8rem",
-                      wordBreak: "break-all",
-                      color: "#14F195",
-                      border: "1px solid rgba(20, 241, 149, 0.2)",
-                      mb: 3
+                       p: 2.5, 
+                       bgcolor: "rgba(0,0,0,0.4)", 
+                       borderRadius: "14px", 
+                       fontFamily: "monospace", 
+                       fontSize: "0.8rem",
+                       wordBreak: "break-all",
+                       color: (theme: any) => theme.palette.primary.main,
+                       border: (theme: any) => `1px solid ${theme.palette.primary.main}33`,
+                       mb: 3
                     }}
                   >
                     {getOverlayUrl()}
@@ -411,7 +411,7 @@ export default function Dashboard() {
                       fullWidth 
                       onClick={copyOverlayUrl}
                       startIcon={<ContentCopyIcon />}
-                      sx={{ borderRadius: "14px", py: 1.5, fontWeight: 800, boxShadow: "0 8px 20px rgba(20, 241, 149, 0.3)" }}
+                      sx={{ borderRadius: "14px", py: 1.5, fontWeight: 800, boxShadow: (theme: any) => `0 8px 20px ${theme.palette.primary.main}4d` }}
                     >
                       Copy URL
                     </Button>
@@ -437,7 +437,7 @@ export default function Dashboard() {
                   onClick={handleGenerateToken}
                   disabled={tokenLoading}
                   startIcon={tokenLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
-                  sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, boxShadow: "0 8px 20px rgba(20, 241, 149, 0.3)" }}
+                  sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, boxShadow: (theme: any) => `0 8px 20px ${theme.palette.primary.main}4d` }}
                 >
                   {tokenLoading ? "Generating..." : "Generate Overlay URL"}
                 </Button>
@@ -445,8 +445,8 @@ export default function Dashboard() {
             </Paper>
 
             {/* Announcement Card */}
-            <Paper sx={{ p: { xs: 3, sm: 4 }, bgcolor: "rgba(153, 69, 255, 0.05)", border: "1px solid rgba(153, 69, 255, 0.2)", borderRadius: "24px", backdropFilter: "blur(20px)" }}>
-              <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, display: "flex", alignItems: "center", gap: 1.5, color: "#9945FF" }}>
+            <Paper sx={{ p: { xs: 3, sm: 4 }, bgcolor: (theme: any) => `${theme.palette.secondary?.main || theme.palette.primary.main}0d`, border: (theme: any) => `1px solid ${theme.palette.secondary?.main || theme.palette.primary.main}33`, borderRadius: "24px", backdropFilter: "blur(20px)" }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, display: "flex", alignItems: "center", gap: 1.5, color: "secondary.main" }}>
                 <BoltIcon /> Broadcast
               </Typography>
               <Typography variant="body2" sx={{ mb: 3, opacity: 0.8, lineHeight: 1.6 }}>
@@ -465,8 +465,8 @@ export default function Dashboard() {
                   "& .MuiOutlinedInput-root": {
                     bgcolor: "rgba(0,0,0,0.2)",
                     borderRadius: "14px",
-                    "&:hover fieldset": { borderColor: "rgba(153, 69, 255, 0.4)" },
-                    "&.Mui-focused fieldset": { borderColor: "rgba(153, 69, 255, 0.8)" }
+                    "&:hover fieldset": { borderColor: (theme: any) => `${theme.palette.secondary?.main || theme.palette.primary.main}66` },
+                    "&.Mui-focused fieldset": { borderColor: (theme: any) => theme.palette.secondary?.main || theme.palette.primary.main }
                   }
                 }}
               />
@@ -477,7 +477,7 @@ export default function Dashboard() {
                 onClick={handleSendAnnouncement}
                 disabled={announcementLoading || !announcement.trim()}
                 startIcon={announcementLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
-                sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, boxShadow: "0 8px 20px rgba(153, 69, 255, 0.3)" }}
+                sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, boxShadow: (theme: any) => `0 8px 20px ${theme.palette.secondary?.main || theme.palette.primary.main}4d` }}
               >
                 {announcementLoading ? "Sending..." : "Broadcast to Followers"}
               </Button>

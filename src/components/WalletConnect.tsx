@@ -1,10 +1,13 @@
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Box, Typography, Card, CardContent, Button } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
+import { useWalletAuth } from "../hooks/useWalletAuth";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
 import LockIcon from "@mui/icons-material/Lock";
 import DiamondIcon from "@mui/icons-material/Diamond";
 
 export default function WalletConnect() {
+  const { isAuthenticated } = useWalletAuth();
   return (
     <Box sx={{ py: { xs: 8, md: 12 }, textAlign: "center", position: "relative" }}>
       {/* Spinning Conic Orbs */}
@@ -16,7 +19,7 @@ export default function WalletConnect() {
           transform: "translateX(-50%)",
           width: { xs: "300px", md: "500px" },
           height: { xs: "300px", md: "500px" },
-          background: "conic-gradient(from 0deg, #9945FF, #14F195, #9945FF)",
+          background: (theme) => `conic-gradient(from 0deg, ${theme.palette.secondary?.main || theme.palette.primary.main}, ${theme.palette.primary.main}, ${theme.palette.secondary?.main || theme.palette.primary.main})`,
           borderRadius: "50%",
           zIndex: -1,
           filter: "blur(80px)",
@@ -38,8 +41,8 @@ export default function WalletConnect() {
           display: "flex",
           alignItems: "center",
           gap: 1.5,
-          bgcolor: "rgba(20, 241, 149, 0.1)",
-          border: "1px solid rgba(20, 241, 149, 0.3)",
+          bgcolor: (theme) => `${theme.palette.primary.main}1a`,
+          border: (theme) => `1px solid ${theme.palette.primary.main}4d`,
           borderRadius: "50px",
           px: 2,
           py: 1,
@@ -52,16 +55,16 @@ export default function WalletConnect() {
             width: 8,
             height: 8,
             borderRadius: "50%",
-            bgcolor: "#14F195",
+            bgcolor: "primary.main",
             animation: "pulseDot 2s infinite",
             "@keyframes pulseDot": {
-              "0%": { boxShadow: "0 0 0 0 rgba(20, 241, 149, 0.7)" },
-              "70%": { boxShadow: "0 0 0 10px rgba(20, 241, 149, 0)" },
-              "100%": { boxShadow: "0 0 0 0 rgba(20, 241, 149, 0)" }
+              "0%": { boxShadow: (theme: any) => `0 0 0 0 ${theme.palette.primary.main}b3` },
+              "70%": { boxShadow: (theme: any) => `0 0 0 10px ${theme.palette.primary.main}00` },
+              "100%": { boxShadow: (theme: any) => `0 0 0 0 ${theme.palette.primary.main}00` }
             }
           }}
         />
-        <Typography sx={{ fontFamily: "'Space Mono', monospace", fontSize: "0.85rem", color: "#14F195", fontWeight: 700 }}>
+        <Typography sx={{ fontFamily: "'Space Mono', monospace", fontSize: "0.85rem", color: "primary.main", fontWeight: 700 }}>
           65,000 TPS · Live
         </Typography>
       </Box>
@@ -82,7 +85,7 @@ export default function WalletConnect() {
           <Box
             component="span"
             sx={{
-              background: "linear-gradient(90deg, #9945FF 0%, #14F195 100%)",
+              background: (theme) => `linear-gradient(90deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
@@ -106,24 +109,46 @@ export default function WalletConnect() {
         </Typography>
         
         <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={() => document.querySelector<HTMLButtonElement>(".wallet-adapter-button")?.click()}
-            sx={{ 
-              px: 6, 
-              py: 2, 
-              borderRadius: "14px", 
-              fontWeight: 800, 
-              fontSize: "1.1rem",
-              background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
-              boxShadow: "0 8px 25px rgba(20, 241, 149, 0.3)",
-              "&:hover": { transform: "translateY(-2px)", boxShadow: "0 12px 30px rgba(20, 241, 149, 0.4)" }
-            }}
-          >
-            Connect Phantom
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              component={RouterLink}
+              to="/dashboard"
+              variant="contained"
+              color="primary"
+              size="large"
+              sx={{ 
+                px: 6, 
+                py: 2, 
+                borderRadius: "14px", 
+                fontWeight: 800, 
+                fontSize: "1.1rem",
+                background: (theme) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
+                boxShadow: (theme) => `0 8px 25px ${theme.palette.primary.main}4d`,
+                "&:hover": { transform: "translateY(-2px)", boxShadow: (theme) => `0 12px 30px ${theme.palette.primary.main}66` }
+              }}
+            >
+              Go to Dashboard
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={() => document.querySelector<HTMLButtonElement>(".wallet-adapter-button")?.click()}
+              sx={{ 
+                px: 6, 
+                py: 2, 
+                borderRadius: "14px", 
+                fontWeight: 800, 
+                fontSize: "1.1rem",
+                background: (theme) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
+                boxShadow: (theme) => `0 8px 25px ${theme.palette.primary.main}4d`,
+                "&:hover": { transform: "translateY(-2px)", boxShadow: (theme) => `0 12px 30px ${theme.palette.primary.main}66` }
+              }}
+            >
+              Connect Phantom
+            </Button>
+          )}
         </Box>
         <Typography variant="caption" sx={{ display: "block", mt: 2, opacity: 0.6, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
           Optimized for Phantom Wallet
@@ -199,7 +224,7 @@ export default function WalletConnect() {
               mx: "auto",
               mb: 3
             }}>
-              <Typography sx={{ fontSize: 28, fontWeight: 800, color: '#14F195', fontFamily: "'Space Mono', monospace" }}>$</Typography>
+              <Typography sx={{ fontSize: 28, fontWeight: 800, color: 'primary.main', fontFamily: "'Space Mono', monospace" }}>$</Typography>
             </Box>
             <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, fontFamily: "'Space Mono', monospace" }}>
               Zero Middleman

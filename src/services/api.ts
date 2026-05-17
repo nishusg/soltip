@@ -128,6 +128,27 @@ export async function updateProfile(data: { name?: string; bio?: string; avatar_
   });
 }
 
+/** Get the current authenticated user's profile */
+export async function getMe() {
+  return api("/creators/me");
+}
+
+/** Activate premium subscription after verifying payment */
+export async function activateSubscription(tx_hash: string) {
+  return api("/subscription/activate", {
+    method: "POST",
+    body: JSON.stringify({ tx_hash }),
+  });
+}
+
+/** Update the user's selected premium theme */
+export async function updateTheme(theme: string) {
+  return api("/creators/theme", {
+    method: "PUT",
+    body: JSON.stringify({ theme }),
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Overlay token endpoints
 // ---------------------------------------------------------------------------

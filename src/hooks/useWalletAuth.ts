@@ -35,7 +35,7 @@ function shortenAddress(address: string, chars = 4): string {
  */
 export function useWalletAuth() {
   const { publicKey, connected, connecting } = useWallet();
-  const { isAuthenticated, token, isLoading, error, login, logout } = useAuth();
+  const { isAuthenticated, token, user, isLoading, error, login, logout, refreshUser } = useAuth();
 
   return {
     // Wallet state
@@ -46,12 +46,14 @@ export function useWalletAuth() {
     // Auth state
     isAuthenticated,
     token,
+    user,
     isLoading,
     error,
 
     // Actions
     login,
     logout,
+    refreshUser,
 
     // Computed helpers
     walletAddress: publicKey ? publicKey.toString() : null,

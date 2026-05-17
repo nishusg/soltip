@@ -141,7 +141,7 @@ export default function RecentTips() {
                       bgcolor: "rgba(255,255,255,0.04)",
                       transform: "translateY(-2px)",
                       boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-                      borderColor: isSent ? "rgba(20, 241, 149, 0.2)" : "rgba(153, 69, 255, 0.2)"
+                      borderColor: (theme) => isSent ? `${theme.palette.primary.main}33` : `${theme.palette.secondary?.main || theme.palette.primary.main}33`
                     }
                   }}
                 >
@@ -151,12 +151,12 @@ export default function RecentTips() {
                         width: { xs: 44, sm: 52 }, 
                         height: { xs: 44, sm: 52 }, 
                         borderRadius: "14px", 
-                        bgcolor: isSent ? "rgba(20, 241, 149, 0.1)" : "rgba(153, 69, 255, 0.1)",
+                        bgcolor: (theme) => isSent ? `${theme.palette.primary.main}1a` : `${theme.palette.secondary?.main || theme.palette.primary.main}1a`,
                         display: "flex", 
                         alignItems: "center", 
                         justifyContent: "center",
                         color: isSent ? "primary.main" : "secondary.main",
-                        boxShadow: isSent ? "0 0 15px rgba(20, 241, 149, 0.15)" : "0 0 15px rgba(153, 69, 255, 0.15)"
+                        boxShadow: (theme) => isSent ? `0 0 15px ${theme.palette.primary.main}26` : `0 0 15px ${theme.palette.secondary?.main || theme.palette.primary.main}26`
                       }}>
                         {isSent ? <CallMadeIcon /> : <CallReceivedIcon />}
                       </Box>
@@ -181,11 +181,11 @@ export default function RecentTips() {
                         fontSize: "0.7rem", 
                         textTransform: "uppercase",
                         letterSpacing: "0.05em",
-                        bgcolor: isSent ? "rgba(20, 241, 149, 0.1)" : "rgba(153, 69, 255, 0.1)",
+                        bgcolor: (theme) => isSent ? `${theme.palette.primary.main}1a` : `${theme.palette.secondary?.main || theme.palette.primary.main}1a`,
                         color: isSent ? "primary.main" : "secondary.main",
-                        borderColor: isSent ? "rgba(20, 241, 149, 0.3)" : "rgba(153, 69, 255, 0.3)",
+                        borderColor: (theme) => isSent ? `${theme.palette.primary.main}4d` : `${theme.palette.secondary?.main || theme.palette.primary.main}4d`,
                         borderRadius: "8px",
-                        boxShadow: isSent ? "0 0 10px rgba(20, 241, 149, 0.2)" : "0 0 10px rgba(153, 69, 255, 0.2)"
+                        boxShadow: (theme) => isSent ? `0 0 10px ${theme.palette.primary.main}33` : `0 0 10px ${theme.palette.secondary?.main || theme.palette.primary.main}33`
                       }}
                       variant="outlined"
                     />
@@ -212,7 +212,7 @@ export default function RecentTips() {
                       p: 2.5, 
                       bgcolor: "rgba(255,255,255,0.03)", 
                       borderRadius: "12px",
-                      borderLeft: `4px solid ${isSent ? "#14F195" : "#9945FF"}`,
+                      borderLeft: (theme) => `4px solid ${isSent ? theme.palette.primary.main : (theme.palette.secondary?.main || theme.palette.primary.main)}`,
                       position: "relative",
                       overflow: "hidden"
                     }}>
@@ -222,7 +222,7 @@ export default function RecentTips() {
                         left: 0,
                         width: "100%",
                         height: "100%",
-                        background: `linear-gradient(90deg, ${isSent ? "rgba(20,241,149,0.05)" : "rgba(153,69,255,0.05)"} 0%, transparent 100%)`,
+                        background: (theme) => `linear-gradient(90deg, ${isSent ? theme.palette.primary.main : (theme.palette.secondary?.main || theme.palette.primary.main)}0d 0%, transparent 100%)`,
                         pointerEvents: "none"
                       }} />
                       <Typography variant="body1" sx={{ fontStyle: "italic", color: "text.primary", opacity: 0.9, position: "relative", zIndex: 1 }}>
@@ -248,7 +248,7 @@ export default function RecentTips() {
                         textDecoration: "none",
                         fontWeight: 700,
                         transition: "all 0.2s",
-                        "&:hover": { color: "#fff", textShadow: "0 0 10px rgba(20,241,149,0.5)" }
+                        "&:hover": { color: "#fff", textShadow: (theme) => `0 0 10px ${theme.palette.primary.main}80` }
                       }}
                     >
                       Ledger Proof <OpenInNewIcon sx={{ fontSize: 14 }} />

@@ -20,7 +20,11 @@ import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
-import { useWalletAuth } from "./hooks/useWalletAuth";
+import { useAuth } from "./context/AuthContext";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { baseTheme, premiumThemes } from "./themes";
+import { getPremiumOverrides } from "./themes/shared";
 
 // Lazy loaded components
 const Home = React.lazy(() => import("./pages/Home"));
@@ -33,7 +37,7 @@ const ActivityPage = React.lazy(() => import("./pages/ActivityPage"));
 const UnauthorizedPage = React.lazy(() => import("./pages/UnauthorizedPage"));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useWalletAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   
   if (isLoading) return null;
@@ -46,10 +50,30 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AppLayout() {
   const location = useLocation();
+  const { user } = useAuth();
   const isOverlay = location.pathname.startsWith("/overlay");
+  
+  // Determine which theme to use
+  let currentTheme = baseTheme;
+  let premiumStyles = "";
+  if (user?.is_premium) {
+    const themeKey = user.selected_theme || "gold";
+    currentTheme = premiumThemes[themeKey] || premiumThemes.gold;
+
+    // Generate dynamic premium style overrides directly from the active theme's palette
+    const primaryColor = currentTheme.palette.primary.main;
+    const secondaryColor = currentTheme.palette.secondary?.main || primaryColor;
+    const bgColor = currentTheme.palette.background.default || "#050508";
+
+    premiumStyles = getPremiumOverrides(primaryColor, secondaryColor, bgColor, "");
+  }
 
   return (
-    <>
+    <ThemeProvider theme={currentTheme}>
+      <CssBaseline />
+      {premiumStyles && <style dangerouslySetInnerHTML={{ __html: premiumStyles }} />}
+      <div className="mesh-gradient" />
+      
       {/* Hide navbar on overlay pages (OBS browser source) */}
       {!isOverlay && <Navbar />}
 
@@ -80,7 +104,7 @@ function AppLayout() {
 
       {/* Global Toast Notifications */}
       <Toaster position="bottom-right" />
-    </>
+    </ThemeProvider>
   );
 }
 

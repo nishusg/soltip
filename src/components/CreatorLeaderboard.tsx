@@ -11,6 +11,7 @@ interface Creator {
   wallet_address: string;
   name: string;
   total_received: number;
+  is_premium?: boolean;
 }
 
 export default function CreatorLeaderboard() {
@@ -78,14 +79,14 @@ export default function CreatorLeaderboard() {
       <Box
         sx={{
           position: "absolute", top: "10%", left: "-10%", width: "40%", height: "40%",
-          background: "radial-gradient(circle, rgba(20, 241, 149, 0.15) 0%, transparent 70%)",
+          background: (theme: any) => `radial-gradient(circle, ${theme.palette.primary.main}26 0%, transparent 70%)`,
           zIndex: -1, filter: "blur(80px)"
         }}
       />
       <Box
         sx={{
           position: "absolute", bottom: "10%", right: "-10%", width: "40%", height: "40%",
-          background: "radial-gradient(circle, rgba(153, 69, 255, 0.15) 0%, transparent 70%)",
+          background: (theme: any) => `radial-gradient(circle, ${theme.palette.secondary?.main || theme.palette.primary.main}26 0%, transparent 70%)`,
           zIndex: -1, filter: "blur(80px)"
         }}
       />
@@ -97,7 +98,7 @@ export default function CreatorLeaderboard() {
           gutterBottom
           sx={{
             fontWeight: 800,
-            background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
+            background: (theme: any) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary?.main || theme.palette.primary.main} 100%)`,
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             mb: 2
@@ -159,26 +160,32 @@ export default function CreatorLeaderboard() {
                   overflow: "hidden",
                   textDecoration: "none",
                   color: "inherit",
-                  background: isTop3
-                    ? `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)`
-                    : "rgba(255,255,255,0.03)",
+                  background: creator.is_premium
+                    ? "linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%)"
+                    : isTop3
+                      ? `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)`
+                      : "rgba(255,255,255,0.03)",
                   backdropFilter: "blur(16px)",
-                  border: isTop3 ? `1px solid ${rankColors[index]}66` : "1px solid rgba(255,255,255,0.05)",
-                  boxShadow: isTop3 ? rankGlows[index] : "0 4px 20px rgba(0,0,0,0.2)",
+                  border: creator.is_premium
+                    ? "1px solid rgba(255, 215, 0, 0.4)"
+                    : isTop3 
+                      ? `1px solid ${rankColors[index]}66` 
+                      : "1px solid rgba(255,255,255,0.05)",
+                  boxShadow: creator.is_premium
+                    ? "0 0 30px rgba(255, 215, 0, 0.15)"
+                    : isTop3 ? rankGlows[index] : "0 4px 20px rgba(0,0,0,0.2)",
                   borderRadius: "20px",
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                   "&:hover": {
                     transform: "translateY(-6px) scale(1.01)",
-                    background: isTop3
-                      ? `linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)`
-                      : "rgba(255,255,255,0.06)",
-                    boxShadow: isTop3 ? `0 15px 40px rgba(0,0,0,0.4), ${rankGlows[index]}` : "0 15px 30px rgba(0,0,0,0.3)"
+                    border: creator.is_premium ? "1px solid #FFD700" : undefined,
+                    boxShadow: creator.is_premium ? "0 20px 40px rgba(255, 215, 0, 0.2)" : undefined
                   },
                   animationDelay: `${index * 0.05}s`,
                 }}
               >
-                {/* Accent Line for Top 3 */}
-                {isTop3 && (
+                {/* Accent Line for Top 3 or Premium */}
+                {(isTop3 || creator.is_premium) && (
                   <Box
                     sx={{
                       position: "absolute",
@@ -186,8 +193,8 @@ export default function CreatorLeaderboard() {
                       left: 0,
                       width: 6,
                       height: "100%",
-                      bgcolor: rankColors[index],
-                      boxShadow: `0 0 10px ${rankColors[index]}`
+                      bgcolor: creator.is_premium ? "#FFD700" : rankColors[index],
+                      boxShadow: `0 0 10px ${creator.is_premium ? "#FFD700" : rankColors[index]}`
                     }}
                   />
                 )}
@@ -201,9 +208,9 @@ export default function CreatorLeaderboard() {
                     alignItems: "center",
                     justifyContent: "center",
                     borderRadius: "50%",
-                    bgcolor: isTop3 ? `${rankColors[index]}15` : "rgba(255,255,255,0.04)",
-                    border: `2px solid ${isTop3 ? rankColors[index] + "66" : "rgba(255,255,255,0.1)"}`,
-                    color: isTop3 ? rankColors[index] : "text.secondary",
+                    bgcolor: creator.is_premium ? "rgba(255, 215, 0, 0.1)" : isTop3 ? `${rankColors[index]}15` : "rgba(255,255,255,0.04)",
+                    border: `2px solid ${creator.is_premium ? "#FFD700" : isTop3 ? rankColors[index] + "66" : "rgba(255,255,255,0.1)"}`,
+                    color: creator.is_premium ? "#FFD700" : isTop3 ? rankColors[index] : "text.secondary",
                     fontSize: isTop3 ? { xs: "1.2rem", sm: "1.5rem" } : "1.1rem",
                     fontWeight: 900,
                     mr: { xs: 2, sm: 3 },
@@ -219,9 +226,9 @@ export default function CreatorLeaderboard() {
                     width: { xs: 45, sm: 55 },
                     height: { xs: 45, sm: 55 },
                     mr: { xs: 2, sm: 3 },
-                    bgcolor: isTop3 ? `${rankColors[index]}33` : 'rgba(255,255,255,0.1)',
-                    color: isTop3 ? rankColors[index] : '#fff',
-                    border: isTop3 ? `1px solid ${rankColors[index]}88` : '1px solid rgba(255,255,255,0.1)',
+                    bgcolor: creator.is_premium ? 'rgba(255, 215, 0, 0.2)' : isTop3 ? `${rankColors[index]}33` : 'rgba(255,255,255,0.1)',
+                    color: creator.is_premium ? '#FFD700' : isTop3 ? rankColors[index] : '#fff',
+                    border: creator.is_premium ? '1px solid #FFD700' : isTop3 ? `1px solid ${rankColors[index]}88` : '1px solid rgba(255,255,255,0.1)',
                     fontWeight: 700,
                     fontSize: "1.2rem",
                     flexShrink: 0
@@ -233,10 +240,25 @@ export default function CreatorLeaderboard() {
                 {/* Info */}
                 <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                    <Typography variant="h6" noWrap sx={{ fontWeight: 800, fontSize: { xs: "1rem", sm: "1.25rem" } }}>
+                    <Typography variant="h6" noWrap sx={{ fontWeight: 800, fontSize: { xs: "1rem", sm: "1.25rem" }, color: creator.is_premium ? "#FFD700" : "inherit" }}>
                       {creator.name || "Anonymous Creator"}
                     </Typography>
-                    {isTop3 && (
+                    {creator.is_premium && (
+                      <Chip
+                        label="PREMIUM"
+                        size="small"
+                        sx={{
+                          height: 20,
+                          fontSize: "0.65rem",
+                          fontWeight: 900,
+                          background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+                          color: "#000",
+                          border: "none",
+                          px: 0.5
+                        }}
+                      />
+                    )}
+                    {isTop3 && !creator.is_premium && (
                       <Chip
                         label={["Champion", "Runner-up", "Bronze"][index]}
                         size="small"
@@ -266,7 +288,7 @@ export default function CreatorLeaderboard() {
                       fontWeight: 900,
                       fontSize: { xs: "1.2rem", sm: "1.7rem" },
                       color: isTop3 ? rankColors[index] : "primary.main",
-                      textShadow: isTop3 ? `0 0 20px ${rankColors[index]}66` : "0 0 10px rgba(20, 241, 149, 0.4)",
+                      textShadow: (theme: any) => isTop3 ? `0 0 20px ${rankColors[index]}66` : `0 0 10px ${theme.palette.primary.main}66`,
                       display: "flex",
                       alignItems: "baseline",
                       justifyContent: "flex-end"

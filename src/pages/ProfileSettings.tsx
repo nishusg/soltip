@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useWalletAuth } from "../hooks/useWalletAuth";
-import { getUserProfile, updateProfile } from "../services/api";
+import { getUserProfile, updateProfile, updateTheme } from "../services/api";
 import toast from "react-hot-toast";
 import SEO from "../components/SEO";
 import { 
@@ -19,13 +19,17 @@ import SaveIcon from "@mui/icons-material/Save";
 import LockIcon from "@mui/icons-material/Lock";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import InfoIcon from "@mui/icons-material/Info";
+import PaletteIcon from "@mui/icons-material/Palette";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export default function ProfileSettings() {
-  const { walletAddress, isAuthenticated } = useWalletAuth();
+  const { walletAddress, isAuthenticated, user, refreshUser } = useWalletAuth();
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [selectedTheme, setSelectedTheme] = useState("gold");
   const [loading, setLoading] = useState(false);
+  const [themeLoading, setThemeLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
@@ -36,6 +40,7 @@ export default function ProfileSettings() {
             setName(data.user.name || "");
             setBio(data.user.bio || "");
             setAvatarUrl(data.user.avatar_url || "");
+            setSelectedTheme(data.user.selected_theme || "gold");
           }
         })
         .catch((err) => {
@@ -57,10 +62,25 @@ export default function ProfileSettings() {
     try {
       await updateProfile({ name, bio, avatar_url: avatarUrl });
       toast.success("Profile updated successfully!");
+      await refreshUser();
     } catch (err: any) {
       toast.error(err.message || "Failed to update profile");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleThemeChange(theme: string) {
+    setThemeLoading(true);
+    try {
+      await updateTheme(theme);
+      setSelectedTheme(theme);
+      toast.success(`${theme.charAt(0).toUpperCase() + theme.slice(1)} theme activated!`);
+      await refreshUser();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update theme");
+    } finally {
+      setThemeLoading(false);
     }
   }
 
@@ -107,7 +127,7 @@ export default function ProfileSettings() {
             }}
           >
             Profile <Box component="span" sx={{ 
-              background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
+              background: (theme: any) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary?.main || theme.palette.primary.main} 100%)`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent"
             }}>Settings</Box>
@@ -117,11 +137,11 @@ export default function ProfileSettings() {
           </Typography>
         </Box>
 
-        <form onSubmit={handleSave}>
-          <Grid container spacing={4} className="fade-in-up">
-            {/* Left Column: Avatar & Basic Visuals */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Card sx={{ height: "100%" }}>
+        <Grid container spacing={4} className="fade-in-up">
+          {/* Left Column: Avatar & Premium Themes */}
+          <Grid size={{ xs: 12, md: 4 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <Card>
                 <CardContent sx={{ p: { xs: 3, sm: 4 }, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
                   <Typography variant="h6" sx={{ fontWeight: 800, mb: 4, alignSelf: "flex-start" }}>
                     Profile Picture
@@ -144,10 +164,6 @@ export default function ProfileSettings() {
                     </Avatar>
                   </Box>
 
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Provide a direct image URL to update your profile picture.
-                  </Typography>
-
                   <TextField
                     label="Image URL"
                     variant="outlined"
@@ -158,16 +174,62 @@ export default function ProfileSettings() {
                   />
                 </CardContent>
               </Card>
-            </Grid>
 
-            {/* Right Column: Personal Information */}
-            <Grid size={{ xs: 12, md: 8 }}>
-              <Card sx={{ height: "100%" }}>
-                <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
-                  <Typography variant="h5" sx={{ fontWeight: 800, mb: 4, display: "flex", alignItems: "center", gap: 1.5 }}>
-                    <AccountCircleIcon color="primary" /> Personal Information
-                  </Typography>
+              {user?.is_premium && (
+                <Card sx={{ border: "1px solid rgba(255, 215, 0, 0.3)", background: "linear-gradient(135deg, rgba(255,215,0,0.05) 0%, rgba(0,0,0,0) 100%)" }}>
+                  <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800, mb: 3, display: "flex", alignItems: "center", gap: 1 }}>
+                      <PaletteIcon sx={{ color: "#FFD700" }} /> Premium Themes
+                    </Typography>
+                    
+                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+                      {[
+                        { id: "gold", color: "#FFD700", label: "Gold" },
+                        { id: "discord", color: "#5865F2", label: "Discord" },
+                        { id: "diamond", color: "#B9F2FF", label: "Diamond" },
+                        { id: "neon", color: "#FF00FF", label: "Neon" },
+                        { id: "midnight", color: "#FF3333", label: "Midnight" }
+                      ].map((t) => (
+                        <Box
+                          key={t.id}
+                          onClick={() => !themeLoading && handleThemeChange(t.id)}
+                          sx={{
+                            p: 2,
+                            borderRadius: "12px",
+                            cursor: "pointer",
+                            textAlign: "center",
+                            border: `2px solid ${selectedTheme === t.id ? t.color : "rgba(255,255,255,0.05)"}`,
+                            bgcolor: selectedTheme === t.id ? `${t.color}11` : "rgba(255,255,255,0.02)",
+                            transition: "all 0.2s ease",
+                            position: "relative",
+                            "&:hover": { bgcolor: "rgba(255,255,255,0.05)", transform: "scale(1.02)" }
+                          }}
+                        >
+                          <Box sx={{ width: 30, height: 30, borderRadius: "50%", bgcolor: t.color, mx: "auto", mb: 1, boxShadow: `0 0 10px ${t.color}` }} />
+                          <Typography variant="caption" sx={{ fontWeight: 700, color: selectedTheme === t.id ? t.color : "text.secondary" }}>
+                            {t.label}
+                          </Typography>
+                          {selectedTheme === t.id && (
+                            <CheckCircleIcon sx={{ position: "absolute", top: 4, right: 4, fontSize: 16, color: t.color }} />
+                          )}
+                        </Box>
+                      ))}
+                    </Box>
+                  </CardContent>
+                </Card>
+              )}
+            </Box>
+          </Grid>
 
+          {/* Right Column: Personal Information */}
+          <Grid size={{ xs: 12, md: 8 }}>
+            <Card sx={{ height: "100%" }}>
+              <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
+                <Typography variant="h5" sx={{ fontWeight: 800, mb: 4, display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <AccountCircleIcon color="primary" /> Personal Information
+                </Typography>
+
+                <form onSubmit={handleSave}>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     <Box>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -191,33 +253,31 @@ export default function ProfileSettings() {
                         multiline
                         rows={5}
                         fullWidth
-                        placeholder="Tell your community what you stream, when you're live, and what they can expect from you..."
+                        placeholder="Tell your community what you stream..."
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
                       />
                     </Box>
 
+                    <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        size="large"
+                        disabled={loading}
+                        startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+                        sx={{ px: 6, py: 1.5, fontSize: "1.1rem" }}
+                      >
+                        {loading ? "Saving Changes..." : "Save Profile"}
+                      </Button>
+                    </Box>
                   </Box>
-                  
-                  <Box sx={{ mt: 6, display: "flex", justifyContent: "flex-end" }}>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      color="primary"
-                      size="large"
-                      disabled={loading}
-                      startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
-                      sx={{ px: 6, py: 1.5, fontSize: "1.1rem" }}
-                    >
-                      {loading ? "Saving Changes..." : "Save Profile"}
-                    </Button>
-                  </Box>
-
-                </CardContent>
-              </Card>
-            </Grid>
+                </form>
+              </CardContent>
+            </Card>
           </Grid>
-        </form>
+        </Grid>
       </Container>
     </Box>
   );

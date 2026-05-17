@@ -122,8 +122,8 @@ export default function ProfilePage() {
                   width: 120,
                   height: 120,
                   fontSize: "3rem",
-                  border: "4px solid #110022",
-                  boxShadow: "0 0 20px rgba(0,229,255,0.3)",
+                  border: (theme) => `4px solid ${theme.palette.background.default}`,
+                  boxShadow: (theme) => `0 0 20px ${theme.palette.primary.main}4d`,
                   bgcolor: "primary.dark"
                 }}
               >
@@ -158,7 +158,7 @@ export default function ProfilePage() {
                   <Typography variant="overline" color="text.secondary" sx={{ display: "block" }}>
                     Total Received
                   </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 800, background: "linear-gradient(90deg, #00e5ff 0%, #b400ff 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                  <Typography variant="h4" sx={{ fontWeight: 800, background: (theme) => `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary?.main || theme.palette.primary.main} 100%)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                     {formatSol(user.total_received)} SOL
                   </Typography>
                 </Box>
@@ -188,9 +188,9 @@ export default function ProfilePage() {
                         py: 2, 
                         borderRadius: "14px", 
                         fontWeight: 800,
-                        background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
-                        boxShadow: "0 8px 25px rgba(20, 241, 149, 0.3)",
-                        "&:hover": { transform: "translateY(-2px)", boxShadow: "0 12px 30px rgba(20, 241, 149, 0.4)" }
+                        background: (theme) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
+                        boxShadow: (theme) => `0 8px 25px ${theme.palette.primary.main}4d`,
+                        "&:hover": { transform: "translateY(-2px)", boxShadow: (theme) => `0 12px 30px ${theme.palette.primary.main}66` }
                       }}
                     >
                       Send Super Chat

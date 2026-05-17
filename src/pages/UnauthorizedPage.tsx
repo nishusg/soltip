@@ -32,14 +32,14 @@ export default function UnauthorizedPage() {
       <Box 
         sx={{ 
           position: "absolute", top: "20%", left: "10%", width: "40%", height: "40%", 
-          background: "radial-gradient(circle, rgba(153, 69, 255, 0.15) 0%, transparent 70%)", 
+          background: (theme: any) => `radial-gradient(circle, ${theme.palette.secondary?.main || theme.palette.primary.main}26 0%, transparent 70%)`, 
           zIndex: -1, filter: "blur(100px)" 
         }} 
       />
       <Box 
         sx={{ 
           position: "absolute", bottom: "20%", right: "10%", width: "40%", height: "40%", 
-          background: "radial-gradient(circle, rgba(20, 241, 149, 0.1) 0%, transparent 70%)", 
+          background: (theme: any) => `radial-gradient(circle, ${theme.palette.primary.main}1a 0%, transparent 70%)`, 
           zIndex: -1, filter: "blur(100px)" 
         }} 
       />
@@ -61,13 +61,13 @@ export default function UnauthorizedPage() {
               width: 80, 
               height: 80, 
               borderRadius: "24px", 
-              bgcolor: "rgba(153, 69, 255, 0.1)", 
+              bgcolor: (theme: any) => `${theme.palette.secondary?.main || theme.palette.primary.main}1a`, 
               display: "flex", 
               alignItems: "center", 
               justifyContent: "center",
               mx: "auto",
               mb: 4,
-              border: "1px solid rgba(153, 69, 255, 0.2)",
+              border: (theme: any) => `1px solid ${theme.palette.secondary?.main || theme.palette.primary.main}33`,
               color: "secondary.main"
             }}>
               <LockOutlinedIcon sx={{ fontSize: 40 }} />
@@ -75,7 +75,7 @@ export default function UnauthorizedPage() {
 
             <Typography variant="h3" sx={{ fontWeight: 800, mb: 2, letterSpacing: "-0.02em" }}>
               Session <Box component="span" sx={{ 
-                background: "linear-gradient(135deg, #9945FF 0%, #14F195 100%)",
+                background: (theme: any) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent"
               }}>Expired</Box>
@@ -97,10 +97,10 @@ export default function UnauthorizedPage() {
                   borderRadius: "16px", 
                   fontWeight: 800,
                   fontSize: "1.1rem",
-                  background: "linear-gradient(135deg, #14F195 0%, #9945FF 100%)",
+                  background: (theme: any) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
                   color: "#fff",
-                  boxShadow: "0 10px 30px rgba(20, 241, 149, 0.2)",
-                  "&:hover": { transform: "translateY(-2px)", boxShadow: "0 15px 40px rgba(20, 241, 149, 0.3)" }
+                  boxShadow: (theme: any) => `0 10px 30px ${theme.palette.primary.main}33`,
+                  "&:hover": { transform: "translateY(-2px)", boxShadow: (theme: any) => `0 15px 40px ${theme.palette.primary.main}4d` }
                 }}
               >
                 Sign In & Continue
