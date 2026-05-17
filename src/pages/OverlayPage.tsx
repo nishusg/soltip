@@ -12,6 +12,15 @@ const slideInLeft = keyframes`
   to { transform: translateX(0); opacity: 1; }
 `;
 
+// Animation for cinematic alert popup
+const alertPopIn = keyframes`
+  0% { transform: translate(-50%, -40%) scale(0.85); opacity: 0; filter: blur(10px); }
+  8% { transform: translate(-50%, -50%) scale(1.03); opacity: 1; filter: blur(0px); }
+  12% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  88% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0px); }
+  100% { transform: translate(-50%, -60%) scale(0.9); opacity: 0; filter: blur(10px); }
+`;
+
 interface TipEntry {
   id: string;
   sender: string;
@@ -19,6 +28,16 @@ interface TipEntry {
   message: string;
   timestamp: string;
 }
+
+// Sizing and Duration Constants for Stream Overlay Layouts
+const ALERT_DISPLAY_DURATION = 6500; // ms
+const ACTIVE_ALERT_WIDTH = 580; // px
+const TICKER_FEED_WIDTH = 400; // px
+const TICKER_MAX_ITEMS = 5;
+
+// Typography Font Constants
+const FONT_ACCENT = "Orbitron, sans-serif";
+const FONT_PRIMARY = "Space Grotesk, sans-serif";
 
 // Color tiers based on amount
 function getTierColor(amount: number): string {
@@ -43,13 +62,49 @@ const OverlayPage: React.FC = () => {
   const { socket } = useSocket();
   const [tips, setTips] = useState<TipEntry[]>([]);
   const [authStatus, setAuthStatus] = useState<"loading" | "ok" | "denied">("loading");
+  const [activeAlert, setActiveAlert] = useState<TipEntry | null>(null);
   const feedRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Preload audio
+
+
+  // Force absolute transparent backgrounds on document body and HTML for OBS compatibility
   useEffect(() => {
-    audioRef.current = new Audio("https://assets.mixkit.co/active_storage/sfx/2436/2436-preview.mp3");
+    // Inject a stylesheet to force transparency on the layout, body, and all global pseudo-elements
+    const styleEl = document.createElement("style");
+    styleEl.id = "obs-transparency-override";
+    styleEl.innerHTML = `
+      html, body, #root {
+        background: transparent !important;
+        background-color: transparent !important;
+        background-image: none !important;
+      }
+      body::before, body::after, html::before, html::after {
+        display: none !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        background-image: none !important;
+      }
+    `;
+    document.head.appendChild(styleEl);
+
+    return () => {
+      const override = document.getElementById("obs-transparency-override");
+      if (override) {
+        override.remove();
+      }
+    };
   }, []);
+
+  // Manage active alert display duration (exits when alertPopIn ends)
+  useEffect(() => {
+    if (!activeAlert) return;
+    const timer = setTimeout(() => {
+      setActiveAlert(null);
+    }, ALERT_DISPLAY_DURATION);
+    return () => clearTimeout(timer);
+  }, [activeAlert]);
+
+
 
   // Step 1: Verify the overlay key
   useEffect(() => {
@@ -88,7 +143,7 @@ const OverlayPage: React.FC = () => {
           setTips(received);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [authStatus, walletAddress]);
 
   // Step 3: Subscribe to real-time tips
@@ -106,13 +161,10 @@ const OverlayPage: React.FC = () => {
         timestamp: new Date().toISOString()
       };
 
-      setTips(prev => [...prev, newTip].slice(-50)); // Keep last 50
+      setTips(prev => [...prev, newTip].slice(-10)); // Keep last 10
+      setActiveAlert(newTip); // Trigger premium animated active popup
 
-      // Play sound
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(() => {});
-      }
+
     };
 
     socket.on("new_superchat", handleSuperChat);
@@ -161,29 +213,171 @@ const OverlayPage: React.FC = () => {
         height: "100vh",
         bgcolor: "transparent",
         overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-end",
-        p: 2
+        position: "relative"
       }}
     >
-      {/* Tip Feed — scrolls from bottom, newest at the end */}
+
+
+      {/* Cinematic Alert Popup */}
+      {activeAlert && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: "45%",
+            left: "50%",
+            zIndex: 999,
+            width: ACTIVE_ALERT_WIDTH, // Constant fixed width for consistent professional stream visuals
+            animation: `${alertPopIn} ${ALERT_DISPLAY_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+            pointerEvents: "none"
+          }}
+        >
+          <Paper
+            elevation={0}
+            sx={{
+              p: 4,
+              borderRadius: "28px",
+              bgcolor: "rgba(0, 0, 0, 0.85)",
+              border: `2px solid ${getTierColor(activeAlert.amount)}`,
+              backdropFilter: "blur(20px)",
+              boxShadow: `0 0 50px ${getTierColor(activeAlert.amount)}33, inset 0 0 20px ${getTierColor(activeAlert.amount)}1a`,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+              position: "relative",
+              overflow: "hidden"
+            }}
+          >
+            {/* Glowing top line matching tier */}
+            <Box sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 4,
+              background: `linear-gradient(90deg, transparent, ${getTierColor(activeAlert.amount)}, transparent)`
+            }} />
+
+            {/* Glowing Category Header */}
+            <Typography
+              variant="caption"
+              sx={{
+                fontFamily: FONT_ACCENT,
+                fontSize: "0.85rem",
+                fontWeight: 900,
+                letterSpacing: "4px",
+                color: getTierColor(activeAlert.amount),
+                textTransform: "uppercase",
+                mb: 2,
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                textShadow: `0 0 10px ${getTierColor(activeAlert.amount)}4d`
+              }}
+            >
+              ⚡ {activeAlert.amount >= 5 ? "Legendary Tip!" : activeAlert.amount >= 1 ? "Epic Super Chat!" : "New Super Chat!"} ⚡
+            </Typography>
+
+            {/* Large Avatar or Bolt Icon representing tier */}
+            <Box
+              sx={{
+                width: 72,
+                height: 72,
+                borderRadius: "50%",
+                bgcolor: `${getTierColor(activeAlert.amount)}1a`,
+                border: `2px solid ${getTierColor(activeAlert.amount)}33`,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                mb: 3,
+                boxShadow: `0 0 20px ${getTierColor(activeAlert.amount)}26`
+              }}
+            >
+              <BoltIcon sx={{ fontSize: 40, color: getTierColor(activeAlert.amount) }} />
+            </Box>
+
+            {/* Combined Sender Name, Amount & Superchat Alert */}
+            <Typography
+              sx={{
+                fontFamily: FONT_PRIMARY,
+                fontWeight: 700,
+                fontSize: "1.65rem", // High-fidelity size optimized to fit beautifully
+                color: "#ffffff",
+                lineHeight: 1.4,
+                mb: activeAlert.message ? 3.5 : 0,
+                textAlign: "center",
+                width: "100%", // Utilize maximum width to prevent early wrapping
+                letterSpacing: "-0.01em"
+              }}
+            >
+              <span style={{ color: getTierColor(activeAlert.amount), fontWeight: 800 }}>
+                {activeAlert.sender}
+              </span>{" "}
+              sent{" "}
+              <span style={{ color: getTierColor(activeAlert.amount), fontWeight: 900, textShadow: `0 0 15px ${getTierColor(activeAlert.amount)}55` }}>
+                {activeAlert.amount.toFixed(activeAlert.amount >= 1 ? 2 : 4)} SOL
+              </span>{" "}
+              Superchat!
+            </Typography>
+
+            {/* User message speech bubble */}
+            {activeAlert.message && (
+              <Box
+                sx={{
+                  width: "100%",
+                  p: 3,
+                  borderRadius: "18px",
+                  bgcolor: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  borderLeft: `5px solid ${getTierColor(activeAlert.amount)}`, // Vertical glowing tier border accent
+                  boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 12px ${getTierColor(activeAlert.amount)}08`,
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: FONT_PRIMARY,
+                    fontWeight: 500,
+                    color: "#f8fafc",
+                    lineHeight: 1.6,
+                    fontSize: "1.15rem",
+                    fontStyle: "italic",
+                    textAlign: "center"
+                  }}
+                >
+                  “{activeAlert.message}”
+                </Typography>
+              </Box>
+            )}
+          </Paper>
+        </Box>
+      )}
+
+      {/* Sleek Ticker Feed */}
       <Box
         ref={feedRef}
         sx={{
           display: "flex",
           flexDirection: "column",
-          gap: 1,
+          gap: 1.5,
           overflowY: "auto",
-          maxHeight: "100%",
+          maxHeight: "35vh",
+          width: TICKER_FEED_WIDTH, // Constant ticker feed width
+          position: "absolute",
+          bottom: 24,
+          left: 24,
+          zIndex: 10,
           // Hide scrollbar for OBS
           "&::-webkit-scrollbar": { display: "none" },
           scrollbarWidth: "none",
         }}
       >
-        {tips.map((tip, i) => {
+        {tips.slice(-TICKER_MAX_ITEMS).map((tip, i) => {
           const tierColor = getTierColor(tip.amount);
-          const isNew = i >= tips.length - 1; // Animate only the latest one
+          const isNew = i >= tips.slice(-TICKER_MAX_ITEMS).length - 1; // Animate only the latest one
 
           return (
             <Box
@@ -192,31 +386,34 @@ const OverlayPage: React.FC = () => {
                 animation: isNew ? `${slideInLeft} 0.4s ease-out` : undefined,
                 display: "flex",
                 flexDirection: "column",
-                maxWidth: 420,
+                width: "100%",
               }}
             >
               <Paper
                 elevation={0}
                 sx={{
-                  p: 1.5,
-                  borderRadius: "10px",
-                  bgcolor: "rgba(0, 0, 0, 0.7)",
-                  backdropFilter: "blur(10px)",
-                  borderLeft: `3px solid ${tierColor}`,
-                  boxShadow: getTierGlow(tip.amount),
+                  p: 2, // Spacious padding matching user mockup
+                  borderRadius: "16px", // Smooth rounded corners
+                  bgcolor: "rgba(0, 0, 0, 0.8)",
+                  backdropFilter: "blur(12px)",
+                  borderLeft: `4px solid ${tierColor}`,
+                  boxShadow: `0 4px 20px rgba(0, 0, 0, 0.4), ${getTierGlow(tip.amount)}`,
+                  border: "1px solid rgba(255,255,255,0.03)",
+                  borderLeftColor: tierColor,
                   transition: "all 0.3s ease",
                 }}
               >
-                {/* Header: Sender + Amount */}
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: tip.message ? 0.5 : 0 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    <BoltIcon sx={{ fontSize: 14, color: tierColor }} />
+                {/* Header: Sender + Amount with absolute space-between alignment */}
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: tip.message ? 0.75 : 0 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <BoltIcon sx={{ fontSize: 16, color: tierColor }} />
                     <Typography
                       variant="body2"
                       sx={{
-                        fontWeight: 800,
-                        color: tierColor,
-                        fontSize: "0.85rem"
+                        fontFamily: FONT_PRIMARY,
+                        fontWeight: 700,
+                        color: "#fff",
+                        fontSize: "0.9rem"
                       }}
                     >
                       {tip.sender}
@@ -225,9 +422,10 @@ const OverlayPage: React.FC = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      fontWeight: 900,
+                      fontFamily: FONT_PRIMARY,
+                      fontWeight: 800,
                       color: tierColor,
-                      fontSize: "0.9rem"
+                      fontSize: "0.95rem"
                     }}
                   >
                     {tip.amount.toFixed(tip.amount >= 1 ? 2 : 4)} SOL
@@ -239,10 +437,11 @@ const OverlayPage: React.FC = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: "rgba(255,255,255,0.9)",
-                      fontSize: "0.85rem",
+                      fontFamily: FONT_PRIMARY,
+                      color: "rgba(255,255,255,0.65)",
+                      fontSize: "0.8rem",
                       lineHeight: 1.4,
-                      pl: 2.5,
+                      pl: 3.25, // Aligns perfectly under the wallet text (skips the bolt icon)
                     }}
                   >
                     {tip.message}

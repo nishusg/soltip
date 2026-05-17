@@ -72,7 +72,9 @@ function AppLayout() {
     <ThemeProvider theme={currentTheme}>
       <CssBaseline />
       {premiumStyles && <style dangerouslySetInnerHTML={{ __html: premiumStyles }} />}
-      <div className="mesh-gradient" />
+      
+      {/* Hide the global background mesh gradient on overlay pages (OBS overlay) */}
+      {!isOverlay && <div className="mesh-gradient" />}
       
       {/* Hide navbar on overlay pages (OBS browser source) */}
       {!isOverlay && <Navbar />}

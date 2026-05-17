@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { getDashboardData, getOverlayToken, generateOverlayToken } from "../services/api";
+import { getDashboardData, getOverlayToken, generateOverlayToken, sendTestAlert } from "../services/api";
 import toast from "react-hot-toast";
 import SEO from "../components/SEO";
+import { useSocket } from "../context/SocketContext";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { 
   Container, 
@@ -40,6 +41,10 @@ import {
   Pie
 } from "recharts";
 
+// OBS Browser Source Default Configurations
+const OBS_DEFAULT_WIDTH = 1920;
+const OBS_DEFAULT_HEIGHT = 1080;
+
 export default function Dashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -47,6 +52,8 @@ export default function Dashboard() {
 
   const [overlayToken, setOverlayToken] = useState<string | null>(null);
   const [tokenLoading, setTokenLoading] = useState(false);
+  const [testLoading, setTestLoading] = useState(false);
+  const { connected } = useSocket();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -72,6 +79,18 @@ export default function Dashboard() {
       toast.error(err.message || "Failed to generate token");
     } finally {
       setTokenLoading(false);
+    }
+  };
+
+  const handleSendTestAlert = async () => {
+    setTestLoading(true);
+    try {
+      const res = await sendTestAlert();
+      toast.success(res.message || "Test alert fired successfully!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to trigger test alert");
+    } finally {
+      setTestLoading(false);
     }
   };
 
@@ -363,57 +382,195 @@ export default function Dashboard() {
             </Paper>
           </Grid>
 
-          {/* OBS Overlay */}
+          {/* OBS Streaming Hub */}
           <Grid size={{ xs: 12, md: 5 }}>
-            {/* OBS Overlay Card */}
-            <Paper sx={{ p: { xs: 3, sm: 4 }, bgcolor: (theme: any) => `${theme.palette.primary.main}08`, border: (theme: any) => `1px solid ${theme.palette.primary.main}33`, borderRadius: "24px", backdropFilter: "blur(20px)" }}>
-              <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, display: "flex", alignItems: "center", gap: 1.5, color: "primary.main" }}>
-                🎬 OBS Overlay
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 3, opacity: 0.8, lineHeight: 1.6 }}>
-                Add this URL as a Browser Source in OBS to display real-time Super Chat alerts on your stream. The secret key ensures only you can use your overlay.
+            <Paper sx={{ 
+              p: { xs: 3, sm: 4 }, 
+              bgcolor: "rgba(255, 255, 255, 0.02)", 
+              border: (theme: any) => `1px solid ${theme.palette.primary.main}33`, 
+              borderRadius: "24px", 
+              backdropFilter: "blur(20px)",
+              boxShadow: (theme: any) => `0 8px 32px ${theme.palette.primary.main}0d`,
+              position: "relative",
+              overflow: "hidden"
+            }}>
+              {/* Top glowing decorative bar */}
+              <Box sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: "3px",
+                background: (theme: any) => `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary?.main || theme.palette.primary.main} 100%)`
+              }} />
+
+              {/* Title & Connection Status */}
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2.5 }}>
+                <Typography variant="h5" sx={{ fontWeight: 900, display: "flex", alignItems: "center", gap: 1.5, color: "primary.main" }}>
+                  🎬 OBS Streaming Hub
+                </Typography>
+                
+                {/* Glowing WebSocket Status Badge */}
+                <Chip 
+                  label={connected ? "Connected" : "Reconnecting"} 
+                  size="small" 
+                  sx={{ 
+                    height: 24, 
+                    fontSize: "0.7rem", 
+                    fontWeight: 800, 
+                    textTransform: "uppercase",
+                    borderRadius: "6px",
+                    bgcolor: connected ? "rgba(0, 255, 128, 0.1)" : "rgba(255, 75, 75, 0.1)",
+                    color: connected ? "#00ff80" : "#ff4b4b",
+                    border: connected ? "1px solid rgba(0, 255, 128, 0.3)" : "1px solid rgba(255, 75, 75, 0.3)",
+                    animation: connected ? "pulse 2s infinite" : "none",
+                    "@keyframes pulse": {
+                      "0%": { boxShadow: "0 0 0 0 rgba(0, 255, 128, 0.4)" },
+                      "70%": { boxShadow: "0 0 0 6px rgba(0, 255, 128, 0)" },
+                      "100%": { boxShadow: "0 0 0 0 rgba(0, 255, 128, 0)" }
+                    }
+                  }} 
+                />
+              </Box>
+
+              <Typography variant="body2" sx={{ mb: 4, opacity: 0.8, lineHeight: 1.6 }}>
+                Integrate live Super Chat alerts into your stream overlay. Simply add your secret URL as a Browser Source in OBS or Streamlabs.
               </Typography>
 
               {overlayToken ? (
                 <>
-                  <Box 
-                    sx={{ 
-                       p: 2.5, 
-                       bgcolor: "rgba(0,0,0,0.4)", 
-                       borderRadius: "14px", 
-                       fontFamily: "monospace", 
-                       fontSize: "0.8rem",
-                       wordBreak: "break-all",
-                       color: (theme: any) => theme.palette.primary.main,
-                       border: (theme: any) => `1px solid ${theme.palette.primary.main}33`,
-                       mb: 3
-                    }}
-                  >
-                    {getOverlayUrl()}
+                  {/* Stream URL Input Bar */}
+                  <Box sx={{ mb: 4 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1, color: "text.primary", display: "flex", alignItems: "center", gap: 0.5 }}>
+                      🔑 Your Unique Browser Source Link
+                    </Typography>
+                    <Box 
+                      sx={{ 
+                         p: 2, 
+                         bgcolor: "rgba(0,0,0,0.3)", 
+                         borderRadius: "14px", 
+                         fontFamily: "monospace", 
+                         fontSize: "0.8rem",
+                         wordBreak: "break-all",
+                         color: (theme: any) => theme.palette.primary.main,
+                         border: (theme: any) => `1px solid ${theme.palette.primary.main}1a`,
+                         display: "flex",
+                         alignItems: "center",
+                         justifyContent: "space-between",
+                         gap: 2
+                      }}
+                    >
+                      <Box sx={{ flexGrow: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {getOverlayUrl()}
+                      </Box>
+                      <Button
+                        size="small"
+                        onClick={copyOverlayUrl}
+                        sx={{ 
+                          minWidth: "auto", 
+                          p: 1, 
+                          borderRadius: "8px", 
+                          color: "primary.main",
+                          bgcolor: (theme: any) => `${theme.palette.primary.main}10`,
+                          "&:hover": { bgcolor: (theme: any) => `${theme.palette.primary.main}20` }
+                        }}
+                      >
+                        <ContentCopyIcon sx={{ fontSize: 16 }} />
+                      </Button>
+                    </Box>
                   </Box>
-                  <Box sx={{ display: "flex", gap: 2 }}>
+
+                  {/* Visual Setup Walkthrough Steps */}
+                  <Box sx={{ mb: 4 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 2, color: "text.primary" }}>
+                      📋 Quick OBS Setup Guide
+                    </Typography>
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                      {/* Step 1 */}
+                      <Box sx={{ display: "flex", gap: 1.5 }}>
+                        <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", fontWeight: 800, bgcolor: "primary.main", color: "#000" }}>1</Avatar>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>Add a Browser Source</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
+                            In OBS, click **+** under Sources and select **Browser**.
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Step 2 */}
+                      <Box sx={{ display: "flex", gap: 1.5 }}>
+                        <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", fontWeight: 800, bgcolor: "primary.main", color: "#000" }}>2</Avatar>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>Set Resolution & Properties</Typography>
+                          <Box sx={{ display: "flex", gap: 1, mt: 0.5, flexWrap: "wrap" }}>
+                            <Chip label={`Width: ${OBS_DEFAULT_WIDTH}`} size="small" sx={{ height: 20, fontSize: "0.65rem", fontWeight: 700, bgcolor: "rgba(255,255,255,0.05)" }} />
+                            <Chip label={`Height: ${OBS_DEFAULT_HEIGHT}`} size="small" sx={{ height: 20, fontSize: "0.65rem", fontWeight: 700, bgcolor: "rgba(255,255,255,0.05)" }} />
+                          </Box>
+                        </Box>
+                      </Box>
+
+                      {/* Step 3 */}
+                      <Box sx={{ display: "flex", gap: 1.5 }}>
+                        <Avatar sx={{ width: 24, height: 24, fontSize: "0.75rem", fontWeight: 800, bgcolor: "primary.main", color: "#000" }}>3</Avatar>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>Enable Alert Sound</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
+                            Check **"Control audio via OBS"** if you want to isolate alert sounds in your stream mixer.
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Box>
+
+                  <Divider sx={{ my: 3, opacity: 0.05 }} />
+
+                  {/* Simulation Room / Test Panel */}
+                  <Box sx={{ mb: 3.5 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1, color: "text.primary" }}>
+                      🧪 Alert Simulator
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+                      Test your sound effects and overlay animations instantly. Open your overlay link first!
+                    </Typography>
+                    
                     <Button 
                       variant="contained" 
-                      color="primary" 
+                      color="secondary" 
                       fullWidth 
-                      onClick={copyOverlayUrl}
-                      startIcon={<ContentCopyIcon />}
-                      sx={{ borderRadius: "14px", py: 1.5, fontWeight: 800, boxShadow: (theme: any) => `0 8px 20px ${theme.palette.primary.main}4d` }}
+                      onClick={handleSendTestAlert}
+                      disabled={testLoading}
+                      startIcon={testLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
+                      sx={{ 
+                        borderRadius: "14px", 
+                        py: 1.5, 
+                        fontWeight: 800, 
+                        background: (theme: any) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
+                        boxShadow: (theme: any) => `0 8px 24px ${theme.palette.primary.main}33`,
+                        "&:hover": {
+                          boxShadow: (theme: any) => `0 12px 30px ${theme.palette.primary.main}4d`
+                        }
+                      }}
                     >
-                      Copy URL
+                      {testLoading ? "Firing Alert..." : "Send Test Alert 🚀"}
                     </Button>
+                  </Box>
+
+                  {/* Actions / Regenerate */}
+                  <Box sx={{ display: "flex", gap: 2, alignItems: "center", mt: 2 }}>
                     <Button 
                       variant="outlined" 
                       color="warning" 
+                      fullWidth
                       onClick={handleGenerateToken}
                       disabled={tokenLoading}
-                      sx={{ borderRadius: "14px", fontWeight: 800, minWidth: { xs: 60, sm: 140 } }}
+                      startIcon={tokenLoading ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon sx={{ fontSize: 16 }} />}
+                      sx={{ borderRadius: "12px", py: 1.2, fontWeight: 800, textTransform: "none", fontSize: "0.85rem" }}
                     >
-                      {tokenLoading ? <CircularProgress size={20} color="inherit" /> : (isMobile ? <RefreshIcon /> : "Regenerate")}
+                      Regenerate Secret Key
                     </Button>
                   </Box>
-                  <Typography variant="caption" sx={{ display: "block", mt: 2, opacity: 0.6, fontWeight: 500 }}>
-                    ⚠️ Regenerating invalidates your current overlay URL. You will need to update it in OBS.
+                  <Typography variant="caption" sx={{ display: "block", mt: 2, opacity: 0.5, fontWeight: 500, textAlign: "center" }}>
+                    ⚠️ Regenerating invalidates your current link and requires updating OBS.
                   </Typography>
                 </>
               ) : (
@@ -424,7 +581,7 @@ export default function Dashboard() {
                   onClick={handleGenerateToken}
                   disabled={tokenLoading}
                   startIcon={tokenLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
-                  sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, boxShadow: (theme: any) => `0 8px 20px ${theme.palette.primary.main}4d` }}
+                  sx={{ py: 1.8, borderRadius: "14px", fontWeight: 800, boxShadow: (theme: any) => `0 8px 20px ${theme.palette.primary.main}4d` }}
                 >
                   {tokenLoading ? "Generating..." : "Generate Overlay URL"}
                 </Button>

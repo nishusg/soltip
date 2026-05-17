@@ -163,3 +163,8 @@ export async function generateOverlayToken() {
   return api("/creators/overlay-token", { method: "POST" });
 }
 
+/** Trigger a test overlay alert (auth required) */
+export async function sendTestAlert() {
+  return api("/creators/overlay-test", { method: "POST" });
+}
+
