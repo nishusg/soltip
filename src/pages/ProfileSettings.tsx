@@ -21,6 +21,8 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import InfoIcon from "@mui/icons-material/Info";
 import PaletteIcon from "@mui/icons-material/Palette";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import BoringAvatar from "boring-avatars";
+
 
 export default function ProfileSettings() {
   const { walletAddress, isAuthenticated, user, refreshUser } = useWalletAuth();
@@ -143,35 +145,36 @@ export default function ProfileSettings() {
             <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
               <Card>
                 <CardContent sx={{ p: { xs: 3, sm: 4 }, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800, mb: 4, alignSelf: "flex-start" }}>
-                    Profile Picture
+                  <Typography variant="h6" sx={{ fontWeight: 800, mb: 3, alignSelf: "flex-start" }}>
+                    Profile Avatar
                   </Typography>
                   
-                  <Box sx={{ position: "relative", mb: 4 }}>
-                    <Avatar 
-                      src={avatarUrl} 
-                      alt="Preview" 
-                      sx={{ 
-                        width: 160, 
-                        height: 160, 
-                        border: "4px solid rgba(20, 241, 149, 0.2)",
-                        boxShadow: "0 0 30px rgba(20, 241, 149, 0.15)",
-                        bgcolor: "rgba(255,255,255,0.05)",
-                        fontSize: "4rem"
-                      }} 
-                    >
-                      {!avatarUrl && (name || walletAddress)?.[0]?.toUpperCase()}
-                    </Avatar>
+                  <Box sx={{ 
+                    position: "relative", 
+                    mb: 3,
+                    p: 1.2,
+                    borderRadius: "50%",
+                    border: "4px solid rgba(153, 69, 242, 0.2)",
+                    boxShadow: "0 0 30px rgba(153, 69, 242, 0.15)",
+                    background: "rgba(255,255,255,0.02)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}>
+                    <BoringAvatar 
+                      name={name || walletAddress || ""} 
+                      variant="beam" 
+                      size={140} 
+                      colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                    />
                   </Box>
 
-                  <TextField
-                    label="Image URL"
-                    variant="outlined"
-                    fullWidth
-                    placeholder="https://..."
-                    value={avatarUrl}
-                    onChange={(e) => setAvatarUrl(e.target.value)}
-                  />
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, mb: 1, color: "primary.main", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                    Dynamic Web3 Avatar
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: "block" }}>
+                    Your avatar is dynamically generated from your display name and wallet address! Change your display name to watch it update in real-time.
+                  </Typography>
                 </CardContent>
               </Card>
 

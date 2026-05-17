@@ -4,6 +4,7 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { API_BASE } from "../shared/constants";
 import { useRealtimeTips } from "../hooks/useRealtimeTips";
 import { Box, Typography, Card, CardContent, CircularProgress, List, Avatar, Chip } from "@mui/material";
+import BoringAvatar from "boring-avatars";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import PersonIcon from "@mui/icons-material/Person";
 
@@ -221,21 +222,28 @@ export default function CreatorLeaderboard() {
                 </Box>
 
                 {/* Avatar */}
-                <Avatar
+                <Box
                   sx={{
                     width: { xs: 45, sm: 55 },
                     height: { xs: 45, sm: 55 },
                     mr: { xs: 2, sm: 3 },
+                    p: 0.4,
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     bgcolor: creator.is_premium ? 'rgba(255, 215, 0, 0.2)' : isTop3 ? `${rankColors[index]}33` : 'rgba(255,255,255,0.1)',
-                    color: creator.is_premium ? '#FFD700' : isTop3 ? rankColors[index] : '#fff',
                     border: creator.is_premium ? '1px solid #FFD700' : isTop3 ? `1px solid ${rankColors[index]}88` : '1px solid rgba(255,255,255,0.1)',
-                    fontWeight: 700,
-                    fontSize: "1.2rem",
                     flexShrink: 0
                   }}
                 >
-                  {creator.name ? creator.name.charAt(0).toUpperCase() : <PersonIcon />}
-                </Avatar>
+                  <BoringAvatar
+                    name={creator.name || creator.wallet_address}
+                    variant="beam"
+                    size="100%"
+                    colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                  />
+                </Box>
 
                 {/* Info */}
                 <Box sx={{ flexGrow: 1, minWidth: 0 }}>

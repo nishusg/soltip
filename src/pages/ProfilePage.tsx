@@ -12,6 +12,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ErrorIcon from "@mui/icons-material/Error";
 import TipForm from "../forms/TipForm";
 import SEO from "../components/SEO";
+import BoringAvatar from "boring-avatars";
 
 interface UserProfile {
   wallet_address: string;
@@ -115,20 +116,27 @@ export default function ProfilePage() {
           />
           {/* Profile Card */}
           <Card sx={{ mb: 4, textAlign: "center", px: 4, pb: 4, pt: 0, overflow: "visible" }}>
-            <Box sx={{ display: "flex", justifyContent: "center", mt: -6, mb: 2 }}>
-              <Avatar
-                src={user.avatar_url}
-                sx={{
-                  width: 120,
-                  height: 120,
-                  fontSize: "3rem",
-                  border: (theme) => `4px solid ${theme.palette.background.default}`,
-                  boxShadow: (theme) => `0 0 20px ${theme.palette.primary.main}4d`,
-                  bgcolor: "primary.dark"
-                }}
-              >
-                {!user.avatar_url && (user.name || user.wallet_address)[0]?.toUpperCase()}
-              </Avatar>
+            <Box sx={{ 
+              display: "flex", 
+              mt: -6, 
+              mb: 2,
+              mx: "auto",
+              width: 120,
+              height: 120,
+              p: 0.6,
+              borderRadius: "50%",
+              border: (theme) => `4px solid ${theme.palette.background.default}`,
+              boxShadow: (theme) => `0 0 20px ${theme.palette.primary.main}4d`,
+              background: (theme) => theme.palette.background.default,
+              alignItems: "center",
+              justifyContent: "center"
+            }}>
+              <BoringAvatar
+                name={user.name || user.wallet_address}
+                variant="beam"
+                size={108}
+                colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+              />
             </Box>
             
             <CardContent sx={{ pt: 0 }}>
