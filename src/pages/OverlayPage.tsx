@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Box, Typography, Paper, keyframes } from "@mui/material";
 import { useSocket } from "../context/SocketContext";
 import { API_BASE } from "../shared/constants";
 import BoltIcon from "@mui/icons-material/Bolt";
 import LockIcon from "@mui/icons-material/Lock";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 // Animation for new tip entry
 const slideInLeft = keyframes`
@@ -64,6 +65,178 @@ const OverlayPage: React.FC = () => {
   const [authStatus, setAuthStatus] = useState<"loading" | "ok" | "denied">("loading");
   const [activeAlert, setActiveAlert] = useState<TipEntry | null>(null);
 
+  // Overlay Settings State with default fallbacks
+  const [settings, setSettings] = useState<any>({
+    tts_enabled: true,
+    tts_min_amount: 0.05,
+    alert_duration: 6500,
+    alert_gif_preset: "bolt",
+    alert_gif_url: "",
+    alert_sound_preset: "ding",
+    alert_sound_url: "",
+    sound_volume: 0.7,
+    theme_color: "#14F195",
+    font_family: "Space Grotesk"
+  });
+
+  const settingsRef = useRef(settings);
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+
+  // Synthetic Audio Engine (Web Audio API)
+  const playAlertSound = (vol: number) => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const now = ctx.currentTime;
+      const soundPreset = settingsRef.current.alert_sound_preset || "ding";
+
+      if (soundPreset === "ding") {
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(880, now); // A5
+        
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(1200, now); // High overtone
+        
+        gainNode.gain.setValueAtTime(vol, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+        
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        osc1.start();
+        osc2.start();
+        osc1.stop(now + 1.2);
+        osc2.stop(now + 1.2);
+      } else if (soundPreset === "swoosh") {
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(80, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.6);
+        
+        gainNode.gain.setValueAtTime(0.0001, now);
+        gainNode.gain.linearRampToValueAtTime(vol, now + 0.2);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+        
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        osc.start();
+        osc.stop(now + 0.6);
+      } else if (soundPreset === "chime") {
+        const playNote = (freq: number, start: number, duration: number) => {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, start);
+          gainNode.gain.setValueAtTime(vol, start);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration - 0.02);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start(start);
+          osc.stop(start + duration);
+        };
+        playNote(523.25, now, 0.15); // C5
+        playNote(659.25, now + 0.12, 0.15); // E5
+        playNote(783.99, now + 0.24, 0.15); // G5
+        playNote(1046.50, now + 0.36, 0.4); // C6
+      } else if (soundPreset === "fanfare") {
+        const playNote = (freq: number, start: number, duration: number, type: OscillatorType = "triangle") => {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, start);
+          gainNode.gain.setValueAtTime(vol * 0.4, start);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration - 0.05);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start(start);
+          osc.stop(start + duration);
+        };
+        playNote(587.33, now, 0.25); // D5
+        playNote(659.25, now + 0.25, 0.25); // E5
+        playNote(783.99, now + 0.5, 0.25); // G5
+        playNote(987.77, now + 0.75, 0.8, "sine"); // B5
+        playNote(1174.66, now + 0.75, 0.8, "sine"); // D6
+        playNote(1318.51, now + 0.75, 0.8, "triangle"); // E6
+      } else if (soundPreset === "custom" && settingsRef.current.alert_sound_url) {
+        const audio = new Audio(settingsRef.current.alert_sound_url);
+        audio.volume = vol;
+        audio.play().catch(e => console.error("Overlay direct sound play failed:", e));
+      }
+    } catch (e) {
+      console.error("Alert sound playback error:", e);
+    }
+  };
+
+  // Browser-native TTS Synthesis engine
+  const speakTtsAlert = (name: string, amount: number, message: string) => {
+    const currentSettings = settingsRef.current;
+    if (!currentSettings.tts_enabled || amount < currentSettings.tts_min_amount || !window.speechSynthesis) return;
+
+    // Polish the TTS phrase to sound beautiful
+    const textToSpeak = message 
+      ? `${name} tipped ${amount.toFixed(amount >= 1 ? 2 : 3)} SOL. ${message}`
+      : `${name} tipped ${amount.toFixed(amount >= 1 ? 2 : 3)} SOL!`;
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.volume = currentSettings.sound_volume !== undefined ? currentSettings.sound_volume : 0.7;
+
+    // Select dynamic voice actor preset based on settings
+    const voiceOption = currentSettings.tts_voice || "female";
+    const voices = window.speechSynthesis.getVoices();
+    let selectedVoice: SpeechSynthesisVoice | null = null;
+
+    if (voiceOption === "female") {
+      // Look for a standard English female voice
+      selectedVoice = voices.find(v => {
+        const nameLower = v.name.toLowerCase();
+        return v.lang.startsWith("en") && 
+          (nameLower.includes("female") || 
+           nameLower.includes("zira") || 
+           nameLower.includes("samantha") || 
+           nameLower.includes("google us english") || 
+           nameLower.includes("susan") || 
+           nameLower.includes("hazel") ||
+           nameLower.includes("karen"));
+      }) || null;
+    } else if (voiceOption === "male") {
+      // Look for a standard English male voice
+      selectedVoice = voices.find(v => {
+        const nameLower = v.name.toLowerCase();
+        return v.lang.startsWith("en") && 
+          (nameLower.includes("male") || 
+           nameLower.includes("david") || 
+           nameLower.includes("daniel") || 
+           nameLower.includes("george") || 
+           nameLower.includes("mark") || 
+           nameLower.includes("ravi"));
+      }) || null;
+    }
+
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+
+    // Set voice rate and pitch values
+    if (voiceOption === "robotic") {
+      utterance.pitch = 0.3; // Low cybernetic monotone pitch
+      utterance.rate = 1.15; // Slightly accelerated
+    } else {
+      utterance.pitch = 1.0;
+      utterance.rate = 0.95; // Slightly slower speed for clearer reading
+    }
+
+    window.speechSynthesis.speak(utterance);
+  };
+
 
 
   // Force absolute transparent backgrounds on document body and HTML for OBS compatibility
@@ -97,11 +270,12 @@ const OverlayPage: React.FC = () => {
   // Manage active alert display duration (exits when alertPopIn ends)
   useEffect(() => {
     if (!activeAlert) return;
+    const duration = settings.alert_duration || ALERT_DISPLAY_DURATION;
     const timer = setTimeout(() => {
       setActiveAlert(null);
-    }, ALERT_DISPLAY_DURATION);
+    }, duration);
     return () => clearTimeout(timer);
-  }, [activeAlert]);
+  }, [activeAlert, settings.alert_duration]);
 
 
 
@@ -113,9 +287,16 @@ const OverlayPage: React.FC = () => {
     }
 
     fetch(`${API_BASE}/creators/overlay-verify?wallet=${walletAddress}&key=${overlayKey}`)
-      .then(res => {
-        if (res.ok) setAuthStatus("ok");
-        else setAuthStatus("denied");
+      .then(res => res.json())
+      .then(data => {
+        if (data.valid) {
+          if (data.settings) {
+            setSettings((prev: any) => ({ ...prev, ...data.settings }));
+          }
+          setAuthStatus("ok");
+        } else {
+          setAuthStatus("denied");
+        }
       })
       .catch(() => setAuthStatus("denied"));
   }, [walletAddress, overlayKey]);
@@ -150,7 +331,7 @@ const OverlayPage: React.FC = () => {
       .catch(() => { });
   }, [authStatus, walletAddress]);
 
-  // Step 3: Subscribe to real-time tips
+  // Step 3: Subscribe to real-time tips & real-time settings synchronization
   useEffect(() => {
     if (authStatus !== "ok" || !socket || !walletAddress || !overlayKey) return;
 
@@ -168,13 +349,26 @@ const OverlayPage: React.FC = () => {
       setTips(prev => [...prev, newTip].slice(-10)); // Keep last 10
       setActiveAlert(newTip); // Trigger premium animated active popup
 
+      // Play direct/synthetic sound with the latest real-time volume
+      const currentVol = settingsRef.current.sound_volume !== undefined ? settingsRef.current.sound_volume : 0.7;
+      playAlertSound(currentVol);
 
+      // Trigger TTS after a short delay (e.g. 1.2s) to let the chime sound finish!
+      setTimeout(() => {
+        speakTtsAlert(newTip.sender, newTip.amount, newTip.message);
+      }, 1200);
+    };
+
+    const handleSettingsUpdated = (newSettings: any) => {
+      setSettings((prev: any) => ({ ...prev, ...newSettings }));
     };
 
     socket.on("new_superchat", handleSuperChat);
+    socket.on("settings_updated", handleSettingsUpdated);
 
     return () => {
       socket.off("new_superchat", handleSuperChat);
+      socket.off("settings_updated", handleSettingsUpdated);
       socket.emit("unsubscribe_overlay", walletAddress);
     };
   }, [authStatus, socket, walletAddress, overlayKey]);
@@ -218,142 +412,185 @@ const OverlayPage: React.FC = () => {
 
 
       {/* Cinematic Alert Popup */}
-      {activeAlert && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: "45%",
-            left: "50%",
-            zIndex: 999,
-            width: ACTIVE_ALERT_WIDTH, // Constant fixed width for consistent professional stream visuals
-            animation: `${alertPopIn} ${ALERT_DISPLAY_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-            pointerEvents: "none"
-          }}
-        >
-          <Paper
-            elevation={0}
+      {activeAlert && (() => {
+        const accentColor = settings.theme_color || getTierColor(activeAlert.amount);
+        const fontStylePrimary = settings.font_family ? `${settings.font_family}, sans-serif` : FONT_PRIMARY;
+        const fontStyleAccent = settings.font_family ? `${settings.font_family}, sans-serif` : FONT_ACCENT;
+
+        return (
+          <Box
             sx={{
-              p: 4,
-              borderRadius: "28px",
-              bgcolor: "rgba(0, 0, 0, 0.85)",
-              border: `2px solid ${getTierColor(activeAlert.amount)}`,
-              backdropFilter: "blur(20px)",
-              boxShadow: `0 0 50px ${getTierColor(activeAlert.amount)}33, inset 0 0 20px ${getTierColor(activeAlert.amount)}1a`,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              textAlign: "center",
-              position: "relative",
-              overflow: "hidden"
+              position: "absolute",
+              top: "45%",
+              left: "50%",
+              zIndex: 999,
+              width: ACTIVE_ALERT_WIDTH, // Constant fixed width for consistent professional stream visuals
+              animation: `${alertPopIn} ${settings.alert_duration || ALERT_DISPLAY_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+              pointerEvents: "none"
             }}
           >
-            {/* Glowing top line matching tier */}
-            <Box sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 4,
-              background: `linear-gradient(90deg, transparent, ${getTierColor(activeAlert.amount)}, transparent)`
-            }} />
-
-            {/* Glowing Category Header */}
-            <Typography
-              variant="caption"
+            <Paper
+              elevation={0}
               sx={{
-                fontFamily: FONT_ACCENT,
-                fontSize: "0.85rem",
-                fontWeight: 900,
-                letterSpacing: "4px",
-                color: getTierColor(activeAlert.amount),
-                textTransform: "uppercase",
-                mb: 2,
+                p: 4,
+                borderRadius: "28px",
+                bgcolor: "rgba(0, 0, 0, 0.85)",
+                border: `2px solid ${accentColor}`,
+                backdropFilter: "blur(20px)",
+                boxShadow: `0 0 50px ${accentColor}33, inset 0 0 20px ${accentColor}1a`,
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
-                gap: 1,
-                textShadow: `0 0 10px ${getTierColor(activeAlert.amount)}4d`
-              }}
-            >
-              ⚡ {activeAlert.amount >= 5 ? "Legendary Tip!" : activeAlert.amount >= 1 ? "Epic Super Chat!" : "New Super Chat!"} ⚡
-            </Typography>
-
-            {/* Large Avatar or Bolt Icon representing tier */}
-            <Box
-              sx={{
-                width: 72,
-                height: 72,
-                borderRadius: "50%",
-                bgcolor: `${getTierColor(activeAlert.amount)}1a`,
-                border: `2px solid ${getTierColor(activeAlert.amount)}33`,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                mb: 3,
-                boxShadow: `0 0 20px ${getTierColor(activeAlert.amount)}26`
-              }}
-            >
-              <BoltIcon sx={{ fontSize: 40, color: getTierColor(activeAlert.amount) }} />
-            </Box>
-
-            {/* Combined Sender Name, Amount & Superchat Alert */}
-            <Typography
-              sx={{
-                fontFamily: FONT_PRIMARY,
-                fontWeight: 700,
-                fontSize: "1.65rem", // High-fidelity size optimized to fit beautifully
-                color: "#ffffff",
-                lineHeight: 1.4,
-                mb: activeAlert.message ? 3.5 : 0,
                 textAlign: "center",
-                width: "100%", // Utilize maximum width to prevent early wrapping
-                letterSpacing: "-0.01em"
+                position: "relative",
+                overflow: "hidden"
               }}
             >
-              <span style={{ color: getTierColor(activeAlert.amount), fontWeight: 800 }}>
-                {activeAlert.sender}
-              </span>{" "}
-              sent{" "}
-              <span style={{ color: getTierColor(activeAlert.amount), fontWeight: 900, textShadow: `0 0 15px ${getTierColor(activeAlert.amount)}55` }}>
-                {activeAlert.amount.toFixed(activeAlert.amount >= 1 ? 2 : 4)} SOL
-              </span>{" "}
-              Superchat!
-            </Typography>
+              {/* Glowing top line matching tier */}
+              <Box sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 4,
+                background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`
+              }} />
 
-            {/* User message speech bubble */}
-            {activeAlert.message && (
-              <Box
+              {/* Glowing Category Header */}
+              <Typography
+                variant="caption"
                 sx={{
-                  width: "100%",
-                  p: 3,
-                  borderRadius: "18px",
-                  bgcolor: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.06)",
-                  borderLeft: `5px solid ${getTierColor(activeAlert.amount)}`, // Vertical glowing tier border accent
-                  boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 12px ${getTierColor(activeAlert.amount)}08`,
-                  position: "relative",
+                  fontFamily: fontStyleAccent,
+                  fontSize: "0.85rem",
+                  fontWeight: 900,
+                  letterSpacing: "4px",
+                  color: accentColor,
+                  textTransform: "uppercase",
+                  mb: 2,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center"
+                  gap: 1,
+                  textShadow: `0 0 10px ${accentColor}4d`
                 }}
               >
-                <Typography
+                ⚡ {activeAlert.amount >= 5 ? "Legendary Tip!" : activeAlert.amount >= 1 ? "Epic Super Chat!" : "New Super Chat!"} ⚡
+              </Typography>
+
+              {/* Large Avatar or Custom Preset representing tier */}
+              <Box
+                sx={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: "50%",
+                  bgcolor: `${accentColor}1a`,
+                  border: `2px solid ${accentColor}33`,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  mb: 3,
+                  boxShadow: `0 0 20px ${accentColor}26`,
+                  overflow: "hidden"
+                }}
+              >
+                {(() => {
+                  const preset = settings.alert_gif_preset || "bolt";
+                  if (preset === "bolt") {
+                    return <BoltIcon sx={{ fontSize: 40, color: accentColor }} />;
+                  }
+                  if (preset === "crown") {
+                    return <EmojiEventsIcon sx={{ fontSize: 40, color: accentColor }} />;
+                  }
+                  if (preset === "orb") {
+                    return (
+                      <Box
+                        sx={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: "50%",
+                          background: `radial-gradient(circle, ${accentColor} 0%, transparent 70%)`,
+                          animation: "pulseGlow 1.5s infinite ease-in-out",
+                          "@keyframes pulseGlow": {
+                            "0%": { transform: "scale(0.95)", opacity: 0.7, boxShadow: `0 0 10px ${accentColor}` },
+                            "50%": { transform: "scale(1.1)", opacity: 1, boxShadow: `0 0 25px ${accentColor}` },
+                            "100%": { transform: "scale(0.95)", opacity: 0.7, boxShadow: `0 0 10px ${accentColor}` }
+                          }
+                        }}
+                      />
+                    );
+                  }
+                  if (preset === "custom" && settings.alert_gif_url) {
+                    return (
+                      <img
+                        src={settings.alert_gif_url}
+                        alt="custom-alert"
+                        style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: "10px" }}
+                      />
+                    );
+                  }
+                  return <BoltIcon sx={{ fontSize: 40, color: accentColor }} />;
+                })()}
+              </Box>
+
+              {/* Combined Sender Name, Amount & Superchat Alert */}
+              <Typography
+                sx={{
+                  fontFamily: fontStylePrimary,
+                  fontWeight: 700,
+                  fontSize: "1.65rem", // High-fidelity size optimized to fit beautifully
+                  color: "#ffffff",
+                  lineHeight: 1.4,
+                  mb: activeAlert.message ? 3.5 : 0,
+                  textAlign: "center",
+                  width: "100%", // Utilize maximum width to prevent early wrapping
+                  letterSpacing: "-0.01em"
+                }}
+              >
+                <span style={{ color: accentColor, fontWeight: 800 }}>
+                  {activeAlert.sender}
+                </span>{" "}
+                sent{" "}
+                <span style={{ color: accentColor, fontWeight: 900, textShadow: `0 0 15px ${accentColor}55` }}>
+                  {activeAlert.amount.toFixed(activeAlert.amount >= 1 ? 2 : 4)} SOL
+                </span>{" "}
+                Superchat!
+              </Typography>
+
+              {/* User message speech bubble */}
+              {activeAlert.message && (
+                <Box
                   sx={{
-                    fontFamily: FONT_PRIMARY,
-                    fontWeight: 500,
-                    color: "#f8fafc",
-                    lineHeight: 1.6,
-                    fontSize: "1.15rem",
-                    fontStyle: "italic",
-                    textAlign: "center"
+                    width: "100%",
+                    p: 3,
+                    borderRadius: "18px",
+                    bgcolor: "rgba(255,255,255,0.02)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    borderLeft: `5px solid ${accentColor}`, // Vertical glowing tier border accent
+                    boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 12px ${accentColor}08`,
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
                   }}
                 >
-                  “{activeAlert.message}”
-                </Typography>
-              </Box>
-            )}
-          </Paper>
-        </Box>
-      )}
+                  <Typography
+                    sx={{
+                      fontFamily: fontStylePrimary,
+                      fontWeight: 500,
+                      color: "#f8fafc",
+                      lineHeight: 1.6,
+                      fontSize: "1.15rem",
+                      fontStyle: "italic",
+                      textAlign: "center"
+                    }}
+                  >
+                    “{activeAlert.message}”
+                  </Typography>
+                </Box>
+              )}
+            </Paper>
+          </Box>
+        );
+      })()}
 
     </Box>
   );

@@ -168,3 +168,22 @@ export async function sendTestAlert() {
   return api("/creators/overlay-test", { method: "POST" });
 }
 
+/** Update the creator's overlay settings (auth required) */
+export async function saveOverlaySettings(settings: {
+  tts_enabled?: boolean;
+  tts_min_amount?: number;
+  alert_duration?: number;
+  alert_gif_preset?: string;
+  alert_gif_url?: string;
+  alert_sound_preset?: string;
+  alert_sound_url?: string;
+  sound_volume?: number;
+  theme_color?: string;
+  font_family?: string;
+}) {
+  return api("/creators/overlay-settings", {
+    method: "PUT",
+    body: JSON.stringify(settings),
+  });
+}
+

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { getDashboardData, getOverlayToken, generateOverlayToken, sendTestAlert } from "../services/api";
+import { getDashboardData, getOverlayToken, generateOverlayToken, sendTestAlert, saveOverlaySettings } from "../services/api";
 import toast from "react-hot-toast";
 import SEO from "../components/SEO";
 import { useSocket } from "../context/SocketContext";
@@ -24,13 +24,22 @@ import {
   TextField,
   Link,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Switch,
+  Slider,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  InputAdornment,
+  FormControlLabel
 } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import AlertCustomizer from "../components/AlertCustomizer";
 import { 
   AreaChart,
   Area,
@@ -167,6 +176,18 @@ export default function Dashboard() {
   const { connected } = useSocket();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  // Save overlay customizer settings and refresh local user stats
+  const handleSaveOverlaySettings = async (settings: any) => {
+    await saveOverlaySettings(settings);
+    toast.success("Overlay settings saved successfully!");
+    try {
+      const refreshed = await getDashboardData();
+      setData(refreshed);
+    } catch (e) {
+      console.error("Failed to refresh dashboard stats:", e);
+    }
+  };
 
   useEffect(() => {
     getDashboardData()
@@ -895,6 +916,22 @@ export default function Dashboard() {
                 </Button>
               )}
             </Paper>
+          </Grid>
+        </Grid>
+
+        <Grid container spacing={4} sx={{ mt: 3 }} className="fade-in-up" style={{ animationDelay: "0.3s" }}>
+          {/* Stream Alert & TTS Settings Customizer Component */}
+          <Grid size={{ xs: 12 }}>
+            <AlertCustomizer
+              initialSettings={data?.user?.overlay_settings}
+              onSave={handleSaveOverlaySettings}
+              testLoading={testLoading}
+              onSendTestAlert={handleSendTestAlert}
+              tokenLoading={tokenLoading}
+              onGenerateToken={handleGenerateToken}
+              overlayToken={overlayToken}
+              connected={connected}
+            />
           </Grid>
         </Grid>
       </Container>
