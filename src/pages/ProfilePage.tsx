@@ -27,6 +27,8 @@ interface Tip {
   tx_hash: string;
   sender_wallet: string;
   creator_wallet: string;
+  sender_name?: string;
+  creator_name?: string;
   amount: number;
   fee: number;
   message: string;
@@ -260,9 +262,9 @@ export default function ProfilePage() {
                           </Box>
                           <Typography variant="body2" color="text.secondary">
                             {activeTab === 0 ? (
-                              <>from <Link component={RouterLink} to={`/profile/${tip.sender_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{shorten(tip.sender_wallet)}</Link></>
+                              <>from <Link component={RouterLink} to={`/profile/${tip.sender_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{tip.sender_name || shorten(tip.sender_wallet)}</Link></>
                             ) : (
-                              <>to <Link component={RouterLink} to={`/profile/${tip.creator_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{shorten(tip.creator_wallet)}</Link></>
+                              <>to <Link component={RouterLink} to={`/profile/${tip.creator_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{tip.creator_name || shorten(tip.creator_wallet)}</Link></>
                             )}
                           </Typography>
                         </Box>

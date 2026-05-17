@@ -60,9 +60,14 @@ export default function ProfileSettings() {
     e.preventDefault();
     if (!isAuthenticated) return;
 
+    if (!name.trim()) {
+      toast.error("Display Name is required!");
+      return;
+    }
+
     setLoading(true);
     try {
-      await updateProfile({ name, bio, avatar_url: avatarUrl });
+      await updateProfile({ name: name.trim(), bio, avatar_url: avatarUrl });
       toast.success("Profile updated successfully!");
       await refreshUser();
     } catch (err: any) {
@@ -236,14 +241,17 @@ export default function ProfileSettings() {
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     <Box>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                        Display Name
+                        Display Name *
                       </Typography>
                       <TextField
+                        required
                         variant="outlined"
                         fullWidth
                         placeholder="Your display name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        error={!name.trim()}
+                        helperText={!name.trim() ? "Display Name is required to receive superchats" : ""}
                       />
                     </Box>
 

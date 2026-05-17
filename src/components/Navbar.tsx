@@ -1,7 +1,7 @@
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWalletAuth } from "../hooks/useWalletAuth";
-import { AppBar, Toolbar, Button, Box, Typography, Chip, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider, useTheme, useMediaQuery, Dialog } from "@mui/material";
+import { AppBar, Toolbar, Button, Box, Typography, Chip, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider, useTheme, useMediaQuery, Dialog, Tooltip } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -27,8 +27,7 @@ export default function Navbar() {
     ...(isAuthenticated ? [
       { label: "Leaderboard", path: "/leaderboard" },
       { label: "Activity", path: "/activity" },
-      { label: "Dashboard", path: "/dashboard" },
-      { label: "Settings", path: "/settings" }
+      { label: "Dashboard", path: "/dashboard" }
     ] : [])
   ];
 
@@ -212,83 +211,115 @@ export default function Navbar() {
 
           {isAuthenticated && (
             <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 1.5 }}>
-              <Button
-                component={RouterLink}
-                to={`/profile/${walletAddress}`}
-                variant="outlined"
-                color="primary"
-                size="small"
-                startIcon={<PersonIcon />}
-                sx={{
-                  height: 38,
-                  borderRadius: "10px",
-                  fontWeight: 700,
-                  px: 2,
-                  borderColor: (theme) => `${theme.palette.primary.main}4d`,
-                  "&:hover": { borderColor: (theme) => theme.palette.primary.main, bgcolor: (theme) => `${theme.palette.primary.main}0d` }
-                }}
-              >
-                My Profile
-              </Button>
-              {!user?.is_premium && (
-                <Button
-                  size="small"
-                  onClick={() => setSubModalOpen(true)}
-                  startIcon={<DiamondIcon />}
+              {/* Profile Icon Button */}
+              <Tooltip title="My Profile" arrow>
+                <IconButton
+                  component={RouterLink}
+                  to={`/profile/${walletAddress}`}
                   sx={{
+                    width: 38,
                     height: 38,
                     borderRadius: "10px",
-                    fontWeight: 800,
-                    px: 2,
-                    background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
-                    color: "#000",
-                    boxShadow: "0 0 15px rgba(255, 215, 0, 0.3)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    color: "text.primary",
+                    transition: "all 0.2s",
                     "&:hover": {
-                      background: "linear-gradient(135deg, #ffea00 0%, #ffb400 100%)",
+                      color: "primary.main",
+                      borderColor: "primary.main",
+                      bgcolor: "rgba(255, 255, 255, 0.05)"
+                    }
+                  }}
+                >
+                  <PersonIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+
+              {/* Premium & Verified Icons */}
+              {user?.is_premium ? (
+                <Tooltip title="Premium Member" arrow>
+                  <IconButton
+                    disableRipple
+                    sx={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: "10px",
+                      border: "1px solid rgba(255, 215, 0, 0.3)",
+                      bgcolor: "rgba(255, 215, 0, 0.05)",
+                      color: "#FFD700",
+                      boxShadow: "0 0 15px rgba(255, 215, 0, 0.2)",
+                      cursor: "default"
+                    }}
+                  >
+                    <DiamondIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <>
+                  <Tooltip title="Go Premium" arrow>
+                    <IconButton
+                      onClick={() => setSubModalOpen(true)}
+                      sx={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: "10px",
+                        background: "rgba(255, 215, 0, 0.1)",
+                        border: "1px solid rgba(255, 215, 0, 0.3)",
+                        color: "#FFD700",
+                        boxShadow: "0 0 10px rgba(255, 215, 0, 0.15)",
+                        transition: "all 0.2s",
+                        "&:hover": {
+                          background: "rgba(255, 215, 0, 0.2)",
+                          borderColor: "#FFD700",
+                          transform: "scale(1.05)"
+                        }
+                      }}
+                    >
+                      <DiamondIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+
+                  <Tooltip title="Verified Account" arrow>
+                    <IconButton
+                      disableRipple
+                      sx={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: "10px",
+                        border: "1px solid rgba(16, 185, 129, 0.2)",
+                        bgcolor: "rgba(16, 185, 129, 0.05)",
+                        color: "success.main",
+                        cursor: "default"
+                      }}
+                    >
+                      <CheckCircleIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
+
+              {/* Logout Button */}
+              <Tooltip title="Logout" arrow>
+                <IconButton
+                  onClick={logout}
+                  size="medium"
+                  sx={{
+                    width: 38,
+                    height: 38,
+                    bgcolor: "rgba(239, 68, 68, 0.05)",
+                    color: "error.main",
+                    borderRadius: "10px",
+                    border: "1px solid rgba(239, 68, 68, 0.1)",
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      bgcolor: "rgba(239, 68, 68, 0.1)",
+                      borderColor: "rgba(239, 68, 68, 0.3)",
                       transform: "scale(1.05)"
                     }
                   }}
                 >
-                  Go Premium
-                </Button>
-              )}
-              <Chip
-                icon={user?.is_premium ? <DiamondIcon sx={{ fontSize: "1.1rem !important", color: "#FFD700 !important" }} /> : <CheckCircleIcon sx={{ fontSize: "1.1rem !important" }} />}
-                label={user?.is_premium ? "Premium" : "Verified"}
-                color={user?.is_premium ? "warning" : "success"}
-                variant="outlined"
-                size="medium"
-                sx={{
-                  height: 38,
-                  borderRadius: "10px",
-                  fontWeight: 700,
-                  bgcolor: user?.is_premium ? "rgba(255, 215, 0, 0.05)" : "rgba(16, 185, 129, 0.05)",
-                  borderColor: user?.is_premium ? "rgba(255, 215, 0, 0.3)" : "rgba(16, 185, 129, 0.2)",
-                  boxShadow: user?.is_premium ? "0 0 15px rgba(255, 215, 0, 0.2)" : "0 0 10px rgba(16, 185, 129, 0.1)",
-                  color: user?.is_premium ? "#FFD700" : "success.main"
-                }}
-              />
-              <IconButton
-                onClick={logout}
-                size="medium"
-                title="Logout"
-                sx={{
-                  width: 38,
-                  height: 38,
-                  bgcolor: "rgba(239, 68, 68, 0.05)",
-                  color: "error.main",
-                  borderRadius: "10px",
-                  border: "1px solid rgba(239, 68, 68, 0.1)",
-                  transition: "all 0.2s",
-                  "&:hover": {
-                    bgcolor: "rgba(239, 68, 68, 0.1)",
-                    borderColor: "rgba(239, 68, 68, 0.3)",
-                    transform: "scale(1.05)"
-                  }
-                }}
-              >
-                <LogoutIcon fontSize="small" />
-              </IconButton>
+                  <LogoutIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             </Box>
           )}
 
@@ -375,18 +406,63 @@ export default function Navbar() {
 
           <Box sx={{ mt: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
             {isAuthenticated && (
-              <Button
-                component={RouterLink}
-                to={`/profile/${walletAddress}`}
-                variant="outlined"
-                color="primary"
-                fullWidth
-                onClick={() => setMobileOpen(false)}
-                sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800 }}
-                startIcon={<PersonIcon />}
-              >
-                My Profile
-              </Button>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <Chip
+                  icon={user?.is_premium ? <DiamondIcon sx={{ fontSize: "1.1rem !important", color: "#FFD700 !important" }} /> : <CheckCircleIcon sx={{ fontSize: "1.1rem !important" }} />}
+                  label={user?.is_premium ? "Premium Member" : "Verified Account"}
+                  color={user?.is_premium ? "warning" : "success"}
+                  variant="outlined"
+                  size="medium"
+                  sx={{
+                    width: "100%",
+                    height: 44,
+                    borderRadius: "14px",
+                    fontWeight: 700,
+                    bgcolor: user?.is_premium ? "rgba(255, 215, 0, 0.05)" : "rgba(16, 185, 129, 0.05)",
+                    borderColor: user?.is_premium ? "rgba(255, 215, 0, 0.3)" : "rgba(16, 185, 129, 0.2)",
+                    boxShadow: user?.is_premium ? "0 0 15px rgba(255, 215, 0, 0.2)" : "0 0 10px rgba(16, 185, 129, 0.1)",
+                    color: user?.is_premium ? "#FFD700" : "success.main"
+                  }}
+                />
+
+                <Button
+                  component={RouterLink}
+                  to={`/profile/${walletAddress}`}
+                  variant="outlined"
+                  color="primary"
+                  fullWidth
+                  onClick={() => setMobileOpen(false)}
+                  sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800 }}
+                  startIcon={<PersonIcon />}
+                >
+                  My Profile
+                </Button>
+
+                {!user?.is_premium && (
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setSubModalOpen(true);
+                    }}
+                    sx={{
+                      py: 1.5,
+                      borderRadius: "14px",
+                      fontWeight: 800,
+                      background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+                      color: "#000",
+                      boxShadow: "0 0 15px rgba(255, 215, 0, 0.3)",
+                      "&:hover": {
+                        background: "linear-gradient(135deg, #ffea00 0%, #ffb400 100%)"
+                      }
+                    }}
+                    startIcon={<DiamondIcon />}
+                  >
+                    Go Premium
+                  </Button>
+                )}
+              </Box>
             )}
 
             {connected && (

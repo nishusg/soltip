@@ -249,7 +249,7 @@ export default function CreatorLeaderboard() {
                 <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
                     <Typography variant="h6" noWrap sx={{ fontWeight: 800, fontSize: { xs: "1rem", sm: "1.25rem" }, color: creator.is_premium ? "#FFD700" : "inherit" }}>
-                      {creator.name || "Anonymous Creator"}
+                      {creator.name || shorten(creator.wallet_address)}
                     </Typography>
                     {creator.is_premium && (
                       <Chip

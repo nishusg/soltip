@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import { getDashboardData, getOverlayToken, generateOverlayToken, sendTestAlert } from "../services/api";
 import toast from "react-hot-toast";
 import SEO from "../components/SEO";
@@ -20,6 +21,7 @@ import {
   CircularProgress,
   Button,
   TextField,
+  Link,
   useTheme,
   useMediaQuery
 } from "@mui/material";
@@ -644,7 +646,9 @@ export default function Dashboard() {
                           primary={
                             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
                               <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                                {tip.sender_wallet.slice(0, 4)}...{tip.sender_wallet.slice(-4)}
+                                <Link component={RouterLink} to={`/profile/${tip.sender_wallet}`} color="inherit" sx={{ textDecoration: "none", "&:hover": { color: "primary.main" } }}>
+                                  {tip.sender_name || `${tip.sender_wallet.slice(0, 4)}...${tip.sender_wallet.slice(-4)}`}
+                                </Link>
                               </Typography>
                               <Typography variant="subtitle1" color="primary.main" sx={{ fontWeight: 900, textShadow: (theme: any) => `0 0 10px ${theme.palette.primary.main}4d` }}>
                                 +{formatSol(tip.amount)} SOL

@@ -18,7 +18,7 @@
 
 import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import { useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "@mui/material/styles";
@@ -37,12 +37,18 @@ const ActivityPage = React.lazy(() => import("./pages/ActivityPage"));
 const UnauthorizedPage = React.lazy(() => import("./pages/UnauthorizedPage"));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
   
   if (isLoading) return null;
   if (!isAuthenticated) {
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;
+  }
+
+  // Force authenticated users to set a display name upon first login before using other pages
+  if (user && !user.name && location.pathname !== "/settings") {
+    toast.error("Please set a display name to complete your registration!", { id: "profile-name-required" });
+    return <Navigate to="/settings" state={{ from: location }} replace />;
   }
   
   return <>{children}</>;

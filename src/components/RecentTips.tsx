@@ -15,6 +15,8 @@ interface Transaction {
   tx_hash: string;
   sender_wallet: string;
   creator_wallet: string;
+  sender_name?: string;
+  creator_name?: string;
   amount: number;
   fee: number;
   message: string;
@@ -166,9 +168,9 @@ export default function RecentTips() {
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "monospace", opacity: 0.8 }}>
                           {isSent ? (
-                            <>To <Link component={RouterLink} to={`/profile/${tx.creator_wallet}`} color="inherit" sx={{ fontWeight: 700 }}>{shorten(tx.creator_wallet)}</Link></>
+                            <>To <Link component={RouterLink} to={`/profile/${tx.creator_wallet}`} color="inherit" sx={{ fontWeight: 700 }}>{tx.creator_name || shorten(tx.creator_wallet)}</Link></>
                           ) : (
-                            <>From <Link component={RouterLink} to={`/profile/${tx.sender_wallet}`} color="inherit" sx={{ fontWeight: 700 }}>{shorten(tx.sender_wallet)}</Link></>
+                            <>From <Link component={RouterLink} to={`/profile/${tx.sender_wallet}`} color="inherit" sx={{ fontWeight: 700 }}>{tx.sender_name || shorten(tx.sender_wallet)}</Link></>
                           )}
                         </Typography>
                       </Box>
