@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Box, Typography, Paper, keyframes } from "@mui/material";
 import { useSocket } from "../context/SocketContext";
@@ -63,7 +63,6 @@ const OverlayPage: React.FC = () => {
   const [tips, setTips] = useState<TipEntry[]>([]);
   const [authStatus, setAuthStatus] = useState<"loading" | "ok" | "denied">("loading");
   const [activeAlert, setActiveAlert] = useState<TipEntry | null>(null);
-  const feedRef = useRef<HTMLDivElement>(null);
 
 
 
@@ -121,7 +120,7 @@ const OverlayPage: React.FC = () => {
       .catch(() => setAuthStatus("denied"));
   }, [walletAddress, overlayKey]);
 
-  // Step 2: Load existing tips on mount
+  // Step 2: Load existing tips on mount (filtered to today for fresh daily streams)
   useEffect(() => {
     if (authStatus !== "ok" || !walletAddress) return;
 
@@ -129,8 +128,13 @@ const OverlayPage: React.FC = () => {
       .then(res => res.json())
       .then(data => {
         if (data.recent_tips && data.recent_tips.length > 0) {
+          const todayStr = new Date().toDateString();
           const received = data.recent_tips
-            .filter((t: any) => t.creator_wallet === walletAddress)
+            .filter((t: any) => {
+              // Only load tips sent today for a fresh daily ticker experience
+              const tipDate = new Date(t.timestamp);
+              return t.creator_wallet === walletAddress && tipDate.toDateString() === todayStr;
+            })
             .slice(0, 20)
             .reverse() // oldest first so newest is at bottom
             .map((t: any) => ({
@@ -175,12 +179,7 @@ const OverlayPage: React.FC = () => {
     };
   }, [authStatus, socket, walletAddress, overlayKey]);
 
-  // Auto-scroll to bottom when new tips arrive
-  useEffect(() => {
-    if (feedRef.current) {
-      feedRef.current.scrollTop = feedRef.current.scrollHeight;
-    }
-  }, [tips]);
+
 
   if (!walletAddress) return null;
 
@@ -356,102 +355,6 @@ const OverlayPage: React.FC = () => {
         </Box>
       )}
 
-      {/* Sleek Ticker Feed */}
-      <Box
-        ref={feedRef}
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.5,
-          overflowY: "auto",
-          maxHeight: "35vh",
-          width: TICKER_FEED_WIDTH, // Constant ticker feed width
-          position: "absolute",
-          bottom: 24,
-          left: 24,
-          zIndex: 10,
-          // Hide scrollbar for OBS
-          "&::-webkit-scrollbar": { display: "none" },
-          scrollbarWidth: "none",
-        }}
-      >
-        {tips.slice(-TICKER_MAX_ITEMS).map((tip, i) => {
-          const tierColor = getTierColor(tip.amount);
-          const isNew = i >= tips.slice(-TICKER_MAX_ITEMS).length - 1; // Animate only the latest one
-
-          return (
-            <Box
-              key={tip.id}
-              sx={{
-                animation: isNew ? `${slideInLeft} 0.4s ease-out` : undefined,
-                display: "flex",
-                flexDirection: "column",
-                width: "100%",
-              }}
-            >
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2, // Spacious padding matching user mockup
-                  borderRadius: "16px", // Smooth rounded corners
-                  bgcolor: "rgba(0, 0, 0, 0.8)",
-                  backdropFilter: "blur(12px)",
-                  borderLeft: `4px solid ${tierColor}`,
-                  boxShadow: `0 4px 20px rgba(0, 0, 0, 0.4), ${getTierGlow(tip.amount)}`,
-                  border: "1px solid rgba(255,255,255,0.03)",
-                  borderLeftColor: tierColor,
-                  transition: "all 0.3s ease",
-                }}
-              >
-                {/* Header: Sender + Amount with absolute space-between alignment */}
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: tip.message ? 0.75 : 0 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <BoltIcon sx={{ fontSize: 16, color: tierColor }} />
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontFamily: FONT_PRIMARY,
-                        fontWeight: 700,
-                        color: "#fff",
-                        fontSize: "0.9rem"
-                      }}
-                    >
-                      {tip.sender}
-                    </Typography>
-                  </Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontFamily: FONT_PRIMARY,
-                      fontWeight: 800,
-                      color: tierColor,
-                      fontSize: "0.95rem"
-                    }}
-                  >
-                    {tip.amount.toFixed(tip.amount >= 1 ? 2 : 4)} SOL
-                  </Typography>
-                </Box>
-
-                {/* Message */}
-                {tip.message && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontFamily: FONT_PRIMARY,
-                      color: "rgba(255,255,255,0.65)",
-                      fontSize: "0.8rem",
-                      lineHeight: 1.4,
-                      pl: 3.25, // Aligns perfectly under the wallet text (skips the bolt icon)
-                    }}
-                  >
-                    {tip.message}
-                  </Typography>
-                )}
-              </Paper>
-            </Box>
-          );
-        })}
-      </Box>
     </Box>
   );
 };

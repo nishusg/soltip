@@ -38,10 +38,10 @@ export default function Navbar() {
   };
 
   return (
-    <AppBar 
-      position="sticky" 
+    <AppBar
+      position="sticky"
       elevation={0}
-      sx={{ 
+      sx={{
         backgroundColor: theme.palette.background.default + "bf", // Use theme background with opacity
         backdropFilter: "blur(24px)",
         borderBottom: `1px solid ${theme.palette.primary.main}1a`,
@@ -51,13 +51,13 @@ export default function Navbar() {
     >
       <Toolbar sx={{ justifyContent: "space-between", py: 1.5, px: { xs: 2, md: 4 } }}>
         {/* Brand */}
-        <Box 
-          component={RouterLink} 
-          to="/" 
-          sx={{ 
-            display: "flex", 
-            alignItems: "center", 
-            textDecoration: "none", 
+        <Box
+          component={RouterLink}
+          to="/"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            textDecoration: "none",
             color: "inherit",
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             "&:hover": { transform: "scale(1.05)" }
@@ -87,14 +87,14 @@ export default function Navbar() {
           >
             <BoltIcon sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000", fontSize: 30 }} />
           </Box>
-          <Typography 
-            variant="h5" 
-            sx={{ 
-              fontWeight: 900, 
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 900,
               letterSpacing: "-0.03em",
-              background: `linear-gradient(90deg, #fff 0%, ${theme.palette.primary.main} 100%)`, 
-              WebkitBackgroundClip: "text", 
-              WebkitTextFillColor: "transparent" 
+              background: `linear-gradient(90deg, #fff 0%, ${theme.palette.primary.main} 100%)`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent"
             }}
           >
             SolChat
@@ -102,73 +102,77 @@ export default function Navbar() {
         </Box>
 
         {/* Links */}
-        <Box 
-          sx={{ 
-            display: { xs: "none", md: "flex" }, 
-            gap: 1, 
-            p: 0.5,
-            borderRadius: "16px",
-            bgcolor: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.05)",
-            backdropFilter: "blur(10px)"
-          }}
-        >
-          {navItems.map((item) => {
-            const active = isActive(item.path);
-            return (
-              <Button 
-                key={item.label}
-                component={RouterLink} 
-                to={item.path}
-                sx={{ 
-                  px: 3,
-                  py: 1,
-                  borderRadius: "12px",
-                  fontWeight: active ? 800 : 600,
-                  color: active ? theme.palette.primary.main : "rgba(255,255,255,0.6)",
-                  bgcolor: active ? `${theme.palette.primary.main}1a` : "transparent",
-                  transition: "all 0.2s ease",
-                  "&:hover": { 
-                    bgcolor: active ? `${theme.palette.primary.main}26` : "rgba(255,255,255,0.05)",
-                    color: theme.palette.primary.main
-                  }
-                }}
-              >
-                {item.label}
-              </Button>
-            );
-          })}
-        </Box>
+        {navItems.length > 1 && (
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              gap: 1,
+              p: 0.5,
+              borderRadius: "16px",
+              bgcolor: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(255,255,255,0.05)",
+              backdropFilter: "blur(10px)"
+            }}
+          >
+            {navItems.map((item) => {
+              const active = isActive(item.path);
+              return (
+                <Button
+                  key={item.label}
+                  component={RouterLink}
+                  to={item.path}
+                  sx={{
+                    px: 3,
+                    py: 1,
+                    borderRadius: "12px",
+                    fontWeight: active ? 800 : 600,
+                    color: active ? theme.palette.primary.main : "rgba(255,255,255,0.6)",
+                    bgcolor: active ? `${theme.palette.primary.main}1a` : "transparent",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      bgcolor: active ? `${theme.palette.primary.main}26` : "rgba(255,255,255,0.05)",
+                      color: theme.palette.primary.main
+                    }
+                  }}
+                >
+                  {item.label}
+                </Button>
+              );
+            })}
+          </Box>
+        )}
 
         {/* Actions - Hidden on mobile (< md), shown in drawer instead */}
         <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 2.5, md: 2 } }}>
-          <Button
-            variant="contained"
-            onClick={() => setTipModalOpen(true)}
-            sx={{
-              height: 44,
-              borderRadius: "14px",
-              fontWeight: 800,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-              color: theme.palette.mode === "dark" ? "#000" : "#fff",
-              display: { xs: "none", md: "flex" },
-              boxShadow: `0 4px 15px ${theme.palette.primary.main}4d`,
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": { 
-                transform: "translateY(-2px)",
-                boxShadow: `0 8px 25px ${theme.palette.primary.main}80`,
-              }
-            }}
-          >
-            Send Tip
-          </Button>
+          {connected && (
+            <Button
+              variant="contained"
+              onClick={() => setTipModalOpen(true)}
+              sx={{
+                height: 44,
+                borderRadius: "14px",
+                fontWeight: 800,
+                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                color: theme.palette.mode === "dark" ? "#000" : "#fff",
+                display: { xs: "none", md: "flex" },
+                boxShadow: `0 4px 15px ${theme.palette.primary.main}4d`,
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: `0 8px 25px ${theme.palette.primary.main}80`,
+                }
+              }}
+            >
+              Send Tip
+            </Button>
+          )}
 
-          <Box sx={{ 
+          <Box sx={{
             display: "block", // Always show the wallet button
-            "& .wallet-adapter-button": { 
-              height: { xs: "38px", md: "44px" }, 
-              borderRadius: "14px", 
-              fontWeight: 700, 
+            "& .wallet-adapter-button": {
+              height: { xs: "38px", md: "44px" },
+              borderRadius: "14px",
+              fontWeight: 700,
               px: { xs: 1.5, md: 3 },
               fontSize: { xs: "0.8rem", md: "0.95rem" },
               background: "rgba(255,255,255,0.05) !important",
@@ -180,19 +184,19 @@ export default function Navbar() {
                 transform: "translateY(-2px)",
                 boxShadow: "0 8px 20px rgba(0,0,0,0.2) !important"
               }
-            } 
+            }
           }}>
-             <WalletMultiButton />
+            <WalletMultiButton />
           </Box>
 
           {connected && !isAuthenticated && (
-            <Button 
-              variant="contained" 
-              onClick={login} 
+            <Button
+              variant="contained"
+              onClick={login}
               disabled={isLoading}
-              sx={{ 
-                height: 44, 
-                borderRadius: "14px", 
+              sx={{
+                height: 44,
+                borderRadius: "14px",
                 fontWeight: 700,
                 background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
                 border: "1px solid rgba(255,255,255,0.2)",
@@ -215,10 +219,10 @@ export default function Navbar() {
                 color="primary"
                 size="small"
                 startIcon={<PersonIcon />}
-                sx={{ 
+                sx={{
                   height: 38,
-                  borderRadius: "10px", 
-                  fontWeight: 700, 
+                  borderRadius: "10px",
+                  fontWeight: 700,
                   px: 2,
                   borderColor: (theme) => `${theme.palette.primary.main}4d`,
                   "&:hover": { borderColor: (theme) => theme.palette.primary.main, bgcolor: (theme) => `${theme.palette.primary.main}0d` }
@@ -239,7 +243,7 @@ export default function Navbar() {
                     background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
                     color: "#000",
                     boxShadow: "0 0 15px rgba(255, 215, 0, 0.3)",
-                    "&:hover": { 
+                    "&:hover": {
                       background: "linear-gradient(135deg, #ffea00 0%, #ffb400 100%)",
                       transform: "scale(1.05)"
                     }
@@ -248,13 +252,13 @@ export default function Navbar() {
                   Go Premium
                 </Button>
               )}
-              <Chip 
-                icon={user?.is_premium ? <DiamondIcon sx={{ fontSize: "1.1rem !important", color: "#FFD700 !important" }} /> : <CheckCircleIcon sx={{ fontSize: "1.1rem !important" }} />} 
-                label={user?.is_premium ? "Premium" : "Verified"} 
-                color={user?.is_premium ? "warning" : "success"} 
-                variant="outlined" 
-                size="medium" 
-                sx={{ 
+              <Chip
+                icon={user?.is_premium ? <DiamondIcon sx={{ fontSize: "1.1rem !important", color: "#FFD700 !important" }} /> : <CheckCircleIcon sx={{ fontSize: "1.1rem !important" }} />}
+                label={user?.is_premium ? "Premium" : "Verified"}
+                color={user?.is_premium ? "warning" : "success"}
+                variant="outlined"
+                size="medium"
+                sx={{
                   height: 38,
                   borderRadius: "10px",
                   fontWeight: 700,
@@ -262,13 +266,13 @@ export default function Navbar() {
                   borderColor: user?.is_premium ? "rgba(255, 215, 0, 0.3)" : "rgba(16, 185, 129, 0.2)",
                   boxShadow: user?.is_premium ? "0 0 15px rgba(255, 215, 0, 0.2)" : "0 0 10px rgba(16, 185, 129, 0.1)",
                   color: user?.is_premium ? "#FFD700" : "success.main"
-                }} 
+                }}
               />
-              <IconButton 
-                onClick={logout} 
-                size="medium" 
+              <IconButton
+                onClick={logout}
+                size="medium"
                 title="Logout"
-                sx={{ 
+                sx={{
                   width: 38,
                   height: 38,
                   bgcolor: "rgba(239, 68, 68, 0.05)",
@@ -288,14 +292,14 @@ export default function Navbar() {
             </Box>
           )}
 
-          {isMobile && (
+          {isMobile && connected && (
             <IconButton
               color="inherit"
               aria-label="open drawer"
               edge="start"
               onClick={() => setMobileOpen(true)}
-              sx={{ 
-                bgcolor: "rgba(255,255,255,0.05)", 
+              sx={{
+                bgcolor: "rgba(255,255,255,0.05)",
                 borderRadius: "12px",
                 border: "1px solid rgba(255,255,255,0.1)",
                 p: 1
@@ -316,8 +320,8 @@ export default function Navbar() {
         ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: "block", md: "none" },
-          "& .MuiDrawer-paper": { 
-            boxSizing: "border-box", 
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
             width: 300,
             background: "rgba(10, 10, 15, 0.95)",
             backdropFilter: "blur(24px)",
@@ -328,62 +332,65 @@ export default function Navbar() {
       >
         <Box sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" }}>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 4 }}>
-             <Box sx={{ display: "flex", alignItems: "center" }}>
-               <Box sx={{ width: 32, height: 32, borderRadius: "8px", background: (theme) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`, display: "flex", alignItems: "center", justifyContent: "center", mr: 1.5 }}>
-                 <BoltIcon sx={{ color: "#fff", fontSize: 20 }} />
-               </Box>
-               <Typography variant="h6" sx={{ fontWeight: 900 }}>Menu</Typography>
-             </Box>
-             <IconButton onClick={() => setMobileOpen(false)} sx={{ color: "text.secondary" }}>
-               <CloseIcon />
-             </IconButton>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Box sx={{ width: 32, height: 32, borderRadius: "8px", background: (theme) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`, display: "flex", alignItems: "center", justifyContent: "center", mr: 1.5 }}>
+                <BoltIcon sx={{ color: "#fff", fontSize: 20 }} />
+              </Box>
+              <Typography variant="h6" sx={{ fontWeight: 900 }}>Menu</Typography>
+            </Box>
+            <IconButton onClick={() => setMobileOpen(false)} sx={{ color: "text.secondary" }}>
+              <CloseIcon />
+            </IconButton>
           </Box>
 
-          <List sx={{ flexGrow: 1 }}>
-            {navItems.map((item) => {
-              const active = isActive(item.path);
-              return (
-                <ListItem key={item.label} disablePadding sx={{ mb: 1 }}>
-                  <ListItemButton 
-                    component={RouterLink} 
-                    to={item.path}
-                    onClick={() => setMobileOpen(false)}
-                    sx={{ 
-                      borderRadius: "12px",
-                      bgcolor: active ? "rgba(255,255,255,0.05)" : "transparent",
-                      border: active ? "1px solid rgba(255,255,255,0.05)" : "1px solid transparent",
-                      "&:hover": { bgcolor: "rgba(255,255,255,0.08)" }
-                    }}
-                  >
-                    <ListItemText 
-                      primary={item.label} 
-                      slotProps={{ primary: { sx: { fontWeight: active ? 800 : 600, color: active ? "#fff" : "text.secondary" } } }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              );
-            })}
-          </List>
+          {navItems.length > 1 && (
+            <List sx={{ flexGrow: 1 }}>
+              {navItems.map((item) => {
+                const active = isActive(item.path);
+                return (
+                  <ListItem key={item.label} disablePadding sx={{ mb: 1 }}>
+                    <ListItemButton
+                      component={RouterLink}
+                      to={item.path}
+                      onClick={() => setMobileOpen(false)}
+                      sx={{
+                        borderRadius: "12px",
+                        bgcolor: active ? "rgba(255,255,255,0.05)" : "transparent",
+                        border: active ? "1px solid rgba(255,255,255,0.05)" : "1px solid transparent",
+                        "&:hover": { bgcolor: "rgba(255,255,255,0.08)" }
+                      }}
+                    >
+                      <ListItemText
+                        primary={item.label}
+                        slotProps={{ primary: { sx: { fontWeight: active ? 800 : 600, color: active ? "#fff" : "text.secondary" } } }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </List>
+          )}
 
           <Divider sx={{ my: 3, opacity: 0.1 }} />
 
           <Box sx={{ mt: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
-             {isAuthenticated && (
-               <Button
-                 component={RouterLink}
-                 to={`/profile/${walletAddress}`}
-                 variant="outlined"
-                 color="primary"
-                 fullWidth
-                 onClick={() => setMobileOpen(false)}
-                 sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800 }}
-                 startIcon={<PersonIcon />}
-               >
-                 My Profile
-               </Button>
-             )}
+            {isAuthenticated && (
+              <Button
+                component={RouterLink}
+                to={`/profile/${walletAddress}`}
+                variant="outlined"
+                color="primary"
+                fullWidth
+                onClick={() => setMobileOpen(false)}
+                sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800 }}
+                startIcon={<PersonIcon />}
+              >
+                My Profile
+              </Button>
+            )}
 
-             <Button
+            {connected && (
+              <Button
                 variant="contained"
                 fullWidth
                 onClick={() => {
@@ -396,36 +403,37 @@ export default function Navbar() {
                   color: "#fff",
                   boxShadow: (theme) => `0 4px 15px ${theme.palette.primary.main}4d`
                 }}
-             >
+              >
                 Send Tip
-             </Button>
+              </Button>
+            )}
 
-             {connected && !isAuthenticated && (
-                <Button 
-                  variant="contained" 
-                  fullWidth 
-                  onClick={login} 
-                  sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, bgcolor: "rgba(255,255,255,0.1)", color: "#fff" }}
-                >
-                  Sign In
-                </Button>
-             )}
+            {connected && !isAuthenticated && (
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={login}
+                sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, bgcolor: "rgba(255,255,255,0.1)", color: "#fff" }}
+              >
+                Sign In
+              </Button>
+            )}
 
-             {isAuthenticated && (
-                <Button 
-                  variant="outlined" 
-                  color="error"
-                  fullWidth 
-                  onClick={() => {
-                    logout();
-                    setMobileOpen(false);
-                  }}
-                  sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, borderColor: "rgba(239, 68, 68, 0.3)" }}
-                  startIcon={<LogoutIcon />}
-                >
-                  Logout
-                </Button>
-             )}
+            {isAuthenticated && (
+              <Button
+                variant="outlined"
+                color="error"
+                fullWidth
+                onClick={() => {
+                  logout();
+                  setMobileOpen(false);
+                }}
+                sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, borderColor: "rgba(239, 68, 68, 0.3)" }}
+                startIcon={<LogoutIcon />}
+              >
+                Logout
+              </Button>
+            )}
           </Box>
         </Box>
       </Drawer>

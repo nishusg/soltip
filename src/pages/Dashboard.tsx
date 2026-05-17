@@ -29,6 +29,8 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { 
+  AreaChart,
+  Area,
   BarChart, 
   Bar, 
   XAxis, 
@@ -45,6 +47,110 @@ import {
 const OBS_DEFAULT_WIDTH = 1920;
 const OBS_DEFAULT_HEIGHT = 1080;
 
+interface DailyEarning {
+  _id: string;
+  total_earned: number;
+  tips_count: number;
+}
+
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <Box
+        sx={{
+          bgcolor: "rgba(11, 15, 23, 0.95)",
+          border: "1px solid rgba(56, 189, 248, 0.2)",
+          borderRadius: "12px",
+          p: 2,
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.15)",
+          backdropFilter: "blur(12px)"
+        }}
+      >
+        <Typography sx={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", fontWeight: 700, mb: 0.5, fontFamily: "Space Grotesk" }}>
+          {data.rawDate || data.label}
+        </Typography>
+        <Typography sx={{ color: "#38BDF8", fontSize: "0.95rem", fontWeight: 800, fontFamily: "Space Grotesk", display: "flex", alignItems: "center", gap: 0.5 }}>
+          💰 {data.value.toFixed(4)} SOL
+        </Typography>
+        <Typography sx={{ color: "#14F195", fontSize: "0.8rem", fontWeight: 700, mt: 0.5, fontFamily: "Space Grotesk" }}>
+          ⚡ {data.tips} Super {data.tips === 1 ? "chat" : "chats"}
+        </Typography>
+      </Box>
+    );
+  }
+  return null;
+};
+
+function calculateStreaks(dailyEarnings: DailyEarning[]): { current: number; max: number } {
+  if (!dailyEarnings || dailyEarnings.length === 0) {
+    return { current: 0, max: 0 };
+  }
+
+  // Parse YYYY-MM-DD strings and set to midnight local time for safe timezone-agnostic date math
+  const getMidnightDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day); // month is 0-indexed
+  };
+
+  const sorted = [...dailyEarnings].sort((a, b) => a._id.localeCompare(b._id));
+  const activeDays = new Set(
+    sorted
+      .filter(e => e.tips_count > 0 || e.total_earned > 0)
+      .map(e => e._id)
+  );
+
+  if (activeDays.size === 0) {
+    return { current: 0, max: 0 };
+  }
+
+  let maxStreak = 0;
+  let tempStreak = 0;
+  let lastDateStr = "";
+
+  const dates = Array.from(activeDays).sort((a, b) => a.localeCompare(b));
+
+  for (let i = 0; i < dates.length; i++) {
+    const currentDateStr = dates[i];
+    if (i === 0) {
+      tempStreak = 1;
+    } else {
+      const d1 = getMidnightDate(dates[i - 1]);
+      const d2 = getMidnightDate(currentDateStr);
+      const diffTime = Math.abs(d2.getTime() - d1.getTime());
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        tempStreak++;
+      } else if (diffDays > 1) {
+        if (tempStreak > maxStreak) maxStreak = tempStreak;
+        tempStreak = 1;
+      }
+    }
+    lastDateStr = currentDateStr;
+  }
+  if (tempStreak > maxStreak) maxStreak = tempStreak;
+
+  let currentStreak = 0;
+  if (lastDateStr) {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    
+    const d1 = getMidnightDate(lastDateStr);
+    const d2 = getMidnightDate(todayStr);
+    const diffTime = Math.abs(d2.getTime() - d1.getTime());
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 1) {
+      currentStreak = tempStreak;
+    } else {
+      currentStreak = 0;
+    }
+  }
+
+  return { current: currentStreak, max: maxStreak };
+}
+
 export default function Dashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -53,6 +159,8 @@ export default function Dashboard() {
   const [overlayToken, setOverlayToken] = useState<string | null>(null);
   const [tokenLoading, setTokenLoading] = useState(false);
   const [testLoading, setTestLoading] = useState(false);
+  const [chartTab, setChartTab] = useState<"daily" | "weekly" | "monthly">("daily");
+  const [filterDate, setFilterDate] = useState<string>("");
   const { connected } = useSocket();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -139,6 +247,107 @@ export default function Dashboard() {
   const avgPerDay = totalDays > 0 
     ? dailyEarnings.reduce((sum: number, d: any) => sum + d.total_earned, 0) / totalDays 
     : 0;
+
+  // Streak calculations
+  const streaks = calculateStreaks(dailyEarnings);
+
+  // Filter recent tips by selected date
+  const filteredTips = recentTips?.filter((tip: any) => {
+    if (!filterDate) return true;
+    const tipDateStr = new Date(tip.timestamp).toISOString().split("T")[0];
+    return tipDateStr === filterDate;
+  }) || [];
+
+  const getChartData = (tab: "daily" | "weekly" | "monthly") => {
+    if (!dailyEarnings) return [];
+
+    const dataMap = new Map<string, { total_earned: number; tips_count: number }>();
+    dailyEarnings.forEach((e: any) => {
+      dataMap.set(e._id, {
+        total_earned: e.total_earned / LAMPORTS_PER_SOL,
+        tips_count: e.tips_count
+      });
+    });
+
+    const today = new Date();
+
+    if (tab === "daily") {
+      const result = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const yyyymmdd = d.toISOString().split("T")[0];
+        const dateLabel = yyyymmdd.slice(5); // MM-DD format
+        const entry = dataMap.get(yyyymmdd) || { total_earned: 0, tips_count: 0 };
+        result.push({
+          label: dateLabel,
+          value: entry.total_earned,
+          tips: entry.tips_count,
+          rawDate: yyyymmdd
+        });
+      }
+      return result;
+    } else if (tab === "weekly") {
+      const result = [];
+      for (let i = 3; i >= 0; i--) {
+        const end = new Date();
+        end.setDate(today.getDate() - i * 7);
+        const start = new Date();
+        start.setDate(end.getDate() - 6);
+
+        let total = 0;
+        let tips = 0;
+        for (let k = 0; k < 7; k++) {
+          const d = new Date(start);
+          d.setDate(start.getDate() + k);
+          const yyyymmdd = d.toISOString().split("T")[0];
+          const entry = dataMap.get(yyyymmdd);
+          if (entry) {
+            total += entry.total_earned;
+            tips += entry.tips_count;
+          }
+        }
+
+        const startLabel = start.toISOString().split("T")[0].slice(5);
+        const endLabel = end.toISOString().split("T")[0].slice(5);
+        result.push({
+          label: `${startLabel} to ${endLabel}`,
+          value: total,
+          tips: tips,
+          rawDate: `Week ${4 - i}`
+        });
+      }
+      return result;
+    } else {
+      const result = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(today.getMonth() - i);
+        const year = d.getFullYear();
+        const month = d.getMonth();
+
+        let total = 0;
+        let tips = 0;
+        
+        dailyEarnings.forEach((e: any) => {
+          const eDate = new Date(e._id);
+          if (eDate.getFullYear() === year && eDate.getMonth() === month) {
+            total += e.total_earned / LAMPORTS_PER_SOL;
+            tips += e.tips_count;
+          }
+        });
+
+        const monthName = d.toLocaleString("default", { month: "short" });
+        result.push({
+          label: `${monthName} ${year}`,
+          value: total,
+          tips: tips,
+          rawDate: monthName
+        });
+      }
+      return result;
+    }
+  };
 
   return (
     <Box sx={{ position: "relative", minHeight: "calc(100vh - 64px)", overflow: "hidden" }}>
@@ -234,41 +443,76 @@ export default function Dashboard() {
         <Grid container spacing={4} sx={{ mb: 6 }} className="fade-in-up" style={{ animationDelay: "0.1s" }}>
           <Grid size={{ xs: 12, md: 8 }}>
             <Paper sx={{ p: { xs: 2, sm: 4 }, height: 420, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", display: "flex", flexDirection: "column" }}>
-              <Typography variant="h5" sx={{ fontWeight: 800, mb: 4, display: "flex", alignItems: "center" }}>
-                <TrendingUpIcon sx={{ color: "primary.main", mr: 1.5 }} /> Daily Earnings <Box component="span" sx={{ fontSize: "0.9rem", color: "text.secondary", ml: 1, fontWeight: 500 }}>(SOL)</Box>
-              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 4 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 2 }}>
+                  <Typography variant="h5" sx={{ fontWeight: 800, display: "flex", alignItems: "center", fontFamily: "Space Grotesk, sans-serif" }}>
+                    <TrendingUpIcon sx={{ color: "primary.main", mr: 1.5 }} /> Tipping Activity <Box component="span" sx={{ fontSize: "0.9rem", color: "text.secondary", ml: 1, fontWeight: 500 }}>(SOL)</Box>
+                  </Typography>
+                  <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                    {(["daily", "weekly", "monthly"] as const).map((tab) => (
+                      <Button
+                        key={tab}
+                        size="small"
+                        onClick={() => setChartTab(tab)}
+                        sx={{
+                          borderRadius: "20px",
+                          px: 2.2,
+                          py: 0.6,
+                          textTransform: "capitalize",
+                          fontWeight: 800,
+                          fontSize: "0.75rem",
+                          fontFamily: "Space Grotesk, sans-serif",
+                          bgcolor: chartTab === tab ? "primary.main" : "rgba(255,255,255,0.02)",
+                          color: chartTab === tab ? "#000" : "rgba(255,255,255,0.5)",
+                          border: chartTab === tab ? "none" : "1px solid rgba(255,255,255,0.06)",
+                          boxShadow: chartTab === tab ? (theme: any) => `0 4px 15px ${theme.palette.primary.main}33` : "none",
+                          "&:hover": {
+                            bgcolor: chartTab === tab ? "primary.main" : "rgba(255,255,255,0.06)",
+                            color: chartTab === tab ? "#000" : "#fff"
+                          }
+                        }}
+                      >
+                        {tab}
+                      </Button>
+                    ))}
+                  </Box>
+                </Box>
+                
+                {/* Streaks Banner */}
+                <Box sx={{ display: "flex", gap: 3, mt: 0.5 }}>
+                  <Typography variant="caption" sx={{ color: "#38BDF8", fontWeight: 700, display: "flex", alignItems: "center", gap: 0.5, letterSpacing: "0.02em", fontFamily: "Space Grotesk, sans-serif" }}>
+                    🔥 Current Streak: <Box component="span" sx={{ fontWeight: 900 }}>{streaks.current} {streaks.current === 1 ? "day" : "days"}</Box>
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "#14F195", fontWeight: 700, display: "flex", alignItems: "center", gap: 0.5, letterSpacing: "0.02em", fontFamily: "Space Grotesk, sans-serif" }}>
+                    🏆 Max Streak: <Box component="span" sx={{ fontWeight: 900 }}>{streaks.max} {streaks.max === 1 ? "day" : "days"}</Box>
+                  </Typography>
+                </Box>
+              </Box>
+
               <Box sx={{ flexGrow: 1, minHeight: 0 }}>
                 {dailyEarnings && dailyEarnings.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={[...dailyEarnings].reverse().map((e: any) => ({
-                      date: e._id.slice(5), // MM-DD format
-                      value: e.total_earned / LAMPORTS_PER_SOL,
-                      tips: e.tips_count
-                    }))}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                      <XAxis dataKey="date" stroke="rgba(255,255,255,0.5)" fontSize={12} tickLine={false} axisLine={false} dy={10} />
-                      <YAxis stroke="rgba(255,255,255,0.5)" fontSize={12} tickLine={false} axisLine={false} dx={-10} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: "rgba(10, 10, 15, 0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px", backdropFilter: "blur(10px)" }}
-                        itemStyle={{ color: theme.palette.primary.main, fontWeight: 700 }}
-                        formatter={(value: any) => [`${Number(value).toFixed(4)} SOL`, "Earned"]}
-                      />
-                      <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                        {dailyEarnings.map((_: any, index: number) => (
-                          <Cell key={`cell-${index}`} fill={index % 2 === 0 ? "url(#colorPurple)" : "url(#colorCyan)"} />
-                        ))}
-                      </Bar>
+                    <AreaChart data={getChartData(chartTab)}>
                       <defs>
-                        <linearGradient id="colorCyan" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0.2}/>
-                        </linearGradient>
-                        <linearGradient id="colorPurple" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={theme.palette.secondary?.main || theme.palette.primary.main} stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor={theme.palette.secondary?.main || theme.palette.primary.main} stopOpacity={0.2}/>
+                        <linearGradient id="tippingGlow" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={theme.palette.primary.main} stopOpacity={0.25}/>
+                          <stop offset="95%" stopColor={theme.palette.primary.main} stopOpacity={0.0}/>
                         </linearGradient>
                       </defs>
-                    </BarChart>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                      <XAxis dataKey="label" stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} dy={10} style={{ fontFamily: "Space Grotesk, sans-serif" }} />
+                      <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} tickLine={false} axisLine={false} dx={-10} style={{ fontFamily: "Space Grotesk, sans-serif" }} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke={theme.palette.primary.main} 
+                        strokeWidth={3} 
+                        fillOpacity={1} 
+                        fill="url(#tippingGlow)" 
+                        activeDot={{ r: 6, strokeWidth: 0, fill: "#14F195" }}
+                      />
+                    </AreaChart>
                   </ResponsiveContainer>
                 ) : (
                   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", opacity: 0.5, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "12px", border: "1px dashed rgba(255,255,255,0.1)" }}>
@@ -325,17 +569,66 @@ export default function Dashboard() {
           {/* Recent Activity */}
           <Grid size={{ xs: 12, md: 7 }}>
             <Paper sx={{ p: 0, overflow: "hidden", bgcolor: "rgba(255,255,255,0.02)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(20px)" }}>
-              <Box sx={{ p: { xs: 3, sm: 4 }, borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <Box sx={{ p: { xs: 3, sm: 4 }, borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
                 <Typography variant="h5" sx={{ fontWeight: 800 }}>Recent Super Chats</Typography>
-                <Chip label="Real-time" size="small" color="primary" variant="outlined" sx={{ fontWeight: 700, borderRadius: "8px", borderWidth: "2px" }} />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <TextField
+                    type="date"
+                    size="small"
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                    slotProps={{
+                      inputLabel: { shrink: true }
+                    }}
+                    sx={{
+                      width: 150,
+                      "& .MuiInputBase-root": {
+                        borderRadius: "10px",
+                        bgcolor: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        color: "#fff",
+                        fontFamily: "Space Grotesk, sans-serif",
+                        fontSize: "0.8rem",
+                        fontWeight: 700,
+                        "& fieldset": { border: "none" },
+                        "&:hover": { bgcolor: "rgba(255,255,255,0.06)" }
+                      },
+                      "& input::-webkit-calendar-picker-indicator": {
+                        filter: "invert(1)"
+                      }
+                    }}
+                  />
+                  {filterDate ? (
+                    <Button 
+                      size="small" 
+                      onClick={() => setFilterDate("")}
+                      sx={{ 
+                        borderRadius: "8px", 
+                        px: 1.5,
+                        textTransform: "none", 
+                        fontWeight: 700, 
+                        fontSize: "0.75rem",
+                        color: "primary.main",
+                        border: (theme: any) => `1px solid ${theme.palette.primary.main}33`,
+                        "&:hover": { bgcolor: (theme: any) => `${theme.palette.primary.main}10` }
+                      }}
+                    >
+                      Clear
+                    </Button>
+                  ) : (
+                    <Chip label="Real-time" size="small" color="primary" variant="outlined" sx={{ fontWeight: 700, borderRadius: "8px", borderWidth: "2px" }} />
+                  )}
+                </Box>
               </Box>
               <List disablePadding>
-                {!recentTips || recentTips.length === 0 ? (
+                {filteredTips.length === 0 ? (
                   <Box sx={{ p: 8, textAlign: "center", opacity: 0.5 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>No transactions yet.</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      {filterDate ? "No superchats received on this day." : "No transactions yet."}
+                    </Typography>
                   </Box>
                 ) : (
-                  recentTips.map((tip: any, idx: number) => (
+                  filteredTips.map((tip: any, idx: number) => (
                     <Box key={tip._id}>
                       <ListItem sx={{ py: 3, px: { xs: 3, sm: 4 }, transition: "all 0.2s ease", "&:hover": { bgcolor: "rgba(255,255,255,0.02)" } }}>
                         <ListItemAvatar sx={{ mr: 2 }}>
@@ -374,7 +667,7 @@ export default function Dashboard() {
                           }
                         />
                       </ListItem>
-                      {idx < recentTips.length - 1 && <Divider sx={{ mx: 4, opacity: 0.1 }} />}
+                      {idx < filteredTips.length - 1 && <Divider sx={{ mx: 4, opacity: 0.1 }} />}
                     </Box>
                   ))
                 )}
