@@ -5,7 +5,7 @@ import { useRealtimeTips } from "../hooks/useRealtimeTips";
 import { listTransactions } from "../services/api";
 import { getExplorerUrl } from "../services/solana";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { Card, CardContent, Typography, List, ListItem, Box, CircularProgress, Link, Chip } from "@mui/material";
+import { Card, CardContent, Typography, List, ListItem, Box, CircularProgress, Link, Chip, Tooltip } from "@mui/material";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -190,19 +190,31 @@ export default function RecentTips() {
                       variant="outlined"
                     />
                     {tx.status && (
-                      <Chip
-                        label={tx.status}
-                        size="small"
-                        color={tx.status === "verified" ? "success" : tx.status === "failed" ? "error" : "warning"}
-                        variant="outlined"
-                        sx={{ 
-                          fontWeight: 800, 
-                          fontSize: "0.7rem", 
-                          textTransform: "uppercase",
-                          borderRadius: "8px",
-                          ml: 1
-                        }}
-                      />
+                      <Tooltip 
+                        title={
+                          tx.status === "verified" 
+                            ? "This tip has been successfully verified on the Solana blockchain." 
+                            : tx.status === "failed" 
+                              ? "This transaction failed to verify on-chain." 
+                              : "This transaction is currently awaiting verification."
+                        } 
+                        arrow
+                      >
+                        <Chip
+                          label={tx.status === "verified" ? "On-Chain Verified" : tx.status}
+                          size="small"
+                          color={tx.status === "verified" ? "success" : tx.status === "failed" ? "error" : "warning"}
+                          variant="outlined"
+                          sx={{ 
+                            fontWeight: 800, 
+                            fontSize: "0.7rem", 
+                            textTransform: "uppercase",
+                            borderRadius: "8px",
+                            ml: 1,
+                            cursor: "help"
+                          }}
+                        />
+                      </Tooltip>
                     )}
                   </Box>
 

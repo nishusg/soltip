@@ -50,13 +50,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         toast.success(`You received a ${notif.data.amount / 1e9} SOL Super Chat from ${notif.data.sender}!`, { duration: 5000 });
       } else if (notif.type === "payment_confirmed") {
         toast.success(`Your payment of ${notif.data.amount / 1e9} SOL was confirmed!`, { duration: 4000 });
-      } else if (notif.type === "announcement") {
-        toast((t) => (
-          <div onClick={() => toast.dismiss(t.id)}>
-            <strong>📣 {notif.data.creator_name}</strong>
-            <div style={{ fontSize: "0.9rem", marginTop: "4px" }}>{notif.data.message}</div>
-          </div>
-        ), { duration: 8000 });
       }
     });
 

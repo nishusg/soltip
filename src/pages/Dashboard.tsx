@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getDashboardData, sendAnnouncement, getOverlayToken, generateOverlayToken } from "../services/api";
+import { getDashboardData, getOverlayToken, generateOverlayToken } from "../services/api";
 import toast from "react-hot-toast";
 import SEO from "../components/SEO";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
@@ -44,8 +44,7 @@ export default function Dashboard() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [announcement, setAnnouncement] = useState("");
-  const [announcementLoading, setAnnouncementLoading] = useState(false);
+
   const [overlayToken, setOverlayToken] = useState<string | null>(null);
   const [tokenLoading, setTokenLoading] = useState(false);
   const theme = useTheme();
@@ -76,19 +75,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleSendAnnouncement = async () => {
-    if (!announcement.trim()) return;
-    setAnnouncementLoading(true);
-    try {
-      const res = await sendAnnouncement(announcement);
-      toast.success(res.message);
-      setAnnouncement("");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to send announcement");
-    } finally {
-      setAnnouncementLoading(false);
-    }
-  };
+
 
   const formatSol = (lamports: number) => (lamports / LAMPORTS_PER_SOL).toFixed(4);
 
@@ -376,10 +363,10 @@ export default function Dashboard() {
             </Paper>
           </Grid>
 
-          {/* Announcement + OBS Overlay */}
+          {/* OBS Overlay */}
           <Grid size={{ xs: 12, md: 5 }}>
             {/* OBS Overlay Card */}
-            <Paper sx={{ p: { xs: 3, sm: 4 }, mb: 4, bgcolor: (theme: any) => `${theme.palette.primary.main}08`, border: (theme: any) => `1px solid ${theme.palette.primary.main}33`, borderRadius: "24px", backdropFilter: "blur(20px)" }}>
+            <Paper sx={{ p: { xs: 3, sm: 4 }, bgcolor: (theme: any) => `${theme.palette.primary.main}08`, border: (theme: any) => `1px solid ${theme.palette.primary.main}33`, borderRadius: "24px", backdropFilter: "blur(20px)" }}>
               <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, display: "flex", alignItems: "center", gap: 1.5, color: "primary.main" }}>
                 🎬 OBS Overlay
               </Typography>
@@ -442,45 +429,6 @@ export default function Dashboard() {
                   {tokenLoading ? "Generating..." : "Generate Overlay URL"}
                 </Button>
               )}
-            </Paper>
-
-            {/* Announcement Card */}
-            <Paper sx={{ p: { xs: 3, sm: 4 }, bgcolor: (theme: any) => `${theme.palette.secondary?.main || theme.palette.primary.main}0d`, border: (theme: any) => `1px solid ${theme.palette.secondary?.main || theme.palette.primary.main}33`, borderRadius: "24px", backdropFilter: "blur(20px)" }}>
-              <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, display: "flex", alignItems: "center", gap: 1.5, color: "secondary.main" }}>
-                <BoltIcon /> Broadcast
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 3, opacity: 0.8, lineHeight: 1.6 }}>
-                Send an instant notification to all your followers. Perfect for going live or special updates!
-              </Typography>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                placeholder="What's happening? (e.g. Going live in 5 mins!)"
-                value={announcement}
-                onChange={(e) => setAnnouncement(e.target.value)}
-                disabled={announcementLoading}
-                sx={{ 
-                  mb: 3,
-                  "& .MuiOutlinedInput-root": {
-                    bgcolor: "rgba(0,0,0,0.2)",
-                    borderRadius: "14px",
-                    "&:hover fieldset": { borderColor: (theme: any) => `${theme.palette.secondary?.main || theme.palette.primary.main}66` },
-                    "&.Mui-focused fieldset": { borderColor: (theme: any) => theme.palette.secondary?.main || theme.palette.primary.main }
-                  }
-                }}
-              />
-              <Button 
-                variant="contained" 
-                color="secondary" 
-                fullWidth 
-                onClick={handleSendAnnouncement}
-                disabled={announcementLoading || !announcement.trim()}
-                startIcon={announcementLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
-                sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, boxShadow: (theme: any) => `0 8px 20px ${theme.palette.secondary?.main || theme.palette.primary.main}4d` }}
-              >
-                {announcementLoading ? "Sending..." : "Broadcast to Followers"}
-              </Button>
             </Paper>
           </Grid>
         </Grid>
