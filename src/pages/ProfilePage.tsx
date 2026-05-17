@@ -237,51 +237,85 @@ export default function ProfilePage() {
                 ) : (
                   (activeTab === 0 ? receivedTips : sentTips).map((tip, idx, arr) => (
                     <Box key={tip.tx_hash}>
-                      <ListItem sx={{ flexDirection: "column", alignItems: "stretch", px: 0, py: 2 }}>
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <Chip 
-                              icon={activeTab === 0 ? <CallReceivedIcon fontSize="small" /> : <CallMadeIcon fontSize="small" />} 
-                              label={activeTab === 0 ? "Received" : "Sent"} 
-                              color={activeTab === 0 ? "primary" : "secondary"} 
-                              size="small" 
-                              variant="outlined" 
+                      <ListItem sx={{ py: 2, px: 0 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
+                          {/* Avatar */}
+                          <Box sx={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: "12px",
+                            overflow: "hidden",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            boxShadow: "0 0 10px rgba(255,255,255,0.05)",
+                            flexShrink: 0
+                          }}>
+                            <BoringAvatar
+                              name={activeTab === 0 ? (tip.sender_name || tip.sender_wallet) : (tip.creator_name || tip.creator_wallet)}
+                              variant="beam"
+                              size={44}
+                              colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
                             />
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                              {formatSol(tip.amount)} SOL
-                            </Typography>
-                            {tip.status && (
-                              <Chip 
-                                label={tip.status} 
-                                color={tip.status === "verified" ? "success" : tip.status === "failed" ? "error" : "warning"} 
-                                size="small" 
-                                variant="outlined" 
-                                sx={{ fontWeight: 800, fontSize: "0.65rem", height: 20, borderRadius: "6px" }}
-                              />
-                            )}
                           </Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {activeTab === 0 ? (
-                              <>from <Link component={RouterLink} to={`/profile/${tip.sender_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{tip.sender_name || shorten(tip.sender_wallet)}</Link></>
-                            ) : (
-                              <>to <Link component={RouterLink} to={`/profile/${tip.creator_wallet}`} color="inherit" sx={{ fontWeight: 600 }}>{tip.creator_name || shorten(tip.creator_wallet)}</Link></>
+
+                          {/* Content */}
+                          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.5, flexWrap: "wrap", gap: 1 }}>
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                                  {formatSol(tip.amount)} SOL
+                                </Typography>
+                                {tip.status && (
+                                  <Chip 
+                                    label={tip.status} 
+                                    color={tip.status === "verified" ? "success" : tip.status === "failed" ? "error" : "warning"} 
+                                    size="small" 
+                                    variant="outlined" 
+                                    sx={{ fontWeight: 800, fontSize: "0.65rem", height: 20, borderRadius: "6px" }}
+                                  />
+                                )}
+                              </Box>
+                              
+                              <Typography variant="body2" color="text.secondary">
+                                {activeTab === 0 ? (
+                                  <>from <Link component={RouterLink} to={`/profile/${tip.sender_wallet}`} color="inherit" sx={{ fontWeight: 600, "&:hover": { color: "primary.main" } }}>{tip.sender_name || shorten(tip.sender_wallet)}</Link></>
+                                ) : (
+                                  <>to <Link component={RouterLink} to={`/profile/${tip.creator_wallet}`} color="inherit" sx={{ fontWeight: 600, "&:hover": { color: "primary.main" } }}>{tip.creator_name || shorten(tip.creator_wallet)}</Link></>
+                                )}
+                              </Typography>
+                            </Box>
+
+                            {tip.message && (
+                              <Box sx={{ my: 0.5, p: 1, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.03)" }}>
+                                <Typography variant="body2" sx={{ fontStyle: "italic", opacity: 0.9 }}>"{tip.message}"</Typography>
+                              </Box>
                             )}
-                          </Typography>
-                        </Box>
 
-                        {tip.message && (
-                          <Box sx={{ my: 1, p: 1.5, bgcolor: "rgba(255,255,255,0.03)", borderRadius: 1 }}>
-                            <Typography variant="body2" sx={{ fontStyle: "italic" }}>"{tip.message}"</Typography>
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 0.5 }}>
+                              <Typography variant="caption" color="text.secondary">
+                                {formatTime(tip.timestamp)}
+                              </Typography>
+                              
+                              <Link 
+                                href={getExplorerUrl(tip.tx_hash)} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                color="primary.main"
+                                sx={{ 
+                                  display: "flex", 
+                                  alignItems: "center", 
+                                  gap: 0.5, 
+                                  fontSize: "0.75rem", 
+                                  textDecoration: "none", 
+                                  opacity: 0.8,
+                                  "&:hover": { opacity: 1 }
+                                }}
+                              >
+                                Explorer <OpenInNewIcon sx={{ fontSize: 12 }} />
+                              </Link>
+                            </Box>
                           </Box>
-                        )}
-
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
-                          <Typography variant="caption" color="text.secondary">
-                            {formatTime(tip.timestamp)}
-                          </Typography>
-                          <Link href={getExplorerUrl(tip.tx_hash)} target="_blank" rel="noopener noreferrer" color="primary.main" sx={{ display: "flex", alignItems: "center", fontSize: "0.75rem", gap: 0.5 }}>
-                            Explorer <OpenInNewIcon sx={{ fontSize: 12 }} />
-                          </Link>
                         </Box>
                       </ListItem>
                       {idx < arr.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.05)" }} />}

@@ -9,6 +9,7 @@ import { Card, CardContent, Typography, List, ListItem, Box, CircularProgress, L
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import BoringAvatar from "boring-avatars";
 
 interface Transaction {
   _id: string;
@@ -153,14 +154,19 @@ export default function RecentTips() {
                         width: { xs: 44, sm: 52 }, 
                         height: { xs: 44, sm: 52 }, 
                         borderRadius: "14px", 
-                        bgcolor: (theme) => isSent ? `${theme.palette.primary.main}1a` : `${theme.palette.secondary?.main || theme.palette.primary.main}1a`,
+                        overflow: "hidden",
                         display: "flex", 
                         alignItems: "center", 
                         justifyContent: "center",
-                        color: isSent ? "primary.main" : "secondary.main",
-                        boxShadow: (theme) => isSent ? `0 0 15px ${theme.palette.primary.main}26` : `0 0 15px ${theme.palette.secondary?.main || theme.palette.primary.main}26`
+                        boxShadow: (theme) => isSent ? `0 0 15px ${theme.palette.primary.main}26` : `0 0 15px ${theme.palette.secondary?.main || theme.palette.primary.main}26`,
+                        flexShrink: 0
                       }}>
-                        {isSent ? <CallMadeIcon /> : <CallReceivedIcon />}
+                        <BoringAvatar
+                          name={isSent ? (tx.creator_name || tx.creator_wallet) : (tx.sender_name || tx.sender_wallet)}
+                          variant="beam"
+                          size="100%"
+                          colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                        />
                       </Box>
                       <Box>
                         <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.2, mb: 0.5 }}>

@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import SEO from "../components/SEO";
 import { useSocket } from "../context/SocketContext";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import BoringAvatar from "boring-avatars";
 import { 
   Container, 
   Grid, 
@@ -634,13 +635,23 @@ export default function Dashboard() {
                     <Box key={tip._id}>
                       <ListItem sx={{ py: 3, px: { xs: 3, sm: 4 }, transition: "all 0.2s ease", "&:hover": { bgcolor: "rgba(255,255,255,0.02)" } }}>
                         <ListItemAvatar sx={{ mr: 2 }}>
-                          <Avatar sx={{ 
-                            width: 48, height: 48, borderRadius: "14px", 
-                            bgcolor: (theme: any) => `${theme.palette.secondary?.main || theme.palette.primary.main}1a`, color: "secondary.main",
+                          <Box sx={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: "14px",
+                            overflow: "hidden",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                             boxShadow: (theme: any) => `0 0 15px ${theme.palette.secondary?.main || theme.palette.primary.main}33`
                           }}>
-                            <BoltIcon />
-                          </Avatar>
+                            <BoringAvatar
+                              name={tip.sender_name || tip.sender_wallet}
+                              variant="beam"
+                              size={48}
+                              colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                            />
+                          </Box>
                         </ListItemAvatar>
                         <ListItemText 
                           primary={
