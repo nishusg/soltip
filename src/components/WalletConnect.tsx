@@ -60,7 +60,7 @@ export default function WalletConnect() {
     },
     {
       q: "Does this protect against Stripe chargebacks?",
-      a: "Yes! Traditional stream tipping platforms suffer from card chargeback fraud where viewers claim refunds, leaving creators with heavy fees. Blockchain transactions on Solana are permanent, irreversible, and immutable—offering 100% protection."
+      a: "Yes! Traditional stream tipping platforms suffer from card chargeback fraud where viewers claim refunds, leaving creators with heavy fees. On-chain Solana blockchain transactions are permanent, irreversible, and mathematically immutable, offering near-absolute protection against fraudulent card disputes."
     },
     {
       q: "Can fans tip without a cryptocurrency wallet?",
@@ -68,7 +68,7 @@ export default function WalletConnect() {
     },
     {
       q: "How do I add the live alert overlay to OBS?",
-      a: "Once authenticated, go to your Control Hub to grab your unique OBS Alert Box URL. Add it as a standard 'Browser Source' inside OBS or Streamlabs. Any tip received on your dynamic SEO profile page will play a premium animation instantly."
+      a: "Once authenticated, go to your Control Dashboard to grab your unique OBS Alert Box URL. Add it as a standard 'Browser Source' inside OBS or Streamlabs. Any tip received on your dynamic SEO profile page will play a premium animation instantly."
     }
   ];
 
@@ -195,7 +195,7 @@ export default function WalletConnect() {
             lineHeight: 1.8
           }}
         >
-          Power your broadcast with instant on-chain alerts, custom superchat widgets, and zero platform cuts. The premium Web3 tipping protocol constructed exclusively for Solana.
+          Power your broadcast with instant on-chain alerts, custom superchat widgets, and ultra-low platform fees. The premium Web3 tipping protocol constructed exclusively for Solana.
         </Typography>
 
         <Box sx={{ display: "flex", justifyContent: "center", gap: 2.5, flexWrap: "wrap" }}>
@@ -264,15 +264,15 @@ export default function WalletConnect() {
       <Box sx={{ py: 6, bgcolor: "rgba(255,255,255,0.01)", borderY: "1px solid rgba(255,255,255,0.04)", mb: 10 }}>
         <Container maxWidth="lg">
           <Typography variant="subtitle2" sx={{ textAlign: "center", fontWeight: 800, color: "text.secondary", letterSpacing: "0.15em", textTransform: "uppercase", mb: 4 }}>
-            ⚡ POWERING THE NEXT GENERATION OF STREAM CREATORS
+            ⚡ SIMULATED CUSTOM CREATOR PROFILE SLUGS
           </Typography>
           <Grid container spacing={4} sx={{ justifyContent: "center", alignItems: "center" }}>
             {[
-              { name: "Ninja", slug: "ninja", color: "#14F195" },
-              { name: "Shroud", slug: "shroud", color: "#9945FF" },
-              { name: "xQc", slug: "xqc", color: "#00E676" },
-              { name: "Pokimane", slug: "poki", color: "#FF1744" },
-              { name: "Asmongold", slug: "asmon", color: "#FFD700" }
+              { name: "AeroDegen", slug: "aerodegen", color: "#14F195" },
+              { name: "GigaStreamer", slug: "gigastreamer", color: "#9945FF" },
+              { name: "DegenVibes", slug: "degenvibes", color: "#00E676" },
+              { name: "CosmicStar", slug: "cosmicstar", color: "#FF1744" },
+              { name: "QuestMaster", slug: "questmaster", color: "#FFD700" }
             ].map((c) => (
               <Grid size={{ xs: 6, sm: 4, md: 2.4 }} key={c.name} sx={{ display: "flex", justifyContent: "center" }}>
                 <Paper
@@ -308,7 +308,7 @@ export default function WalletConnect() {
       {/* ================= HOW IT WORKS SECTION ================= */}
       <Container maxWidth="lg" sx={{ mb: 14 }}>
         <Box sx={{ textAlign: "center", mb: 8 }}>
-          <Typography variant="h3" sx={{ fontWeight: 900, mb: 2 }}>Three Steps To Tipping Freedom</Typography>
+          <Typography variant="h3" component="h2" sx={{ fontWeight: 900, mb: 2 }}>Three Steps To Tipping Freedom</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: "auto", fontSize: "1.05rem" }}>
             Get fully integrated with OBS stream overlays and direct-to-wallet tips in less than five minutes.
           </Typography>
@@ -325,7 +325,7 @@ export default function WalletConnect() {
             {
               step: "02",
               title: "Claim Public Profile URL",
-              desc: "Set a unique slug like solchat.app/ninja, hook up your socials, and grab your custom alert overlay URL for OBS Studio.",
+              desc: "Set a unique slug like solchat.io/aerodegen, hook up your socials, and grab your custom alert overlay URL for OBS Studio.",
               icon: <LanguageIcon sx={{ fontSize: 30, color: "secondary.main" }} />
             },
             {
@@ -374,7 +374,7 @@ export default function WalletConnect() {
           {/* Left Panel: Inputs */}
           <Grid size={{ xs: 12, lg: 6 }}>
             <Box sx={{ pr: { lg: 4 } }}>
-              <Typography variant="h3" sx={{ fontWeight: 900, mb: 2 }}>Interactive Live Demo</Typography>
+              <Typography variant="h3" component="h2" sx={{ fontWeight: 900, mb: 2 }}>Interactive Live Demo</Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 4, lineHeight: 1.7 }}>
                 See exactly how our high-speed tipping layer operates! Customize a mock superchat on the left, click <b>Trigger Alert</b>, and watch the OBS overlay panel update immediately on the virtual screen to the right.
               </Typography>
@@ -531,7 +531,7 @@ export default function WalletConnect() {
       {/* ================= FEATURES GRID SECTION ================= */}
       <Container maxWidth="lg" sx={{ mb: 14 }}>
         <Box sx={{ textAlign: "center", mb: 8 }}>
-          <Typography variant="h3" sx={{ fontWeight: 900, mb: 2 }}>Protocol Capabilities</Typography>
+          <Typography variant="h3" component="h2" sx={{ fontWeight: 900, mb: 2 }}>Protocol Capabilities</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: "auto", fontSize: "1.05rem" }}>
             Explore the deep technical core features that make SolChat the premier tipping solution.
           </Typography>
@@ -555,8 +555,8 @@ export default function WalletConnect() {
               icon: <DiamondIcon sx={{ color: "primary.main" }} />
             },
             {
-              title: "Chargeback Security Shield",
-              desc: "On-chain settlements are permanent. Completely safe from fraudulent viewer bank refunds.",
+              title: "Chargeback Protection Shield",
+              desc: "On-chain settlements are permanent and mathematically final, protecting you from fraudulent bank refund disputes.",
               icon: <CheckCircleIcon sx={{ color: "primary.light" }} />
             },
             {
@@ -603,7 +603,7 @@ export default function WalletConnect() {
         >
           <Grid container spacing={4} sx={{ alignItems: "center" }}>
             <Grid size={{ xs: 12, md: 7 }}>
-              <Typography variant="h3" sx={{ fontWeight: 950, mb: 2, letterSpacing: "-0.01em" }}>
+              <Typography variant="h3" component="h2" sx={{ fontWeight: 950, mb: 2, letterSpacing: "-0.01em" }}>
                 OBS Browser Overlay Integration
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 4, lineHeight: 1.7 }}>
@@ -651,7 +651,7 @@ export default function WalletConnect() {
                     ✨ OBS SCREEN PREVIEW
                   </Typography>
                   <Typography sx={{ fontWeight: 800, color: "#fff", fontSize: "0.95rem" }}>
-                    <span style={{ color: "#14F195" }}>Shroud</span> donated <b>2.5 SOL</b>!
+                    <span style={{ color: "#14F195" }}>GigaStreamer</span> donated <b>2.5 SOL</b>!
                   </Typography>
                   <Typography variant="caption" color="text.secondary" sx={{ fontStyle: "italic", mt: 0.5, display: "block" }}>
                     "Ready to stream on Solana!"
@@ -669,7 +669,7 @@ export default function WalletConnect() {
       {/* ================= SUPPORTED PLATFORMS SECTION ================= */}
       <Container maxWidth="lg" sx={{ mb: 14 }}>
         <Box sx={{ textAlign: "center", mb: 8 }}>
-          <Typography variant="h3" sx={{ fontWeight: 900, mb: 2 }}>Supported Ecosystems</Typography>
+          <Typography variant="h3" component="h2" sx={{ fontWeight: 900, mb: 2 }}>Supported Ecosystems</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: "auto", fontSize: "1.05rem" }}>
             Display your stream player and links on your public SEO profiles cleanly.
           </Typography>
@@ -717,7 +717,7 @@ export default function WalletConnect() {
       {/* ================= WHY SOLANA SECTION ================= */}
       <Container maxWidth="lg" sx={{ mb: 14 }}>
         <Box sx={{ textAlign: "center", mb: 8 }}>
-          <Typography variant="h3" sx={{ fontWeight: 900, mb: 2 }}>Why Solana Matters?</Typography>
+          <Typography variant="h3" component="h2" sx={{ fontWeight: 900, mb: 2 }}>Why Solana Matters?</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: "auto", fontSize: "1.05rem" }}>
             A comparative look: decentralized blockchain versus central payment processors.
           </Typography>
@@ -734,7 +734,7 @@ export default function WalletConnect() {
             { spec: "Platform Commissions", solana: "0% - 5%", legacy: "30% + card margins" },
             { spec: "Payout Payout Delay", solana: "Instant (< 1s)", legacy: "7 - 14 Days" },
             { spec: "Custody Control", solana: "100% Non-Custodial", legacy: "Centralized Vaults" },
-            { spec: "Chargeback Security", solana: "Complete Security (Finality)", legacy: "Heavy processor risks" }
+            { spec: "Chargeback Security", solana: "On-Chain Ledger Finality", legacy: "Heavy processor risks" }
           ].map((item, idx) => (
             <Box 
               key={idx} 
@@ -757,7 +757,7 @@ export default function WalletConnect() {
       {/* ================= TESTIMONIALS SECTION ================= */}
       <Container maxWidth="lg" sx={{ mb: 14 }}>
         <Box sx={{ textAlign: "center", mb: 8 }}>
-          <Typography variant="h3" sx={{ fontWeight: 900, mb: 2 }}>Broadcaster Stories</Typography>
+          <Typography variant="h3" component="h2" sx={{ fontWeight: 900, mb: 2 }}>Broadcaster Stories</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: "auto", fontSize: "1.05rem" }}>
             Hear from streamers who migrated to SolChat's direct on-chain tipping channels.
           </Typography>
@@ -766,7 +766,7 @@ export default function WalletConnect() {
         <Grid container spacing={4}>
           {[
             {
-              quote: "Since adopting SolChat, my superchat revenue grew by 35% because of no platform cuts! The sub-second alert updates have blown my Twitch viewer community away.",
+              quote: "Since adopting SolChat, my stream tipping has been incredibly smooth with near-zero network fees! The sub-second alert updates have blown my Twitch viewer community away.",
               author: "TectonicDegen",
               role: "Broadcaster, Twitch Esports"
             },
@@ -809,7 +809,7 @@ export default function WalletConnect() {
       {/* ================= FAQ SECTION ================= */}
       <Container maxWidth="md" sx={{ mb: 14 }}>
         <Box sx={{ textAlign: "center", mb: 8 }}>
-          <Typography variant="h3" sx={{ fontWeight: 900, mb: 2 }}>Frequently Answered Questions</Typography>
+          <Typography variant="h3" component="h2" sx={{ fontWeight: 900, mb: 2 }}>Frequently Answered Questions</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.05rem" }}>
             Got questions about integrations, security, or fees? We have complete documentation below.
           </Typography>
@@ -867,7 +867,7 @@ export default function WalletConnect() {
           {/* Subtle background overlay */}
           <Box sx={{ position: "absolute", inset: 0, opacity: 0.04, background: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54 48c-2 0-3 1-4 2v4c0 1-1 2-2 2h-4c-1 0-2 1-2 2s1 2 2 2h4c3 0 6-3 6-6v-4c1-1 2-2 2-2s-1-2-2-2zm-36-36c2 0 3-1 4-2V6c0-1 1-2 2-2h4c1 0 2-1 2-2S29 0 28 0h-4C21 0 18 3 18 6v4c-1 1-2 2-2 2s1 2 2 2zm18 36c1 1 2 2 2 2s-1 2-2 2v4c0 3-3 6-6 6h-4c-1 0-2-1-2-2s1-2 2-2h4c1 0 2-1 2-2v-4c0-1 1-2 2-2zM18 12c-1-1-2-2-2-2s1-2 2-2V4c0-3 3-6 6-6h4c1 0 2 1 2 2s-1 2-2 2h-4c-1 0-2 1-2 2v4c0 1-1 2-2 2z' fill='%23ffffff'/%3E%3C/svg%3E\")" }} />
           
-          <Typography variant="h3" sx={{ fontWeight: 950, mb: 3 }}>
+          <Typography variant="h3" component="h2" sx={{ fontWeight: 950, mb: 3 }}>
             Build Your Public Creator SEO Profile Today
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 6, maxWidth: 650, mx: "auto", fontSize: "1.08rem", lineHeight: 1.8 }}>

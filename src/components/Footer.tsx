@@ -235,6 +235,22 @@ export default function Footer() {
 
         <Divider sx={{ my: 5, opacity: 0.1 }} />
 
+        {/* Global Legal & Volatility Disclaimer */}
+        <Typography 
+          variant="caption" 
+          sx={{ 
+            display: "block",
+            color: "text.secondary", 
+            lineHeight: 1.8, 
+            mb: 4, 
+            textAlign: "justify",
+            opacity: 0.6,
+            fontSize: "0.72rem"
+          }}
+        >
+          <strong>Legal Disclaimer:</strong> SolChat is a decentralized, non-custodial software protocol. Digital assets, including Solana (SOL) and USD Coin (USDC), are subject to extreme market volatility, technical network risks, and potential total loss of value. SolChat does not operate as a financial institution, custodian, or broker-dealer, and does not provide investment, financial, tax, or legal advice. Tipping transactions are settled directly peer-to-peer on-chain between fans and creators. Creators are solely responsible for self-reporting and paying any income, capital gains, sales, or self-employment taxes required under their local jurisdictions. Brand names, logos, and simulated creator slugs (e.g., AeroDegen, GigaStreamer) are shown for technical demonstration and illustrative compatibility purposes only, and do not constitute an active endorsement, affiliation, or sponsorship.
+        </Typography>
+
         {/* Legal & Copyright */}
         <Box 
           sx={{ 

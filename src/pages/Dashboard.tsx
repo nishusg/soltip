@@ -32,7 +32,8 @@ import {
   FormControl,
   InputLabel,
   InputAdornment,
-  FormControlLabel
+  FormControlLabel,
+  Pagination
 } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
@@ -177,9 +178,14 @@ export default function Dashboard() {
   const [testLoading, setTestLoading] = useState(false);
   const [chartTab, setChartTab] = useState<"daily" | "weekly" | "monthly">("daily");
   const [filterDate, setFilterDate] = useState<string>("");
+  const [page, setPage] = useState(1);
   const { connected } = useSocket();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  useEffect(() => {
+    setPage(1);
+  }, [filterDate]);
 
   // Wallet Connection & Live Balance States
   const { connection } = useConnection();
@@ -321,6 +327,15 @@ export default function Dashboard() {
       return false;
     }
   }) || [];
+
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(filteredTips.length / itemsPerPage);
+  const paginatedTips = filteredTips.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    document.getElementById("recent-superchats-header")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const getChartData = (tab: "daily" | "weekly" | "monthly") => {
     if (!dailyEarnings) return [];
@@ -736,30 +751,10 @@ export default function Dashboard() {
           </Grid>
         </Grid>
 
-        {/* Group and aggregate top supporters dynamically */}
-        {(() => {
-          const supporterMap = new Map<string, { wallet: string; totalAmount: number; count: number; name?: string }>();
-          recentTips?.forEach((tip: any) => {
-            const wallet = tip.sender_wallet || "Anonymous";
-            const name = tip.sender_name || "";
-            const amount = tip.amount || 0;
-            const existing = supporterMap.get(wallet) || { wallet, totalAmount: 0, count: 0, name };
-            existing.totalAmount += amount;
-            existing.count += 1;
-            if (name && !existing.name) {
-              existing.name = name;
-            }
-            supporterMap.set(wallet, existing);
-          });
-          const topSupporters = Array.from(supporterMap.values())
-            .sort((a, b) => b.totalAmount - a.totalAmount)
-            .slice(0, 5);
-
-          return (
-            <Grid container spacing={4} className="fade-in-up" style={{ animationDelay: "0.2s" }}>
-              {/* Recent Activity */}
-              <Grid size={{ xs: 12, md: 4 }}>
-                <Paper sx={{ p: 0, overflow: "hidden", bgcolor: "rgba(255,255,255,0.02)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(20px)" }}>
+        <Grid container spacing={4} className="fade-in-up" style={{ animationDelay: "0.2s" }}>
+          {/* Recent Activity */}
+          <Grid size={{ xs: 12, md: 6 }}>
+                <Paper id="recent-superchats-header" sx={{ p: 0, overflow: "hidden", bgcolor: "rgba(255,255,255,0.02)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", display: "flex", flexDirection: "column", height: "100%" }}>
                   <Box sx={{ p: { xs: 3, sm: 4 }, borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 2 }}>
                     <Typography variant="h5" sx={{ fontWeight: 800 }}>Recent Super Chats</Typography>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -820,15 +815,15 @@ export default function Dashboard() {
                       )}
                     </Box>
                   </Box>
-                  <List disablePadding>
+                  <List disablePadding sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
                     {filteredTips.length === 0 ? (
-                      <Box sx={{ p: 8, textAlign: "center", opacity: 0.5 }}>
+                      <Box sx={{ p: 8, textAlign: "center", opacity: 0.5, flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <Typography variant="h6" sx={{ fontWeight: 600 }}>
                           {filterDate ? "No superchats received on this day." : "No transactions yet."}
                         </Typography>
                       </Box>
                     ) : (
-                      filteredTips.map((tip: any, idx: number) => (
+                      paginatedTips.map((tip: any, idx: number) => (
                         <Box key={tip._id}>
                           <ListItem sx={{ py: 3, px: { xs: 3, sm: 4 }, transition: "all 0.2s ease", "&:hover": { bgcolor: "rgba(255,255,255,0.02)" } }}>
                             <ListItemAvatar sx={{ mr: 2 }}>
@@ -897,82 +892,41 @@ export default function Dashboard() {
                               }
                             />
                           </ListItem>
-                          {idx < filteredTips.length - 1 && <Divider sx={{ mx: 4, opacity: 0.1 }} />}
+                          {idx < paginatedTips.length - 1 && <Divider sx={{ mx: 4, opacity: 0.1 }} />}
                         </Box>
                       ))
                     )}
                   </List>
-                </Paper>
-              </Grid>
-
-              {/* Top Supporters scoreboard list */}
-              <Grid size={{ xs: 12, md: 3 }}>
-                <Paper sx={{ p: 0, overflow: "hidden", bgcolor: "rgba(255,255,255,0.02)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", height: "100%", display: "flex", flexDirection: "column" }}>
-                  <Box sx={{ p: { xs: 3, sm: 4 }, borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: 1.5 }}>
-                    <StarIcon sx={{ color: "gold", filter: "drop-shadow(0 0 8px rgba(255,215,0,0.5))" }} />
-                    <Typography variant="h5" sx={{ fontWeight: 800 }}>Top Supporters</Typography>
-                  </Box>
-                  <List disablePadding sx={{ flexGrow: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                    {topSupporters.length === 0 ? (
-                      <Box sx={{ p: 8, textAlign: "center", opacity: 0.5 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>No supporters yet.</Typography>
-                      </Box>
-                    ) : (
-                      topSupporters.map((supporter, idx) => (
-                        <Box key={supporter.wallet}>
-                          <ListItem sx={{ py: 2.2, px: { xs: 2.5, sm: 3 }, transition: "all 0.2s ease", "&:hover": { bgcolor: "rgba(255,255,255,0.02)" } }}>
-                            <ListItemAvatar sx={{ mr: 1.5 }}>
-                              <Box sx={{
-                                width: 40,
-                                height: 40,
-                                borderRadius: "12px",
-                                overflow: "hidden",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                boxShadow: `0 0 10px rgba(255, 215, 0, 0.15)`
-                              }}>
-                                <BoringAvatar
-                                  name={supporter.wallet}
-                                  variant="beam"
-                                  size={40}
-                                  colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
-                                />
-                              </Box>
-                            </ListItemAvatar>
-                            <ListItemText
-                              primary={
-                                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                  <Typography variant="subtitle2" sx={{ fontWeight: 800, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 100 }}>
-                                    {supporter.name || `${supporter.wallet.slice(0, 4)}...${supporter.wallet.slice(-4)}`}
-                                  </Typography>
-                                  <Typography variant="subtitle2" color="success.main" sx={{ fontWeight: 950 }}>
-                                    {formatSol(supporter.totalAmount)} SOL
-                                  </Typography>
-                                </Box>
-                              }
-                              secondary={
-                                <Box sx={{ display: "flex", justifyContent: "space-between", mt: 0.25 }}>
-                                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
-                                    {idx === 0 ? "👑 Leader" : `#${idx + 1} Supporter`}
-                                  </Typography>
-                                  <Typography variant="caption" color="text.secondary">
-                                    {supporter.count} {supporter.count === 1 ? "tip" : "tips"}
-                                  </Typography>
-                                </Box>
-                              }
-                            />
-                          </ListItem>
-                          {idx < topSupporters.length - 1 && <Divider sx={{ mx: 3, opacity: 0.05 }} />}
-                        </Box>
-                      ))
-                    )}
-                  </List>
+                  {totalPages > 1 && (
+                    <Box sx={{ display: "flex", justifyContent: "center", p: 3, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                      <Pagination
+                        count={totalPages}
+                        page={page}
+                        onChange={handlePageChange}
+                        color="primary"
+                        size="medium"
+                        sx={{
+                          "& .MuiPaginationItem-root": {
+                            fontFamily: "Space Grotesk, sans-serif",
+                            fontWeight: 700,
+                            borderRadius: "8px",
+                            "&:hover": {
+                              bgcolor: "rgba(255,255,255,0.08)",
+                            },
+                            "&.Mui-selected": {
+                              boxShadow: "0 0 10px rgba(153, 69, 255, 0.3)",
+                              fontWeight: 900
+                            }
+                          }
+                        }}
+                      />
+                    </Box>
+                  )}
                 </Paper>
               </Grid>
 
               {/* OBS Streaming Hub */}
-              <Grid size={{ xs: 12, md: 5 }}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Paper sx={{
                   p: { xs: 3, sm: 4 },
                   bgcolor: "rgba(255, 255, 255, 0.02)",
@@ -981,7 +935,10 @@ export default function Dashboard() {
                   backdropFilter: "blur(20px)",
                   boxShadow: (theme: any) => `0 8px 32px ${theme.palette.primary.main}0d`,
                   position: "relative",
-                  overflow: "hidden"
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "100%"
                 }}>
                   {/* Top glowing decorative bar */}
                   <Box sx={{
@@ -1178,8 +1135,6 @@ export default function Dashboard() {
                 </Paper>
               </Grid>
             </Grid>
-          );
-        })()}
 
         <Grid container spacing={4} sx={{ mt: 3 }} className="fade-in-up" style={{ animationDelay: "0.3s" }}>
           {/* Stream Alert & TTS Settings Customizer Component */}

@@ -4,7 +4,7 @@ import { getUserProfile } from "../services/api";
 import { getExplorerUrl } from "../services/solana";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWalletAuth } from "../hooks/useWalletAuth";
-import { Container, Card, CardContent, Typography, Box, CircularProgress, Button, Avatar, List, ListItem, Divider, Link, Chip, Tabs, Tab } from "@mui/material";
+import { Container, Card, CardContent, Typography, Box, CircularProgress, Button, Avatar, List, ListItem, Divider, Link, Chip, Tabs, Tab, Pagination } from "@mui/material";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -46,6 +46,11 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
   const [showTipForm, setShowTipForm] = useState(false);
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab]);
 
   useEffect(() => {
     if (!wallet) return;
@@ -86,6 +91,16 @@ export default function ProfilePage() {
 
   const receivedTips = tips.filter(t => t.creator_wallet === wallet);
   const sentTips = tips.filter(t => t.sender_wallet === wallet);
+
+  const activeTips = activeTab === 0 ? receivedTips : sentTips;
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(activeTips.length / itemsPerPage);
+  const paginatedTips = activeTips.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    document.getElementById("profile-activity-header")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <Container maxWidth="md" sx={{ py: 10, minHeight: "calc(100vh - 64px)" }}>
@@ -221,7 +236,7 @@ export default function ProfilePage() {
 
 
           {/* Activity Tabs */}
-          <Card>
+          <Card id="profile-activity-header">
             <Box sx={{ borderBottom: 1, borderColor: "rgba(255,255,255,0.1)" }}>
               <Tabs value={activeTab} onChange={(_, val) => setActiveTab(val)} centered textColor="primary" indicatorColor="primary">
                 <Tab label={`Received (${receivedTips.length})`} sx={{ fontWeight: 700 }} />
@@ -230,12 +245,12 @@ export default function ProfilePage() {
             </Box>
             <CardContent sx={{ p: 4 }}>
               <List disablePadding>
-                {(activeTab === 0 ? receivedTips : sentTips).length === 0 ? (
+                {activeTips.length === 0 ? (
                   <Typography sx={{ textAlign: "center", py: 4, color: "text.secondary", fontStyle: "italic" }}>
                     No activity found
                   </Typography>
                 ) : (
-                  (activeTab === 0 ? receivedTips : sentTips).map((tip, idx, arr) => (
+                  paginatedTips.map((tip, idx, arr) => (
                     <Box key={tip.tx_hash}>
                       <ListItem sx={{ py: 2, px: 0 }}>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
@@ -318,11 +333,36 @@ export default function ProfilePage() {
                           </Box>
                         </Box>
                       </ListItem>
-                      {idx < arr.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.05)" }} />}
+                      {idx < paginatedTips.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.05)" }} />}
                     </Box>
                   ))
                 )}
               </List>
+              {totalPages > 1 && (
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                  <Pagination
+                    count={totalPages}
+                    page={page}
+                    onChange={handlePageChange}
+                    color="primary"
+                    size="medium"
+                    sx={{
+                      "& .MuiPaginationItem-root": {
+                        fontFamily: "Space Grotesk, sans-serif",
+                        fontWeight: 700,
+                        borderRadius: "8px",
+                        "&:hover": {
+                          bgcolor: "rgba(255,255,255,0.08)",
+                        },
+                        "&.Mui-selected": {
+                          boxShadow: "0 0 10px rgba(153, 69, 255, 0.3)",
+                          fontWeight: 900
+                        }
+                      }
+                    }}
+                  />
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Box>

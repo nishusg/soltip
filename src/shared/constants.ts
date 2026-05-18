@@ -5,19 +5,19 @@ import { PublicKey } from "@solana/web3.js";
 // ============================================================================
 
 // API Endpoints
-export const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
-export const SOCKET_URL = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:3001";
+export const API_BASE = import.meta.env.VITE_API_URL;
+export const SOCKET_URL = import.meta.env.VITE_API_URL?.replace("/api", "");
 
 // Solana & Smart Contract
 export const PROGRAM_ID = new PublicKey(
-  import.meta.env.VITE_PROGRAM_ID || "11111111111111111111111111111111"
+  import.meta.env.VITE_PROGRAM_ID
 );
 
 export const PLATFORM_WALLET = new PublicKey(
-  import.meta.env.VITE_PLATFORM_WALLET || "11111111111111111111111111111111"
+  import.meta.env.VITE_PLATFORM_WALLET
 );
 
-export const SOLANA_RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL; // Can be undefined, fallback in main.tsx to clusterApiUrl
+export const SOLANA_RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL;
 
 // Fees
-export const FEE_PERCENTAGE = 0.05; // 5%
+export const FEE_PERCENTAGE = 0.05;

@@ -37,7 +37,8 @@ import {
   FormControl, 
   InputLabel,
   LinearProgress,
-  Grid
+  Grid,
+  Pagination
 } from "@mui/material";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
@@ -77,6 +78,15 @@ export default function ActivityPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  // Reset pagination to page 1 when active tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
   
   // Explorer preference (Persisted in LocalStorage)
   const [explorerPref, setExplorerPref] = useState<string>(() => {
@@ -235,6 +245,14 @@ export default function ActivityPage() {
       return true;
     });
   }, [transactions, activeTab, walletAddress]);
+
+  // 4. Calculate Paginated Transactions
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredTransactions.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredTransactions, currentPage]);
+
+  const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
 
   // Execute Refund Action
   /*
@@ -398,7 +416,7 @@ export default function ActivityPage() {
             }}>
               
               {/* Tab Selector */}
-              <Box sx={{ borderBottom: "1px solid rgba(255,255,255,0.06)", bgcolor: "rgba(0,0,0,0.15)" }}>
+              <Box id="ledger-tabs-header" sx={{ borderBottom: "1px solid rgba(255,255,255,0.06)", bgcolor: "rgba(0,0,0,0.15)" }}>
                 <Tabs 
                   value={activeTab} 
                   onChange={(_, val) => setActiveTab(val)}
@@ -442,7 +460,7 @@ export default function ActivityPage() {
 
                 {!loading && filteredTransactions.length > 0 && (
                   <Stack spacing={2.5}>
-                    {filteredTransactions.map((tx) => {
+                    {paginatedTransactions.map((tx) => {
                       const isSent = tx.sender_wallet === walletAddress;
                       return (
                         <Box 
@@ -641,6 +659,44 @@ export default function ActivityPage() {
                       );
                     })}
                   </Stack>
+                )}
+
+                {/* Pagination Controls */}
+                {!loading && totalPages > 1 && (
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+                    <Pagination 
+                      count={totalPages} 
+                      page={currentPage} 
+                      onChange={(_, page) => {
+                        setCurrentPage(page);
+                        // Smooth scroll to top of tabs header container
+                        document.getElementById("ledger-tabs-header")?.scrollIntoView({ behavior: "smooth" });
+                      }} 
+                      color="primary"
+                      variant="outlined"
+                      shape="rounded"
+                      sx={{
+                        "& .MuiPaginationItem-root": {
+                          color: "text.secondary",
+                          borderColor: "rgba(255,255,255,0.1)",
+                          fontWeight: 700,
+                          "&:hover": {
+                            borderColor: "primary.main",
+                            bgcolor: "rgba(153, 69, 242, 0.08)"
+                          },
+                          "&.Mui-selected": {
+                            color: "#fff",
+                            borderColor: "primary.main",
+                            bgcolor: "primary.main",
+                            boxShadow: (theme) => `0 0 10px ${theme.palette.primary.main}4d`,
+                            "&:hover": {
+                              bgcolor: "primary.dark"
+                            }
+                          }
+                        }
+                      }}
+                    />
+                  </Box>
                 )}
               </CardContent>
             </Card>

@@ -25,7 +25,8 @@ import {
   Divider,
   ThemeProvider,
   CssBaseline,
-  IconButton
+  IconButton,
+  Pagination
 } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
 import SendIcon from "@mui/icons-material/Send";
@@ -87,6 +88,11 @@ export default function PublicProfilePage() {
   const [tips, setTips] = useState<EnrichedTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [username]);
 
   // Tip Form State
   const [amount, setAmount] = useState("");
@@ -181,6 +187,7 @@ export default function PublicProfilePage() {
       // Reload recent superchats
       const updatedData = await getPublicProfileByUsername(username!);
       setTips(updatedData.recent_tips || []);
+      setPage(1);
     } catch (err: any) {
       setTxStatus("error");
       const msg = err.message || "Transaction execution failed";
@@ -232,6 +239,15 @@ export default function PublicProfilePage() {
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
     return date.toLocaleDateString();
   }
+
+  const itemsPerPage = 5;
+  const totalPages = Math.ceil(tips.length / itemsPerPage);
+  const paginatedTips = tips.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    document.getElementById("public-superchats-header")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   // Load Custom Theme Dynamically
   const currentTheme = useMemo(() => {
@@ -609,7 +625,7 @@ export default function PublicProfilePage() {
                 )}
 
                 {/* 🎙️ Recent Superchats Feed */}
-                <Card>
+                <Card id="public-superchats-header">
                   <CardContent sx={{ p: 4 }}>
                     <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mb: 3 }}>
                       <Typography variant="h6" sx={{ fontWeight: 900 }}>🎙️ Recent Superchats</Typography>
@@ -626,7 +642,7 @@ export default function PublicProfilePage() {
                       </Box>
                     ) : (
                       <Stack spacing={2.5}>
-                        {tips.map((tip, idx) => (
+                        {paginatedTips.map((tip, idx) => (
                           <Box key={tip.tx_hash}>
                             <Stack direction="row" spacing={2} sx={{ p: 2, borderRadius: "14px", bgcolor: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)" }}>
                               <Box sx={{ width: 44, height: 44, borderRadius: "10px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -674,10 +690,35 @@ export default function PublicProfilePage() {
                                 </Stack>
                               </Box>
                             </Stack>
-                            {idx < tips.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", my: 1 }} />}
+                            {idx < paginatedTips.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", my: 1 }} />}
                           </Box>
                         ))}
                       </Stack>
+                    )}
+                    {totalPages > 1 && (
+                      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                        <Pagination
+                          count={totalPages}
+                          page={page}
+                          onChange={handlePageChange}
+                          color="primary"
+                          size="medium"
+                          sx={{
+                            "& .MuiPaginationItem-root": {
+                              fontFamily: "Space Grotesk, sans-serif",
+                              fontWeight: 700,
+                              borderRadius: "8px",
+                              "&:hover": {
+                                bgcolor: "rgba(255,255,255,0.08)",
+                              },
+                              "&.Mui-selected": {
+                                boxShadow: "0 0 10px rgba(153, 69, 255, 0.3)",
+                                fontWeight: 900
+                              }
+                            }
+                          }}
+                        />
+                      </Box>
                     )}
                   </CardContent>
                 </Card>

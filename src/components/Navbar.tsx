@@ -463,13 +463,39 @@ export default function Navbar() {
                   </Stack>
                   
                   {user?.is_premium ? (
-                    <Typography variant="caption" sx={{ color: "#FFD700", fontWeight: 900, fontSize: "0.68rem", display: "flex", alignItems: "center", gap: 0.3 }}>
-                      GOLD MEMBER 👑
-                    </Typography>
+                    <Box sx={{ 
+                      mt: 0.4,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      py: 0.2,
+                      px: 0.8,
+                      borderRadius: "6px",
+                      background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+                      color: "#000",
+                      border: "1px solid rgba(255, 215, 0, 0.4)",
+                      boxShadow: "0 0 10px rgba(255, 215, 0, 0.25)"
+                    }}>
+                      <Typography variant="caption" sx={{ fontWeight: 950, fontSize: "0.64rem", letterSpacing: "0.05em", fontFamily: "Space Grotesk, sans-serif" }}>
+                        GOLD MEMBER 👑
+                      </Typography>
+                    </Box>
                   ) : (
-                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, fontSize: "0.68rem" }}>
-                      Standard Creator
-                    </Typography>
+                    <Box sx={{
+                      mt: 0.4,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      py: 0.2,
+                      px: 0.8,
+                      borderRadius: "6px",
+                      bgcolor: "rgba(255, 255, 255, 0.04)",
+                      border: "1px solid rgba(255, 255, 255, 0.08)",
+                      color: "rgba(255, 255, 255, 0.6)"
+                    }}>
+                      <Typography variant="caption" sx={{ fontWeight: 800, fontSize: "0.64rem", letterSpacing: "0.02em", fontFamily: "Space Grotesk, sans-serif" }}>
+                        Standard Creator
+                      </Typography>
+                    </Box>
                   )}
                 </Box>
               </Stack>
@@ -739,9 +765,41 @@ export default function Navbar() {
                       </Typography>
                       <CheckCircleIcon sx={{ color: "success.main", fontSize: "1rem" }} />
                     </Stack>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
-                      {user?.is_premium ? "Gold Premium Member 👑" : "Standard Verified Creator"}
-                    </Typography>
+                    {user?.is_premium ? (
+                      <Box sx={{ 
+                        mt: 0.6,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        py: 0.2,
+                        px: 0.8,
+                        borderRadius: "6px",
+                        background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+                        color: "#000",
+                        border: "1px solid rgba(255, 215, 0, 0.4)",
+                        boxShadow: "0 0 10px rgba(255, 215, 0, 0.25)"
+                      }}>
+                        <Typography variant="caption" sx={{ fontWeight: 950, fontSize: "0.64rem", letterSpacing: "0.05em", fontFamily: "Space Grotesk, sans-serif" }}>
+                          GOLD MEMBER 👑
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Box sx={{
+                        mt: 0.6,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        py: 0.2,
+                        px: 0.8,
+                        borderRadius: "6px",
+                        bgcolor: "rgba(255, 255, 255, 0.04)",
+                        border: "1px solid rgba(255, 255, 255, 0.08)",
+                        color: "rgba(255, 255, 255, 0.6)"
+                      }}>
+                        <Typography variant="caption" sx={{ fontWeight: 800, fontSize: "0.64rem", letterSpacing: "0.02em", fontFamily: "Space Grotesk, sans-serif" }}>
+                          Standard Creator
+                        </Typography>
+                      </Box>
+                    )}
                   </Box>
                 </Stack>
 
