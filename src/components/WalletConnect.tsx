@@ -170,7 +170,7 @@ export default function WalletConnect() {
             WebkitTextFillColor: "transparent"
           }}
         >
-          Real-Time Stream Alerts <br />
+          Instant Superchats for Streamers <br />
           <Box
             component="span"
             sx={{
@@ -179,7 +179,7 @@ export default function WalletConnect() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Direct To Your Wallet
+            Powered by Solana
           </Box>
         </Typography>
 

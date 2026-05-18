@@ -89,9 +89,7 @@ export default function Navbar() {
       { label: "Dashboard", path: "/dashboard" },
       { label: "Activity", path: "/activity" },
       { label: "Leaderboard", path: "/leaderboard" }
-    ] : [
-      { label: "How It Works", path: "/how-it-works" }
-    ])
+    ] : [])
   ];
 
   const isActive = (path: string) => {
@@ -100,11 +98,17 @@ export default function Navbar() {
   };
 
   const isDropdownActive = () => {
-    const dropdownPaths = ["/pricing", "/security", "/blog", "/obs-overlay"];
+    const dropdownPaths = ["/pricing", "/security", "/blog", "/obs-overlay", "/how-it-works"];
     return dropdownPaths.some(path => location.pathname.startsWith(path));
   };
 
   const resources = [
+    {
+      label: "How It Works",
+      desc: "Complete step-by-step setup guides",
+      path: "/how-it-works",
+      icon: <BoltIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
+    },
     {
       label: "Pricing & Fees",
       desc: "Flat 5% cut with zero monthly gas holds",

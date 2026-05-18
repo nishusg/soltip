@@ -1,5 +1,5 @@
 // ============================================================================
-// Static Site Generation (SSG) Pre-renderer — scripts/prerender.js
+// Static Site Generation (SSG) Pre-renderer — scripts/prerender.cjs
 // ============================================================================
 //
 // Post-build script to pre-render static HTML pages for SEO crawler spiders.
@@ -137,7 +137,7 @@ const routes = [
 function prerender() {
   if (!fs.existsSync(INDEX_HTML_PATH)) {
     console.error(`☠️ Prerender failed: 'dist/index.html' not found! Make sure to run 'npm run build' first.`);
-    return;
+    process.exit(1);
   }
 
   console.log(`🚀 Starting Static Site Generation (SSG) Pre-render Engine...`);
