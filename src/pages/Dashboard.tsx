@@ -1193,6 +1193,7 @@ export default function Dashboard() {
               onGenerateToken={handleGenerateToken}
               overlayToken={overlayToken}
               connected={connected}
+              walletAddress={publicKey?.toString() || data?.user?.wallet_address || ""}
             />
           </Grid>
         </Grid>

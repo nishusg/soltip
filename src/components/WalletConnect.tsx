@@ -81,7 +81,7 @@ export default function WalletConnect() {
             WebkitTextFillColor: "transparent"
           }}
         >
-          Real-Time Engagement <br/>
+          Real-Time Engagement <br />
           <Box
             component="span"
             sx={{
@@ -107,7 +107,7 @@ export default function WalletConnect() {
         >
           Elevate your stream with instant on-chain alerts, ultra-low fees, and direct-to-wallet superchats. The ultimate engagement layer for the next generation of creators.
         </Typography>
-        
+
         <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
           {isAuthenticated ? (
             <Button
@@ -116,11 +116,11 @@ export default function WalletConnect() {
               variant="contained"
               color="primary"
               size="large"
-              sx={{ 
-                px: 6, 
-                py: 2, 
-                borderRadius: "14px", 
-                fontWeight: 800, 
+              sx={{
+                px: 6,
+                py: 2,
+                borderRadius: "14px",
+                fontWeight: 800,
                 fontSize: "1.1rem",
                 background: (theme) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
                 boxShadow: (theme) => `0 8px 25px ${theme.palette.primary.main}4d`,
@@ -135,11 +135,11 @@ export default function WalletConnect() {
               color="primary"
               size="large"
               onClick={() => document.querySelector<HTMLButtonElement>(".wallet-adapter-button")?.click()}
-              sx={{ 
-                px: 6, 
-                py: 2, 
-                borderRadius: "14px", 
-                fontWeight: 800, 
+              sx={{
+                px: 6,
+                py: 2,
+                borderRadius: "14px",
+                fontWeight: 800,
                 fontSize: "1.1rem",
                 background: (theme) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
                 boxShadow: (theme) => `0 8px 25px ${theme.palette.primary.main}4d`,

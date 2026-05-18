@@ -172,6 +172,7 @@ export async function sendTestAlert() {
 export async function saveOverlaySettings(settings: {
   tts_enabled?: boolean;
   tts_min_amount?: number;
+  tts_voice?: string;
   alert_duration?: number;
   alert_gif_preset?: string;
   alert_gif_url?: string;
@@ -180,6 +181,10 @@ export async function saveOverlaySettings(settings: {
   sound_volume?: number;
   theme_color?: string;
   font_family?: string;
+  theme?: string;
+  alert_animation?: string;
+  queue_system_enabled?: boolean;
+  font_size?: number;
 }) {
   return api("/creators/overlay-settings", {
     method: "PUT",

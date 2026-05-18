@@ -36,6 +36,7 @@ import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import StarIcon from "@mui/icons-material/Star";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import toast from "react-hot-toast";
 
 interface AlertCustomizerProps {
@@ -47,6 +48,7 @@ interface AlertCustomizerProps {
   onGenerateToken: () => Promise<void>;
   overlayToken: string | null;
   connected: boolean;
+  walletAddress: string | null;
 }
 
 export default function AlertCustomizer({
@@ -57,7 +59,8 @@ export default function AlertCustomizer({
   tokenLoading,
   onGenerateToken,
   overlayToken,
-  connected
+  connected,
+  walletAddress
 }: AlertCustomizerProps) {
   const theme = useTheme();
   const userThemeColor = theme.palette.primary.main;
@@ -76,6 +79,12 @@ export default function AlertCustomizer({
   const [fontFamily, setFontFamily] = useState<string>("Space Grotesk");
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
 
+  // New visual overlay themes, font size, entry transitions, and queue systems
+  const [overlayTheme, setOverlayTheme] = useState<string>("standard");
+  const [alertAnimation, setAlertAnimation] = useState<string>("bounce");
+  const [queueSystemEnabled, setQueueSystemEnabled] = useState<boolean>(true);
+  const [fontSize, setFontSize] = useState<number>(20);
+
   // Sync state values when backend profile settings change
   useEffect(() => {
     if (initialSettings) {
@@ -90,12 +99,18 @@ export default function AlertCustomizer({
       if (initialSettings.sound_volume !== undefined) setSoundVolume(initialSettings.sound_volume);
       if (initialSettings.font_family !== undefined) setFontFamily(initialSettings.font_family);
 
-      // Respect saved color, else fall back gracefully to the current active premium theme color!
+      // Respect saved color, else fall back gracefully to the current active theme color!
       if (initialSettings.theme_color) {
         setThemeColor(initialSettings.theme_color);
       } else {
         setThemeColor(theme.palette.primary.main);
       }
+
+      // Sync new overlay specific variables
+      if (initialSettings.theme !== undefined) setOverlayTheme(initialSettings.theme);
+      if (initialSettings.alert_animation !== undefined) setAlertAnimation(initialSettings.alert_animation);
+      if (initialSettings.queue_system_enabled !== undefined) setQueueSystemEnabled(initialSettings.queue_system_enabled);
+      if (initialSettings.font_size !== undefined) setFontSize(initialSettings.font_size);
     }
   }, [initialSettings, theme]);
 
@@ -105,6 +120,33 @@ export default function AlertCustomizer({
       setThemeColor(theme.palette.primary.main);
     }
   }, [theme]);
+
+  // Local file direct MP3/WAV base64 asset converter
+  const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith("audio/")) {
+      toast.error("Please upload a valid audio file (MP3, WAV, etc.)");
+      return;
+    }
+    
+    if (file.size > 2 * 1024 * 1024) { // 2MB cap
+      toast.error("Custom audio files are capped at 2MB for stream performance.");
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64Url = event.target?.result as string;
+      setAlertSoundUrl(base64Url);
+      toast.success(`"${file.name}" uploaded successfully! Click Save Settings to activate.`);
+    };
+    reader.onerror = () => {
+      toast.error("Failed to read audio file.");
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Synthetic Audio Preview Engine using browser-native oscillators
   const playPreviewSound = () => {
@@ -193,10 +235,10 @@ export default function AlertCustomizer({
         audio.volume = volume;
         audio.play().catch(e => {
           console.error("Audio preview failed:", e);
-          toast.error("Failed to load custom sound URL. Verify CORS headers.");
+          toast.error("Failed to play custom sound. Verify audio format or upload again.");
         });
       } else {
-        toast.error("Please enter a custom sound URL to preview");
+        toast.error("Please enter a custom sound URL or upload a file to preview");
       }
     } catch (e) {
       console.error("Sound preview synthesis error:", e);
@@ -217,13 +259,21 @@ export default function AlertCustomizer({
         alert_sound_url: alertSoundUrl,
         sound_volume: soundVolume,
         theme_color: themeColor,
-        font_family: fontFamily
+        font_family: fontFamily,
+        theme: overlayTheme,
+        alert_animation: alertAnimation,
+        queue_system_enabled: queueSystemEnabled,
+        font_size: fontSize
       });
     } catch (err: any) {
       toast.error(err.message || "Failed to save settings");
     } finally {
       setSaveLoading(false);
     }
+  };
+
+  const getOverlayUrl = () => {
+    return `${window.location.origin}/overlay/${walletAddress}?key=${overlayToken}`;
   };
 
   return (
@@ -247,13 +297,14 @@ export default function AlertCustomizer({
         background: `linear-gradient(90deg, transparent, ${userThemeColor}, transparent)`
       }} />
 
+      {/* Main Settings Header */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4, flexWrap: "wrap", gap: 2 }}>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 900, display: "flex", alignItems: "center", gap: 1.5, color: userThemeColor }}>
-            <SettingsIcon /> 🎨 Stream Alert & TTS Customizer
+          <Typography variant="h5" sx={{ fontWeight: 950, display: "flex", alignItems: "center", gap: 1.5, color: userThemeColor, letterSpacing: "-0.02em" }}>
+            <SettingsIcon /> SolChat Stream Overlay Studio
           </Typography>
           <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
-            Personalize your stream overlays. Configure your theme colors, preset sounds, custom GIFs, and Text-to-Speech (TTS) rules.
+            Personalize your stream overlays in real time. Configure theme colors, preset sounds, transitions, custom uploads, and sequential queues.
           </Typography>
         </Box>
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
@@ -304,10 +355,93 @@ export default function AlertCustomizer({
         </Box>
       </Box>
 
+      {/* Secret Browser Source Link Section */}
+      {overlayToken && walletAddress && (
+        <Box sx={{
+          mb: 5,
+          p: 3.5,
+          bgcolor: "rgba(0,0,0,0.18)",
+          border: `1px solid ${userThemeColor}26`,
+          borderRadius: "22px",
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 3
+        }}>
+          <Box sx={{ flexGrow: 1, minWidth: 280 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 0.5, color: userThemeColor, display: "flex", alignItems: "center", gap: 1 }}>
+              🔌 OBS Browser Source URL
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+              Add this confidential link as a Browser Source in your OBS, Streamlabs, or vMix broadcaster.
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: { xs: "wrap", sm: "nowrap" } }}>
+              <Box sx={{
+                px: 2.2,
+                py: 1.2,
+                bgcolor: "rgba(0,0,0,0.4)",
+                borderRadius: "12px",
+                fontFamily: "Space Mono, monospace",
+                fontSize: "0.72rem",
+                color: "#14F195",
+                wordBreak: "break-all",
+                border: "1px solid rgba(255,255,255,0.04)",
+                flexGrow: 1
+              }}>
+                {getOverlayUrl()}
+              </Box>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  navigator.clipboard.writeText(getOverlayUrl());
+                  toast.success("Overlay source link copied!");
+                }}
+                sx={{
+                  borderRadius: "10px",
+                  borderColor: `${userThemeColor}33`,
+                  color: userThemeColor,
+                  fontWeight: 800,
+                  textTransform: "none",
+                  whiteSpace: "nowrap",
+                  py: 1.2,
+                  px: 2.2,
+                  "&:hover": { borderColor: userThemeColor, bgcolor: `${userThemeColor}0f` }
+                }}
+              >
+                Copy Link
+              </Button>
+            </Box>
+          </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: { xs: "flex-start", md: "flex-end" } }}>
+            <Typography variant="body2" sx={{ fontWeight: 800 }}>Overlay Link Status</Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.6 }}>
+              <Box sx={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                bgcolor: connected ? "#14F195" : "#ff4b4b",
+                boxShadow: connected ? "0 0 10px #14F195" : "0 0 10px #ff4b4b",
+                animation: "livePulse 2s infinite ease-in-out",
+                "@keyframes livePulse": {
+                  "0%": { opacity: 0.6 },
+                  "50%": { opacity: 1 },
+                  "100%": { opacity: 0.6 }
+                }
+              }} />
+              <Typography variant="caption" sx={{ color: connected ? "#14F195" : "#ff4b4b", fontWeight: 850, textTransform: "uppercase", fontSize: "0.68rem" }}>
+                {connected ? "Active Broadcast Source" : "Disconnected / Offline"}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      )}
+
       <Divider sx={{ mb: 4, opacity: 0.05 }} />
 
       <Grid container spacing={4}>
-        {/* 1. TTS Alerts Column */}
+        {/* 1. TTS & Queue Config Column */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{
             p: 3.5,
@@ -321,8 +455,8 @@ export default function AlertCustomizer({
               boxShadow: `0 4px 24px ${userThemeColor}0d`
             }
           }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 800, display: "flex", alignItems: "center", gap: 1, mb: 3, color: userThemeColor }}>
-              <RecordVoiceOverIcon sx={{ fontSize: 20 }} /> 🎙️ Text-to-Speech (TTS)
+            <Typography variant="subtitle1" sx={{ fontWeight: 850, display: "flex", alignItems: "center", gap: 1, mb: 3, color: userThemeColor }}>
+              <RecordVoiceOverIcon sx={{ fontSize: 20 }} /> 🎙️ Speech & Queue Controls
             </Typography>
 
             <FormControlLabel
@@ -342,7 +476,7 @@ export default function AlertCustomizer({
                   <Typography variant="caption" color="text.secondary">Read tip messages aloud on stream</Typography>
                 </Box>
               }
-              sx={{ mb: 4, display: "flex", width: "100%" }}
+              sx={{ mb: 3.5, display: "flex", width: "100%" }}
             />
 
             <TextField
@@ -369,7 +503,7 @@ export default function AlertCustomizer({
               }}
             />
 
-            <FormControl fullWidth size="small" sx={{ mb: 2 }} disabled={!ttsEnabled}>
+            <FormControl fullWidth size="small" sx={{ mb: 4 }} disabled={!ttsEnabled}>
               <InputLabel id="tts-voice-label" sx={{ "&.Mui-focused": { color: userThemeColor } }}>TTS Voice Actor</InputLabel>
               <Select
                 labelId="tts-voice-label"
@@ -388,13 +522,31 @@ export default function AlertCustomizer({
               </Select>
             </FormControl>
 
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-              Prevents TTS spam by reading messages only for tips equal to or above this amount.
-            </Typography>
+            <Divider sx={{ my: 3, opacity: 0.05 }} />
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={queueSystemEnabled}
+                  onChange={(e) => setQueueSystemEnabled(e.target.checked)}
+                  sx={{
+                    "& .MuiSwitch-switchBase.Mui-checked": { color: userThemeColor },
+                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": { backgroundColor: userThemeColor }
+                  }}
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>Alert Queue Engine</Typography>
+                  <Typography variant="caption" color="text.secondary">Play alerts sequentially during high traffic</Typography>
+                </Box>
+              }
+              sx={{ display: "flex", width: "100%" }}
+            />
           </Paper>
         </Grid>
 
-        {/* 2. Visual Theme & Style Column */}
+        {/* 2. Visual Theme & Sizing Column */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{
             p: 3.5,
@@ -408,11 +560,30 @@ export default function AlertCustomizer({
               boxShadow: `0 4px 24px ${userThemeColor}0d`
             }
           }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 800, display: "flex", alignItems: "center", gap: 1, mb: 3, color: userThemeColor }}>
-              <PaletteIcon sx={{ fontSize: 20 }} /> 🎨 Visual Theme & Colors
+            <Typography variant="subtitle1" sx={{ fontWeight: 850, display: "flex", alignItems: "center", gap: 1, mb: 3, color: userThemeColor }}>
+              <PaletteIcon sx={{ fontSize: 20 }} /> 🎨 Visual Theme & Sizing
             </Typography>
 
-            <Box sx={{ mb: 3 }}>
+            <FormControl fullWidth size="small" sx={{ mb: 3 }}>
+              <InputLabel id="overlay-theme-label" sx={{ "&.Mui-focused": { color: userThemeColor } }}>Overlay Layout Theme</InputLabel>
+              <Select
+                labelId="overlay-theme-label"
+                label="Overlay Layout Theme"
+                value={overlayTheme}
+                onChange={(e) => setOverlayTheme(e.target.value)}
+                sx={{
+                  borderRadius: "12px",
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: userThemeColor }
+                }}
+              >
+                <MenuItem value="standard">Standard Sky Blue 🌌</MenuItem>
+                <MenuItem value="gold">Premium Gold Edition ✨</MenuItem>
+                <MenuItem value="neon">Neon Shock Cyber ⚡</MenuItem>
+                <MenuItem value="midnight">Mystical Obsidian/Void 🔮</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Box sx={{ mb: 4 }}>
               <Typography variant="body2" sx={{ fontWeight: 700, mb: 1.5 }}>Theme Accent Color</Typography>
               <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
                 {[
@@ -443,9 +614,7 @@ export default function AlertCustomizer({
                 fullWidth
                 label="Custom Hex Code"
                 value={themeColor}
-                onChange={(e) => {
-                  setThemeColor(e.target.value);
-                }}
+                onChange={(e) => setThemeColor(e.target.value)}
                 sx={{
                   "& .MuiInputLabel-root.Mui-focused": { color: userThemeColor },
                   "& .MuiOutlinedInput-root": {
@@ -477,15 +646,15 @@ export default function AlertCustomizer({
 
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>Alert Duration</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 800, color: userThemeColor }}>{(alertDuration / 1000).toFixed(1)}s</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Overlay Text Size</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 800, color: userThemeColor }}>{fontSize}px</Typography>
               </Box>
               <Slider
-                value={alertDuration}
-                min={3000}
-                max={15000}
-                step={500}
-                onChange={(_, val) => setAlertDuration(val as number)}
+                value={fontSize}
+                min={14}
+                max={32}
+                step={1}
+                onChange={(_, val) => setFontSize(val as number)}
                 sx={{
                   color: userThemeColor,
                   height: 6,
@@ -496,7 +665,7 @@ export default function AlertCustomizer({
           </Paper>
         </Grid>
 
-        {/* 3. Audio & Animation Presets Column */}
+        {/* 3. Audio & Animation Customizer Column */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{
             p: 3.5,
@@ -510,8 +679,8 @@ export default function AlertCustomizer({
               boxShadow: `0 4px 24px ${userThemeColor}0d`
             }
           }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 800, display: "flex", alignItems: "center", gap: 1, mb: 3, color: userThemeColor }}>
-              <MusicNoteIcon sx={{ fontSize: 20 }} /> 🎵 Audio & Animation Settings
+            <Typography variant="subtitle1" sx={{ fontWeight: 850, display: "flex", alignItems: "center", gap: 1, mb: 3, color: userThemeColor }}>
+              <MusicNoteIcon sx={{ fontSize: 20 }} /> 🎵 Sound & Transitions
             </Typography>
 
             <FormControl fullWidth size="small" sx={{ mb: 2 }}>
@@ -530,30 +699,68 @@ export default function AlertCustomizer({
                 <MenuItem value="swoosh">Cyber Swoosh 💨 (Synthetic)</MenuItem>
                 <MenuItem value="chime">Classic Chime 🔮 (Synthetic)</MenuItem>
                 <MenuItem value="fanfare">Epic Fanfare 🎺 (Synthetic)</MenuItem>
-                <MenuItem value="custom">Custom Sound URL 🔗</MenuItem>
+                <MenuItem value="custom">Custom Upload / URL 🔗</MenuItem>
               </Select>
             </FormControl>
 
             {alertSoundPreset === "custom" && (
-              <TextField
-                size="small"
-                fullWidth
-                label="Custom Sound Audio URL"
-                placeholder="https://example.com/sound.mp3"
-                value={alertSoundUrl}
-                onChange={(e) => setAlertSoundUrl(e.target.value)}
-                sx={{
-                  mb: 2,
-                  "& .MuiInputLabel-root.Mui-focused": { color: userThemeColor },
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "12px",
-                    "&.Mui-focused fieldset": { borderColor: userThemeColor }
-                  }
-                }}
-              />
+              <Box sx={{ mb: 3 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  label="Audio File / Link"
+                  placeholder="https://example.com/sound.mp3"
+                  value={alertSoundUrl.startsWith("data:") ? "Local Upload Active 📁" : alertSoundUrl}
+                  onChange={(e) => setAlertSoundUrl(e.target.value)}
+                  disabled={alertSoundUrl.startsWith("data:")}
+                  sx={{
+                    mb: 1.5,
+                    "& .MuiInputLabel-root.Mui-focused": { color: userThemeColor },
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                      "&.Mui-focused fieldset": { borderColor: userThemeColor }
+                    }
+                  }}
+                />
+                <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    size="small"
+                    startIcon={<CloudUploadIcon />}
+                    sx={{
+                      borderRadius: "10px",
+                      textTransform: "none",
+                      fontWeight: 700,
+                      color: userThemeColor,
+                      borderColor: `${userThemeColor}44`,
+                      "&:hover": { borderColor: userThemeColor, bgcolor: `${userThemeColor}0a` }
+                    }}
+                  >
+                    Upload Sound
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      hidden
+                      onChange={handleAudioUpload}
+                    />
+                  </Button>
+                  {alertSoundUrl.startsWith("data:") && (
+                    <Button
+                      variant="text"
+                      color="error"
+                      size="small"
+                      onClick={() => setAlertSoundUrl("")}
+                      sx={{ textTransform: "none", fontWeight: 800 }}
+                    >
+                      Reset Custom
+                    </Button>
+                  )}
+                </Box>
+              </Box>
             )}
 
-            <Box sx={{ display: "flex", gap: 2, mb: 3.5, alignItems: "center" }}>
+            <Box sx={{ display: "flex", gap: 2, mb: 4, alignItems: "center" }}>
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
                   <VolumeUpIcon sx={{ fontSize: 14 }} /> Alert Volume
@@ -582,7 +789,7 @@ export default function AlertCustomizer({
                   color: userThemeColor,
                   textTransform: "none",
                   fontSize: "0.75rem",
-                  fontWeight: 700,
+                  fontWeight: 800,
                   py: 0.8,
                   "&:hover": {
                     borderColor: userThemeColor,
@@ -594,11 +801,11 @@ export default function AlertCustomizer({
               </Button>
             </Box>
 
-            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-              <InputLabel id="gif-preset-label" sx={{ "&.Mui-focused": { color: userThemeColor } }}>Alert Animation Preset</InputLabel>
+            <FormControl fullWidth size="small" sx={{ mb: 3 }}>
+              <InputLabel id="gif-preset-label" sx={{ "&.Mui-focused": { color: userThemeColor } }}>Alert Graphic preset</InputLabel>
               <Select
                 labelId="gif-preset-label"
-                label="Alert Animation Preset"
+                label="Alert Graphic Preset"
                 value={alertGifPreset}
                 onChange={(e) => setAlertGifPreset(e.target.value)}
                 sx={{
@@ -622,6 +829,7 @@ export default function AlertCustomizer({
                 value={alertGifUrl}
                 onChange={(e) => setAlertGifUrl(e.target.value)}
                 sx={{
+                  mb: 3,
                   "& .MuiInputLabel-root.Mui-focused": { color: userThemeColor },
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "12px",
@@ -630,6 +838,45 @@ export default function AlertCustomizer({
                 }}
               />
             )}
+
+            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+              <InputLabel id="alert-animation-label" sx={{ "&.Mui-focused": { color: userThemeColor } }}>Alert Entry Animation</InputLabel>
+              <Select
+                labelId="alert-animation-label"
+                label="Alert Entry Animation"
+                value={alertAnimation}
+                onChange={(e) => setAlertAnimation(e.target.value)}
+                sx={{
+                  borderRadius: "12px",
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: userThemeColor }
+                }}
+              >
+                <MenuItem value="bounce">Bounce Impact (Classic)</MenuItem>
+                <MenuItem value="fade">Elegant Fade In</MenuItem>
+                <MenuItem value="slide">Slide In Left</MenuItem>
+                <MenuItem value="zoom">Zoom Scale Pop</MenuItem>
+                <MenuItem value="slide_down">Slide Down Drop</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Box sx={{ mb: 1 }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Alert Duration</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 800, color: userThemeColor }}>{(alertDuration / 1000).toFixed(1)}s</Typography>
+              </Box>
+              <Slider
+                value={alertDuration}
+                min={3000}
+                max={15000}
+                step={500}
+                onChange={(_, val) => setAlertDuration(val as number)}
+                sx={{
+                  color: userThemeColor,
+                  height: 6,
+                  "& .MuiSlider-thumb": { width: 14, height: 14 }
+                }}
+              />
+            </Box>
           </Paper>
         </Grid>
       </Grid>

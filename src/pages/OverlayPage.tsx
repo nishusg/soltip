@@ -13,13 +13,46 @@ const slideInLeft = keyframes`
   to { transform: translateX(0); opacity: 1; }
 `;
 
-// Animation for cinematic alert popup
+// Classic Bounce popup animation
 const alertPopIn = keyframes`
   0% { transform: translate(-50%, -40%) scale(0.85); opacity: 0; filter: blur(10px); }
   8% { transform: translate(-50%, -50%) scale(1.03); opacity: 1; filter: blur(0px); }
   12% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
   88% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0px); }
   100% { transform: translate(-50%, -60%) scale(0.9); opacity: 0; filter: blur(10px); }
+`;
+
+// Dynamic Fade In transition
+const alertFadeIn = keyframes`
+  0% { opacity: 0; filter: blur(10px); transform: translate(-50%, -50%); }
+  10% { opacity: 1; filter: blur(0px); transform: translate(-50%, -50%); }
+  90% { opacity: 1; filter: blur(0px); transform: translate(-50%, -50%); }
+  100% { opacity: 0; filter: blur(10px); transform: translate(-50%, -50%); }
+`;
+
+// Dynamic Slide In Left transition
+const alertSlideLeft = keyframes`
+  0% { transform: translate(-150%, -50%); opacity: 0; }
+  10% { transform: translate(-50%, -50%); opacity: 1; }
+  90% { transform: translate(-50%, -50%); opacity: 1; }
+  100% { transform: translate(150%, -50%); opacity: 0; }
+`;
+
+// Dynamic Zoom Scale Pop transition
+const alertZoomIn = keyframes`
+  0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
+  8% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+  12% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  88% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+`;
+
+// Dynamic Slide Down Drop transition
+const alertSlideDown = keyframes`
+  0% { transform: translate(-50%, -150%); opacity: 0; }
+  10% { transform: translate(-50%, -50%); opacity: 1; }
+  90% { transform: translate(-50%, -50%); opacity: 1; }
+  100% { transform: translate(-50%, 150%); opacity: 0; }
 `;
 
 interface TipEntry {
@@ -65,6 +98,13 @@ const OverlayPage: React.FC = () => {
   const [authStatus, setAuthStatus] = useState<"loading" | "ok" | "denied">("loading");
   const [activeAlert, setActiveAlert] = useState<TipEntry | null>(null);
 
+  // Sequential alerts queue engine variables
+  const [alertQueue, setAlertQueue] = useState<TipEntry[]>([]);
+  const alertQueueRef = useRef<TipEntry[]>([]);
+  useEffect(() => {
+    alertQueueRef.current = alertQueue;
+  }, [alertQueue]);
+
   // Overlay Settings State with default fallbacks
   const [settings, setSettings] = useState<any>({
     tts_enabled: true,
@@ -76,7 +116,11 @@ const OverlayPage: React.FC = () => {
     alert_sound_url: "",
     sound_volume: 0.7,
     theme_color: "#14F195",
-    font_family: "Space Grotesk"
+    font_family: "Space Grotesk",
+    theme: "standard",
+    alert_animation: "bounce",
+    queue_system_enabled: true,
+    font_size: 20
   });
 
   const settingsRef = useRef(settings);
@@ -237,8 +281,6 @@ const OverlayPage: React.FC = () => {
     window.speechSynthesis.speak(utterance);
   };
 
-
-
   // Force absolute transparent backgrounds on document body and HTML for OBS compatibility
   useEffect(() => {
     // Inject a stylesheet to force transparency on the layout, body, and all global pseudo-elements
@@ -267,7 +309,7 @@ const OverlayPage: React.FC = () => {
     };
   }, []);
 
-  // Manage active alert display duration (exits when alertPopIn ends)
+  // Manage active alert display duration and trigger next from queue
   useEffect(() => {
     if (!activeAlert) return;
     const duration = settings.alert_duration || ALERT_DISPLAY_DURATION;
@@ -277,7 +319,23 @@ const OverlayPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [activeAlert, settings.alert_duration]);
 
+  // Sequential alerts queue processor
+  useEffect(() => {
+    if (settings.queue_system_enabled !== false && !activeAlert && alertQueue.length > 0) {
+      const nextAlert = alertQueue[0];
+      setAlertQueue(prev => prev.slice(1));
+      setActiveAlert(nextAlert);
 
+      // Play sound
+      const currentVol = settingsRef.current.sound_volume !== undefined ? settingsRef.current.sound_volume : 0.7;
+      playAlertSound(currentVol);
+
+      // Trigger TTS after a short delay
+      setTimeout(() => {
+        speakTtsAlert(nextAlert.sender, nextAlert.amount, nextAlert.message);
+      }, 1200);
+    }
+  }, [activeAlert, alertQueue, settings.queue_system_enabled]);
 
   // Step 1: Verify the overlay key
   useEffect(() => {
@@ -347,16 +405,21 @@ const OverlayPage: React.FC = () => {
       };
 
       setTips(prev => [...prev, newTip].slice(-10)); // Keep last 10
-      setActiveAlert(newTip); // Trigger premium animated active popup
 
-      // Play direct/synthetic sound with the latest real-time volume
-      const currentVol = settingsRef.current.sound_volume !== undefined ? settingsRef.current.sound_volume : 0.7;
-      playAlertSound(currentVol);
+      if (settingsRef.current.queue_system_enabled !== false) {
+        setAlertQueue(prev => [...prev, newTip]);
+      } else {
+        setActiveAlert(newTip);
 
-      // Trigger TTS after a short delay (e.g. 1.2s) to let the chime sound finish!
-      setTimeout(() => {
-        speakTtsAlert(newTip.sender, newTip.amount, newTip.message);
-      }, 1200);
+        // Play sound with the latest volume
+        const currentVol = settingsRef.current.sound_volume !== undefined ? settingsRef.current.sound_volume : 0.7;
+        playAlertSound(currentVol);
+
+        // Trigger TTS after delay
+        setTimeout(() => {
+          speakTtsAlert(newTip.sender, newTip.amount, newTip.message);
+        }, 1200);
+      }
     };
 
     const handleSettingsUpdated = (newSettings: any) => {
@@ -372,8 +435,6 @@ const OverlayPage: React.FC = () => {
       socket.emit("unsubscribe_overlay", walletAddress);
     };
   }, [authStatus, socket, walletAddress, overlayKey]);
-
-
 
   if (!walletAddress) return null;
 
@@ -409,13 +470,46 @@ const OverlayPage: React.FC = () => {
         position: "relative"
       }}
     >
-
-
       {/* Cinematic Alert Popup */}
       {activeAlert && (() => {
-        const accentColor = settings.theme_color || getTierColor(activeAlert.amount);
+        const selectedTheme = settings.theme || "standard";
+        let accentColor = settings.theme_color || getTierColor(activeAlert.amount);
+        let borderStyleColor = accentColor;
+        let bgStyleColor = "rgba(0, 0, 0, 0.85)";
+        let shadowStyle = `0 0 50px ${accentColor}33, inset 0 0 20px ${accentColor}1a`;
+        let computedHeaderIcon = settings.alert_gif_preset || "bolt";
+
+        // Layout Theme Configs
+        if (selectedTheme === "gold") {
+          borderStyleColor = "#FFD700";
+          bgStyleColor = "linear-gradient(135deg, rgba(15, 12, 5, 0.97) 0%, rgba(30, 24, 10, 0.99) 100%)";
+          shadowStyle = "0 0 60px rgba(255, 215, 0, 0.45), inset 0 0 25px rgba(255, 215, 0, 0.2)";
+          accentColor = "#FFD700";
+          if (settings.alert_gif_preset === "bolt") {
+            computedHeaderIcon = "crown";
+          }
+        } else if (selectedTheme === "neon") {
+          borderStyleColor = "#FF007F";
+          bgStyleColor = "rgba(8, 4, 18, 0.95)";
+          shadowStyle = "0 0 60px rgba(255, 0, 127, 0.55), inset 0 0 25px rgba(255, 0, 127, 0.25)";
+          accentColor = "#00FFFF";
+        } else if (selectedTheme === "midnight") {
+          borderStyleColor = "#9945FF";
+          bgStyleColor = "linear-gradient(135deg, rgba(5, 5, 12, 0.98) 0%, rgba(15, 8, 30, 0.98) 100%)";
+          shadowStyle = "0 0 60px rgba(153, 69, 255, 0.45), inset 0 0 25px rgba(153, 69, 255, 0.2)";
+          accentColor = "#14F195";
+        }
+
         const fontStylePrimary = settings.font_family ? `${settings.font_family}, sans-serif` : FONT_PRIMARY;
         const fontStyleAccent = settings.font_family ? `${settings.font_family}, sans-serif` : FONT_ACCENT;
+        const customFontSize = settings.font_size || 20;
+
+        // Custom Broadcaster Transitions
+        let activeKeyframe = alertPopIn;
+        if (settings.alert_animation === "fade") activeKeyframe = alertFadeIn;
+        else if (settings.alert_animation === "slide") activeKeyframe = alertSlideLeft;
+        else if (settings.alert_animation === "zoom") activeKeyframe = alertZoomIn;
+        else if (settings.alert_animation === "slide_down") activeKeyframe = alertSlideDown;
 
         return (
           <Box
@@ -424,8 +518,8 @@ const OverlayPage: React.FC = () => {
               top: "45%",
               left: "50%",
               zIndex: 999,
-              width: ACTIVE_ALERT_WIDTH, // Constant fixed width for consistent professional stream visuals
-              animation: `${alertPopIn} ${settings.alert_duration || ALERT_DISPLAY_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+              width: ACTIVE_ALERT_WIDTH,
+              animation: `${activeKeyframe} ${settings.alert_duration || ALERT_DISPLAY_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
               pointerEvents: "none"
             }}
           >
@@ -434,10 +528,10 @@ const OverlayPage: React.FC = () => {
               sx={{
                 p: 4,
                 borderRadius: "28px",
-                bgcolor: "rgba(0, 0, 0, 0.85)",
-                border: `2px solid ${accentColor}`,
+                background: bgStyleColor,
+                border: `2px solid ${borderStyleColor}`,
                 backdropFilter: "blur(20px)",
-                boxShadow: `0 0 50px ${accentColor}33, inset 0 0 20px ${accentColor}1a`,
+                boxShadow: shadowStyle,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -453,7 +547,7 @@ const OverlayPage: React.FC = () => {
                 left: 0,
                 right: 0,
                 height: 4,
-                background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)`
+                background: `linear-gradient(90deg, transparent, ${borderStyleColor}, transparent)`
               }} />
 
               {/* Glowing Category Header */}
@@ -493,14 +587,13 @@ const OverlayPage: React.FC = () => {
                 }}
               >
                 {(() => {
-                  const preset = settings.alert_gif_preset || "bolt";
-                  if (preset === "bolt") {
+                  if (computedHeaderIcon === "bolt") {
                     return <BoltIcon sx={{ fontSize: 40, color: accentColor }} />;
                   }
-                  if (preset === "crown") {
+                  if (computedHeaderIcon === "crown") {
                     return <EmojiEventsIcon sx={{ fontSize: 40, color: accentColor }} />;
                   }
-                  if (preset === "orb") {
+                  if (computedHeaderIcon === "orb") {
                     return (
                       <Box
                         sx={{
@@ -518,7 +611,7 @@ const OverlayPage: React.FC = () => {
                       />
                     );
                   }
-                  if (preset === "custom" && settings.alert_gif_url) {
+                  if (computedHeaderIcon === "custom" && settings.alert_gif_url) {
                     return (
                       <img
                         src={settings.alert_gif_url}
@@ -536,12 +629,12 @@ const OverlayPage: React.FC = () => {
                 sx={{
                   fontFamily: fontStylePrimary,
                   fontWeight: 700,
-                  fontSize: "1.65rem", // High-fidelity size optimized to fit beautifully
+                  fontSize: `${customFontSize + 6}px`,
                   color: "#ffffff",
                   lineHeight: 1.4,
                   mb: activeAlert.message ? 3.5 : 0,
                   textAlign: "center",
-                  width: "100%", // Utilize maximum width to prevent early wrapping
+                  width: "100%",
                   letterSpacing: "-0.01em"
                 }}
               >
@@ -564,7 +657,7 @@ const OverlayPage: React.FC = () => {
                     borderRadius: "18px",
                     bgcolor: "rgba(255,255,255,0.02)",
                     border: "1px solid rgba(255,255,255,0.06)",
-                    borderLeft: `5px solid ${accentColor}`, // Vertical glowing tier border accent
+                    borderLeft: `5px solid ${borderStyleColor}`,
                     boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 12px ${accentColor}08`,
                     position: "relative",
                     display: "flex",
@@ -578,7 +671,7 @@ const OverlayPage: React.FC = () => {
                       fontWeight: 500,
                       color: "#f8fafc",
                       lineHeight: 1.6,
-                      fontSize: "1.15rem",
+                      fontSize: `${customFontSize}px`,
                       fontStyle: "italic",
                       textAlign: "center"
                     }}
@@ -591,7 +684,6 @@ const OverlayPage: React.FC = () => {
           </Box>
         );
       })()}
-
     </Box>
   );
 };
