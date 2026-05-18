@@ -20,6 +20,7 @@ import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import { useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -28,6 +29,9 @@ import { getPremiumOverrides } from "./themes/shared";
 
 // Lazy loaded components
 const Home = React.lazy(() => import("./pages/Home"));
+const HowItWorks = React.lazy(() => import("./pages/HowItWorks"));
+const ObsOverlayPage = React.lazy(() => import("./pages/ObsOverlayPage"));
+const VerticalCreatorPage = React.lazy(() => import("./pages/VerticalCreatorPage"));
 const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const OverlayPage = React.lazy(() => import("./pages/OverlayPage"));
@@ -35,6 +39,10 @@ const CreatorLeaderboard = React.lazy(() => import("./components/CreatorLeaderbo
 const ProfileSettings = React.lazy(() => import("./pages/ProfileSettings"));
 const ActivityPage = React.lazy(() => import("./pages/ActivityPage"));
 const UnauthorizedPage = React.lazy(() => import("./pages/UnauthorizedPage"));
+const PricingPage = React.lazy(() => import("./pages/PricingPage"));
+const SecurityPage = React.lazy(() => import("./pages/SecurityPage"));
+const BlogPage = React.lazy(() => import("./pages/BlogPage"));
+const BlogPostPage = React.lazy(() => import("./pages/BlogPostPage"));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -89,6 +97,16 @@ function AppLayout() {
       <Suspense fallback={<div className="page-wrapper container"><div className="spinner"></div></div>}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/obs-overlay" element={<ObsOverlayPage />} />
+          <Route path="/for-youtube" element={<VerticalCreatorPage platform="youtube" />} />
+          <Route path="/for-kick" element={<VerticalCreatorPage platform="kick" />} />
+          <Route path="/for-streamlabs" element={<VerticalCreatorPage platform="streamlabs" />} />
+          <Route path="/for-content-creators" element={<VerticalCreatorPage platform="general" />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/security" element={<SecurityPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route
             path="/leaderboard"
@@ -109,6 +127,9 @@ function AppLayout() {
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         </Routes>
       </Suspense>
+
+      {/* Hide footer on overlay pages */}
+      {!isOverlay && <Footer />}
 
       {/* Global Toast Notifications */}
       <Toaster position="bottom-right" />

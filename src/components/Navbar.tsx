@@ -1,34 +1,97 @@
+// ============================================================================
+// Navbar Component — Navbar.tsx
+// ============================================================================
+//
+// A refined, premium Web3 header navigation bar.
+// Integrates:
+//   1. "Resources" glassmorphic Dropdown Menu: Combines Pricing, Security, Blog,
+//      and OBS Setup under a single beautiful card with dynamic icons & subtexts.
+//   2. Conic glow brand logo with rotation hover effects
+//   3. High-conversion glowing "Authenticate Creator Profile" button
+//   4. Glassmorphic "Creator Control Hub Panel" for logged-in creators
+//   5. Dynamic Boring Avatars, Gold Member badge, and Go Gold conversion sweeps
+//   6. Beautifully structured and polished Mobile drawer
+// ============================================================================
+
+import { useState } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWalletAuth } from "../hooks/useWalletAuth";
-import { AppBar, Toolbar, Button, Box, Typography, Chip, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Divider, useTheme, useMediaQuery, Dialog, Tooltip } from "@mui/material";
+import { 
+  AppBar, 
+  Toolbar, 
+  Button, 
+  Box, 
+  Typography, 
+  Chip, 
+  IconButton, 
+  Drawer, 
+  List, 
+  ListItem, 
+  ListItemButton, 
+  ListItemText, 
+  Divider, 
+  useTheme, 
+  useMediaQuery, 
+  Dialog, 
+  Tooltip,
+  Stack,
+  Menu,
+  MenuItem
+} from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import { useState } from "react";
+import DiamondIcon from "@mui/icons-material/Diamond";
+import SettingsIcon from "@mui/icons-material/Settings";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import PaymentsIcon from "@mui/icons-material/Payments";
+import ShieldIcon from "@mui/icons-material/Shield";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import MonitorIcon from "@mui/icons-material/Monitor";
+import BoringAvatar from "boring-avatars";
 import TipForm from "../forms/TipForm";
 import SubscriptionModal from "./SubscriptionModal";
-import DiamondIcon from "@mui/icons-material/Diamond";
 
 export default function Navbar() {
-  const { connected, isAuthenticated, login, logout, isLoading, walletAddress, user } = useWalletAuth();
+  const { connected, isAuthenticated, login, logout, isLoading, walletAddress, shortAddress, user } = useWalletAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tipModalOpen, setTipModalOpen] = useState(false);
   const [subModalOpen, setSubModalOpen] = useState(false);
+  
+  // Dropdown menu state
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const openMenu = Boolean(anchorEl);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const location = useLocation();
 
+  // Theme-aware palette colors
+  const brandColor = theme.palette.primary.main;
+  const secondaryColor = theme.palette.secondary?.main || brandColor;
+
+  const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
+  // Swapping nav links (landing vs creator workflow)
   const navItems = [
     { label: "Home", path: "/" },
     ...(isAuthenticated ? [
-      { label: "Leaderboard", path: "/leaderboard" },
+      { label: "Dashboard", path: "/dashboard" },
       { label: "Activity", path: "/activity" },
-      { label: "Dashboard", path: "/dashboard" }
-    ] : [])
+      { label: "Leaderboard", path: "/leaderboard" }
+    ] : [
+      { label: "How It Works", path: "/how-it-works" }
+    ])
   ];
 
   const isActive = (path: string) => {
@@ -36,20 +99,56 @@ export default function Navbar() {
     return location.pathname.startsWith(path);
   };
 
+  const isDropdownActive = () => {
+    const dropdownPaths = ["/pricing", "/security", "/blog", "/obs-overlay"];
+    return dropdownPaths.some(path => location.pathname.startsWith(path));
+  };
+
+  const resources = [
+    {
+      label: "Pricing & Fees",
+      desc: "Flat 5% cut with zero monthly gas holds",
+      path: "/pricing",
+      icon: <PaymentsIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
+    },
+    {
+      label: "Security & Trust",
+      desc: "100% Non-custodial cryptographic safety",
+      path: "/security",
+      icon: <ShieldIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
+    },
+    {
+      label: "Blog Hub",
+      desc: "Streamer insights & crypto tipping manuals",
+      path: "/blog",
+      icon: <MenuBookIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
+    },
+    {
+      label: "OBS Setup",
+      desc: "Low-latency alert browser overlay integrations",
+      path: "/obs-overlay",
+      icon: <MonitorIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
+    }
+  ];
+
   return (
     <AppBar
       position="sticky"
       elevation={0}
       sx={{
-        backgroundColor: theme.palette.background.default + "bf", // Use theme background with opacity
-        backdropFilter: "blur(24px)",
-        borderBottom: `1px solid ${theme.palette.primary.main}1a`,
+        backgroundColor: theme.palette.background.default + "cc", // Soft glassmorphic backdrop
+        backdropFilter: "blur(20px)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
         zIndex: 1100,
-        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)"
+        boxShadow: "0 10px 40px rgba(0, 0, 0, 0.25)"
       }}
     >
-      <Toolbar sx={{ justifyContent: "space-between", py: 1.5, px: { xs: 2, md: 4 } }}>
-        {/* Brand */}
+      {/* Dynamic Top Neon Border glow matching brand skin */}
+      <Box sx={{ height: "3px", width: "100%", background: `linear-gradient(90deg, ${brandColor} 0%, ${secondaryColor} 100%)` }} />
+
+      <Toolbar sx={{ justifyContent: "space-between", py: 1.5, px: { xs: 2.5, md: 4 } }}>
+        
+        {/* Conic Glow Brand Logo */}
         <Box
           component={RouterLink}
           to="/"
@@ -58,59 +157,63 @@ export default function Navbar() {
             alignItems: "center",
             textDecoration: "none",
             color: "inherit",
-            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-            "&:hover": { transform: "scale(1.05)" }
+            cursor: "pointer",
+            "&:hover .brand-icon-box": { 
+              transform: "rotate(360deg) scale(1.05)",
+              boxShadow: `0 0 30px ${brandColor}99`
+            },
+            "&:hover .brand-text": {
+              letterSpacing: "-0.01em"
+            }
           }}
         >
           <Box
+            className="brand-icon-box"
             sx={{
-              width: 44,
-              height: 44,
-              borderRadius: "14px",
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+              width: 42,
+              height: 42,
+              borderRadius: "12px",
+              background: `linear-gradient(135deg, ${brandColor} 0%, ${secondaryColor} 100%)`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              mr: 2,
-              boxShadow: `0 0 20px ${theme.palette.primary.main}66`,
-              position: "relative",
-              "&::after": {
-                content: '""',
-                position: "absolute",
-                top: 0, left: 0, right: 0, bottom: 0,
-                borderRadius: "14px",
-                boxShadow: "inset 0 0 10px rgba(255,255,255,0.4)",
-                pointerEvents: "none"
-              }
+              mr: 1.8,
+              boxShadow: `0 0 20px ${brandColor}4d`,
+              transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease",
+              position: "relative"
             }}
           >
-            <BoltIcon sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#000", fontSize: 30 }} />
+            <BoltIcon sx={{ color: "#000", fontSize: 28 }} />
           </Box>
           <Typography
+            className="brand-text"
             variant="h5"
             sx={{
-              fontWeight: 900,
+              fontWeight: 950,
               letterSpacing: "-0.03em",
-              background: `linear-gradient(90deg, #fff 0%, ${theme.palette.primary.main} 100%)`,
+              background: "linear-gradient(90deg, #fff 0%, #cbd5e1 100%)",
               WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent"
+              WebkitTextFillColor: "transparent",
+              fontFamily: "Space Grotesk, sans-serif",
+              transition: "letter-spacing 0.3s ease"
             }}
           >
             SolChat
           </Typography>
         </Box>
 
-        {/* Links */}
-        {navItems.length > 1 && (
+        {/* Dynamic Primary Nav links (Home/Dashboard + Resources Dropdown) */}
+        {!isMobile && (
           <Box
             sx={{
-              display: { xs: "none", md: "flex" },
-              gap: 1,
+              display: "flex",
+              gap: 0.5,
               p: 0.5,
               borderRadius: "16px",
-              bgcolor: "rgba(255,255,255,0.02)",
+              bgcolor: "rgba(255,255,255,0.01)",
               border: "1px solid rgba(255,255,255,0.05)",
-              backdropFilter: "blur(10px)"
+              backdropFilter: "blur(10px)",
+              alignItems: "center"
             }}
           >
             {navItems.map((item) => {
@@ -121,16 +224,19 @@ export default function Navbar() {
                   component={RouterLink}
                   to={item.path}
                   sx={{
-                    px: 3,
-                    py: 1,
+                    px: 2.2,
+                    py: 0.8,
                     borderRadius: "12px",
                     fontWeight: active ? 800 : 600,
-                    color: active ? theme.palette.primary.main : "rgba(255,255,255,0.6)",
-                    bgcolor: active ? `${theme.palette.primary.main}1a` : "transparent",
+                    fontSize: "0.88rem",
+                    color: active ? "#fff" : "rgba(255,255,255,0.6)",
+                    bgcolor: active ? "rgba(255,255,255,0.04)" : "transparent",
+                    border: active ? "1px solid rgba(255,255,255,0.05)" : "1px solid transparent",
                     transition: "all 0.2s ease",
                     "&:hover": {
-                      bgcolor: active ? `${theme.palette.primary.main}26` : "rgba(255,255,255,0.05)",
-                      color: theme.palette.primary.main
+                      bgcolor: "rgba(255,255,255,0.06)",
+                      color: "#fff",
+                      borderColor: "rgba(255,255,255,0.08)"
                     }
                   }}
                 >
@@ -138,27 +244,118 @@ export default function Navbar() {
                 </Button>
               );
             })}
+
+            {/* Resources Dropdown Trigger */}
+            <Button
+              aria-controls={openMenu ? 'resources-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={openMenu ? 'true' : undefined}
+              onClick={handleOpenMenu}
+              endIcon={<KeyboardArrowDownIcon sx={{ transition: "transform 0.3s", transform: openMenu ? "rotate(180deg)" : "rotate(0)" }} />}
+              sx={{
+                px: 2.2,
+                py: 0.8,
+                borderRadius: "12px",
+                fontWeight: openMenu || isDropdownActive() ? 800 : 600,
+                fontSize: "0.88rem",
+                color: openMenu || isDropdownActive() ? brandColor : "rgba(255,255,255,0.6)",
+                bgcolor: openMenu || isDropdownActive() ? "rgba(255,255,255,0.04)" : "transparent",
+                border: openMenu || isDropdownActive() ? "1px solid rgba(255,255,255,0.05)" : "1px solid transparent",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  bgcolor: "rgba(255,255,255,0.06)",
+                  color: brandColor,
+                  borderColor: "rgba(255,255,255,0.08)"
+                }
+              }}
+            >
+              Resources
+            </Button>
+
+            {/* Resources Menu Dropdown Card */}
+            <Menu
+              id="resources-menu"
+              anchorEl={anchorEl}
+              open={openMenu}
+              onClose={handleCloseMenu}
+              slotProps={{
+                list: {
+                  sx: { py: 1 }
+                },
+                paper: {
+                  sx: {
+                    bgcolor: "rgba(8, 9, 12, 0.96)",
+                    backdropFilter: "blur(24px)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: "20px",
+                    mt: 1.5,
+                    minWidth: 320,
+                    boxShadow: `0 20px 50px rgba(0,0,0,0.6), 0 0 30px ${brandColor}0a`
+                  }
+                }
+              }}
+            >
+              {resources.map((res, idx) => (
+                <MenuItem
+                  key={idx}
+                  component={RouterLink}
+                  to={res.path}
+                  onClick={handleCloseMenu}
+                  sx={{
+                    py: 1.8,
+                    px: 2.5,
+                    borderRadius: "14px",
+                    mx: 1.2,
+                    mb: idx === resources.length - 1 ? 0 : 0.8,
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      bgcolor: `${brandColor}0d`,
+                      "& .menu-icon": { color: brandColor }
+                    }
+                  }}
+                >
+                  <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+                    <Box sx={{ display: "flex", mt: 0.2 }}>
+                      {res.icon}
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 850, color: "#fff", fontFamily: "Space Grotesk" }}>
+                        {res.label}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.3, fontSize: "0.72rem" }}>
+                        {res.desc}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </MenuItem>
+              ))}
+            </Menu>
+
           </Box>
         )}
 
-        {/* Actions - Hidden on mobile (< md), shown in drawer instead */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 2.5, md: 2 } }}>
-          {connected && (
+        {/* Right Side Actions & Authentication controls */}
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+          
+          {/* Send Tip (when connected) */}
+          {connected && !isMobile && (
             <Button
               variant="contained"
               onClick={() => setTipModalOpen(true)}
+              startIcon={<BoltIcon sx={{ color: "#000" }} />}
               sx={{
-                height: 44,
-                borderRadius: "14px",
+                height: 42,
+                borderRadius: "12px",
                 fontWeight: 800,
-                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                color: theme.palette.mode === "dark" ? "#000" : "#fff",
-                display: { xs: "none", md: "flex" },
-                boxShadow: `0 4px 15px ${theme.palette.primary.main}4d`,
+                fontSize: "0.85rem",
+                bgcolor: brandColor,
+                color: "#000",
+                boxShadow: `0 4px 15px ${brandColor}40`,
                 transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 "&:hover": {
-                  transform: "translateY(-2px)",
-                  boxShadow: `0 8px 25px ${theme.palette.primary.main}80`,
+                  bgcolor: brandColor,
+                  transform: "translateY(-1px)",
+                  boxShadow: `0 6px 20px ${brandColor}66`
                 }
               }}
             >
@@ -166,77 +363,143 @@ export default function Navbar() {
             </Button>
           )}
 
-          <Box sx={{
-            display: "block", // Always show the wallet button
-            "& .wallet-adapter-button": {
-              height: { xs: "38px", md: "44px" },
-              borderRadius: "14px",
-              fontWeight: 700,
-              px: { xs: 1.5, md: 3 },
-              fontSize: { xs: "0.8rem", md: "0.95rem" },
-              background: "rgba(255,255,255,0.05) !important",
-              border: "1px solid rgba(255,255,255,0.1) !important",
-              transition: "all 0.3s ease !important",
-              "&:hover": {
-                background: "rgba(255,255,255,0.1) !important",
-                borderColor: "rgba(255,255,255,0.2) !important",
-                transform: "translateY(-2px)",
-                boxShadow: "0 8px 20px rgba(0,0,0,0.2) !important"
+          {/* Standard Web3 Wallet Adapter Button */}
+          <Box 
+            sx={{
+              display: "block",
+              "& .wallet-adapter-button": {
+                height: "42px",
+                borderRadius: "12px",
+                fontWeight: 700,
+                px: { xs: 1.5, md: 2.5 },
+                fontSize: { xs: "0.78rem", md: "0.88rem" },
+                background: "rgba(255,255,255,0.03) !important",
+                border: "1px solid rgba(255,255,255,0.06) !important",
+                transition: "all 0.3s ease !important",
+                "&:hover": {
+                  background: "rgba(255,255,255,0.08) !important",
+                  borderColor: "rgba(255,255,255,0.12) !important",
+                  transform: "translateY(-1px)"
+                }
               }
-            }
-          }}>
+            }}
+          >
             <WalletMultiButton />
           </Box>
 
-          {connected && !isAuthenticated && (
+          {/* High-Conversion glowing signature prompt */}
+          {connected && !isAuthenticated && !isMobile && (
             <Button
               variant="contained"
               onClick={login}
               disabled={isLoading}
+              startIcon={<VpnKeyIcon sx={{ color: "#000", fontSize: "0.9rem" }} />}
               sx={{
-                height: 44,
-                borderRadius: "14px",
-                fontWeight: 700,
-                background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                backdropFilter: "blur(10px)",
-                display: { xs: "none", md: "flex" },
-                color: "#fff",
-                "&:hover": { background: "rgba(255,255,255,0.15)" }
+                height: 42,
+                borderRadius: "12px",
+                fontWeight: 800,
+                fontSize: "0.85rem",
+                background: `linear-gradient(135deg, ${brandColor} 0%, ${secondaryColor} 100%)`,
+                color: "#000",
+                boxShadow: `0 0 15px ${brandColor}66`,
+                transition: "all 0.3s ease",
+                "&:hover": { 
+                  transform: "translateY(-1px)",
+                  boxShadow: `0 0 25px ${brandColor}99`
+                }
               }}
             >
-              {isLoading ? "Signing..." : "Sign In"}
+              {isLoading ? "Signing..." : "Authenticate Profile"}
             </Button>
           )}
 
-          {isAuthenticated && (
-            <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 1.5 }}>
-              {/* Profile Icon Button */}
-              <Tooltip title="My Profile" arrow>
-                <IconButton
-                  component={RouterLink}
-                  to={`/profile/${walletAddress}`}
-                  sx={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: "10px",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    color: "text.primary",
-                    transition: "all 0.2s",
-                    "&:hover": {
-                      color: "primary.main",
-                      borderColor: "primary.main",
-                      bgcolor: "rgba(255, 255, 255, 0.05)"
-                    }
-                  }}
-                >
-                  <PersonIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
+          {/* Dynamic Creator Control Hub Capsule (Authenticated) */}
+          {isAuthenticated && !isMobile && (
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+              
+              {/* Profile glass Capsule */}
+              <Stack 
+                direction="row" 
+                spacing={1.8} 
+                component={RouterLink}
+                to={`/profile/${walletAddress}`}
+                sx={{ 
+                  alignItems: "center", 
+                  p: 0.4, 
+                  pl: 0.4, 
+                  pr: 2, 
+                  borderRadius: "16px", 
+                  bgcolor: "rgba(255,255,255,0.02)", 
+                  border: "1px solid rgba(255,255,255,0.06)",
+                  textDecoration: "none",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    bgcolor: "rgba(255,255,255,0.05)",
+                    borderColor: `${brandColor}44`,
+                    boxShadow: `0 0 15px ${brandColor}0a`
+                  }
+                }}
+              >
+                {/* Boring Avatar */}
+                <Box sx={{ width: 34, height: 34, borderRadius: "10px", overflow: "hidden", display: "flex" }}>
+                  <BoringAvatar 
+                    size={34} 
+                    name={user?.username || walletAddress || "guest"} 
+                    variant="marble" 
+                    colors={[brandColor, secondaryColor, "#00F0FF", "#FF007A", "#FFB800"]} 
+                  />
+                </Box>
+                
+                <Box>
+                  <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#fff", fontSize: "0.85rem", lineHeight: 1.1 }}>
+                      {user?.username || shortAddress}
+                    </Typography>
+                    <CheckCircleIcon sx={{ color: "success.main", fontSize: "0.95rem" }} />
+                  </Stack>
+                  
+                  {user?.is_premium ? (
+                    <Typography variant="caption" sx={{ color: "#FFD700", fontWeight: 900, fontSize: "0.68rem", display: "flex", alignItems: "center", gap: 0.3 }}>
+                      GOLD MEMBER 👑
+                    </Typography>
+                  ) : (
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, fontSize: "0.68rem" }}>
+                      Standard Creator
+                    </Typography>
+                  )}
+                </Box>
+              </Stack>
 
-              {/* Premium & Verified Icons */}
-              {user?.is_premium ? (
-                <Tooltip title="Premium Member" arrow>
+              {/* Gold subscription sweep trigger */}
+              {!user?.is_premium ? (
+                <Tooltip title="Unlock Gold Theme & Custom Skins" arrow>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => setSubModalOpen(true)}
+                    startIcon={<DiamondIcon sx={{ color: "#000", fontSize: "0.85rem !important" }} />}
+                    sx={{
+                      height: 38,
+                      borderRadius: "10px",
+                      fontWeight: 900,
+                      fontSize: "0.75rem",
+                      px: 2,
+                      background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+                      color: "#000",
+                      boxShadow: "0 0 10px rgba(255, 215, 0, 0.2)",
+                      transition: "all 0.2s",
+                      "&:hover": {
+                        background: "linear-gradient(135deg, #ffea00 0%, #ffb400 100%)",
+                        transform: "scale(1.03)",
+                        boxShadow: "0 0 18px rgba(255, 215, 0, 0.4)"
+                      }
+                    }}
+                  >
+                    Go Gold 👑
+                  </Button>
+                </Tooltip>
+              ) : (
+                <Tooltip title="Premium Gold Enabled" arrow>
                   <IconButton
                     disableRipple
                     sx={{
@@ -253,96 +516,82 @@ export default function Navbar() {
                     <DiamondIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
-              ) : (
-                <>
-                  <Tooltip title="Go Premium" arrow>
-                    <IconButton
-                      onClick={() => setSubModalOpen(true)}
-                      sx={{
-                        width: 38,
-                        height: 38,
-                        borderRadius: "10px",
-                        background: "rgba(255, 215, 0, 0.1)",
-                        border: "1px solid rgba(255, 215, 0, 0.3)",
-                        color: "#FFD700",
-                        boxShadow: "0 0 10px rgba(255, 215, 0, 0.15)",
-                        transition: "all 0.2s",
-                        "&:hover": {
-                          background: "rgba(255, 215, 0, 0.2)",
-                          borderColor: "#FFD700",
-                          transform: "scale(1.05)"
-                        }
-                      }}
-                    >
-                      <DiamondIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-
-                  <Tooltip title="Verified Account" arrow>
-                    <IconButton
-                      disableRipple
-                      sx={{
-                        width: 38,
-                        height: 38,
-                        borderRadius: "10px",
-                        border: "1px solid rgba(16, 185, 129, 0.2)",
-                        bgcolor: "rgba(16, 185, 129, 0.05)",
-                        color: "success.main",
-                        cursor: "default"
-                      }}
-                    >
-                      <CheckCircleIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </>
               )}
 
-              {/* Logout Button */}
-              <Tooltip title="Logout" arrow>
-                <IconButton
-                  onClick={logout}
-                  size="medium"
-                  sx={{
-                    width: 38,
-                    height: 38,
-                    bgcolor: "rgba(239, 68, 68, 0.05)",
-                    color: "error.main",
-                    borderRadius: "10px",
-                    border: "1px solid rgba(239, 68, 68, 0.1)",
-                    transition: "all 0.2s",
-                    "&:hover": {
-                      bgcolor: "rgba(239, 68, 68, 0.1)",
-                      borderColor: "rgba(239, 68, 68, 0.3)",
-                      transform: "scale(1.05)"
-                    }
-                  }}
-                >
-                  <LogoutIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
+              {/* Utility actions */}
+              <Stack direction="row" spacing={0.8} sx={{ alignItems: "center" }}>
+                {/* Settings gears icon */}
+                <Tooltip title="Creator Profile Settings" arrow>
+                  <IconButton
+                    component={RouterLink}
+                    to="/settings"
+                    sx={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: "10px",
+                      border: "1px solid rgba(255, 255, 255, 0.06)",
+                      bgcolor: "rgba(255, 255, 255, 0.02)",
+                      color: "text.secondary",
+                      transition: "all 0.2s",
+                      "&:hover": {
+                        color: brandColor,
+                        borderColor: brandColor,
+                        bgcolor: `${brandColor}08`
+                      }
+                    }}
+                  >
+                    <SettingsIcon sx={{ fontSize: "1.1rem" }} />
+                  </IconButton>
+                </Tooltip>
+
+                {/* Logout trigger */}
+                <Tooltip title="Sign Out Profile" arrow>
+                  <IconButton
+                    onClick={logout}
+                    sx={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: "10px",
+                      border: "1px solid rgba(239, 68, 68, 0.15)",
+                      bgcolor: "rgba(239, 68, 68, 0.03)",
+                      color: "error.main",
+                      transition: "all 0.2s",
+                      "&:hover": {
+                        bgcolor: "rgba(239, 68, 68, 0.08)",
+                        borderColor: "rgba(239, 68, 68, 0.4)",
+                        transform: "scale(1.03)"
+                      }
+                    }}
+                  >
+                    <LogoutIcon sx={{ fontSize: "1.1rem" }} />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+
+            </Stack>
           )}
 
-          {isMobile && connected && (
+          {/* Mobile drawer trigger */}
+          {isMobile && (
             <IconButton
               color="inherit"
               aria-label="open drawer"
-              edge="start"
               onClick={() => setMobileOpen(true)}
               sx={{
-                bgcolor: "rgba(255,255,255,0.05)",
-                borderRadius: "12px",
-                border: "1px solid rgba(255,255,255,0.1)",
+                bgcolor: "rgba(255,255,255,0.03)",
+                borderRadius: "10px",
+                border: "1px solid rgba(255,255,255,0.06)",
                 p: 1
               }}
             >
               <MenuIcon />
             </IconButton>
           )}
-        </Box>
+
+        </Stack>
       </Toolbar>
 
-      {/* Mobile Drawer */}
+      {/* Structured Mobile Drawer */}
       <Drawer
         variant="temporary"
         anchor="right"
@@ -353,77 +602,144 @@ export default function Navbar() {
           display: { xs: "block", md: "none" },
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
-            width: 300,
-            background: "rgba(10, 10, 15, 0.95)",
-            backdropFilter: "blur(24px)",
+            width: 310,
+            background: "rgba(10, 10, 15, 0.96)",
+            backdropFilter: "blur(30px)",
             borderLeft: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "-10px 0 40px rgba(0,0,0,0.5)"
+            boxShadow: "-10px 0 45px rgba(0,0,0,0.6)"
           },
         }}
       >
-        <Box sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" }}>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 4 }}>
+        <Box sx={{ p: 3.5, display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" }}>
+          
+          {/* Header Mobile Drawer */}
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Box sx={{ width: 32, height: 32, borderRadius: "8px", background: (theme) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`, display: "flex", alignItems: "center", justifyContent: "center", mr: 1.5 }}>
-                <BoltIcon sx={{ color: "#fff", fontSize: 20 }} />
+              <Box 
+                sx={{ 
+                  width: 32, height: 32, borderRadius: "8px", 
+                  background: `linear-gradient(135deg, ${brandColor} 0%, ${secondaryColor} 100%)`, 
+                  display: "flex", alignItems: "center", justifyContent: "center", mr: 1.5 
+                }}
+              >
+                <BoltIcon sx={{ color: "#000", fontSize: 20 }} />
               </Box>
-              <Typography variant="h6" sx={{ fontWeight: 900 }}>Menu</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 950, fontFamily: "Space Grotesk" }}>SolChat Menu</Typography>
             </Box>
             <IconButton onClick={() => setMobileOpen(false)} sx={{ color: "text.secondary" }}>
               <CloseIcon />
             </IconButton>
           </Box>
 
-          {navItems.length > 1 && (
-            <List sx={{ flexGrow: 1 }}>
-              {navItems.map((item) => {
-                const active = isActive(item.path);
-                return (
-                  <ListItem key={item.label} disablePadding sx={{ mb: 1 }}>
-                    <ListItemButton
-                      component={RouterLink}
-                      to={item.path}
-                      onClick={() => setMobileOpen(false)}
-                      sx={{
-                        borderRadius: "12px",
-                        bgcolor: active ? "rgba(255,255,255,0.05)" : "transparent",
-                        border: active ? "1px solid rgba(255,255,255,0.05)" : "1px solid transparent",
-                        "&:hover": { bgcolor: "rgba(255,255,255,0.08)" }
-                      }}
-                    >
+          {/* Primary Mobile Navigation links */}
+          <List>
+            {navItems.map((item) => {
+              const active = isActive(item.path);
+              return (
+                <ListItem key={item.label} disablePadding sx={{ mb: 0.5 }}>
+                  <ListItemButton
+                    component={RouterLink}
+                    to={item.path}
+                    onClick={() => setMobileOpen(false)}
+                    sx={{
+                      borderRadius: "12px",
+                      bgcolor: active ? "rgba(255,255,255,0.04)" : "transparent",
+                      "&:hover": { bgcolor: "rgba(255,255,255,0.06)" }
+                    }}
+                  >
+                    <ListItemText
+                      primary={item.label}
+                      slotProps={{ primary: { sx: { fontWeight: active ? 800 : 600, color: active ? brandColor : "text.primary", fontSize: "0.92rem" } } }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </List>
+
+          <Divider sx={{ my: 2, opacity: 0.08 }} />
+
+          {/* Mobile Dropdown Sub-menu Resources links */}
+          <Typography variant="overline" sx={{ fontWeight: 900, px: 2, py: 1, letterSpacing: "0.15em", color: brandColor, fontSize: "0.68rem" }}>
+            Explore Resources
+          </Typography>
+          
+          <List sx={{ mb: 2 }}>
+            {resources.map((res, idx) => {
+              const active = isActive(res.path);
+              return (
+                <ListItem key={idx} disablePadding sx={{ mb: 0.5 }}>
+                  <ListItemButton
+                    component={RouterLink}
+                    to={res.path}
+                    onClick={() => setMobileOpen(false)}
+                    sx={{
+                      borderRadius: "12px",
+                      bgcolor: active ? "rgba(255,255,255,0.04)" : "transparent",
+                      py: 1,
+                      "&:hover": { bgcolor: "rgba(255,255,255,0.06)" }
+                    }}
+                  >
+                    <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                      <Box sx={{ display: "flex", color: active ? brandColor : "text.secondary" }}>
+                        {res.icon}
+                      </Box>
                       <ListItemText
-                        primary={item.label}
-                        slotProps={{ primary: { sx: { fontWeight: active ? 800 : 600, color: active ? "#fff" : "text.secondary" } } }}
+                        primary={res.label}
+                        secondary={res.desc}
+                        slotProps={{ 
+                          primary: { sx: { fontWeight: active ? 800 : 700, color: active ? "#fff" : "text.primary", fontSize: "0.88rem" } },
+                          secondary: { sx: { fontSize: "0.68rem", color: "text.secondary" } }
+                        }}
                       />
-                    </ListItemButton>
-                  </ListItem>
-                );
-              })}
-            </List>
-          )}
+                    </Stack>
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </List>
 
-          <Divider sx={{ my: 3, opacity: 0.1 }} />
+          <Divider sx={{ my: 2, opacity: 0.08 }} />
 
+          {/* Mobile Profile & Authorization Actions Drawer Footer */}
           <Box sx={{ mt: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
+            
+            {/* Authenticated User mobile Capsule */}
             {isAuthenticated && (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <Chip
-                  icon={user?.is_premium ? <DiamondIcon sx={{ fontSize: "1.1rem !important", color: "#FFD700 !important" }} /> : <CheckCircleIcon sx={{ fontSize: "1.1rem !important" }} />}
-                  label={user?.is_premium ? "Premium Member" : "Verified Account"}
-                  color={user?.is_premium ? "warning" : "success"}
-                  variant="outlined"
-                  size="medium"
-                  sx={{
-                    width: "100%",
-                    height: 44,
-                    borderRadius: "14px",
-                    fontWeight: 700,
-                    bgcolor: user?.is_premium ? "rgba(255, 215, 0, 0.05)" : "rgba(16, 185, 129, 0.05)",
-                    borderColor: user?.is_premium ? "rgba(255, 215, 0, 0.3)" : "rgba(16, 185, 129, 0.2)",
-                    boxShadow: user?.is_premium ? "0 0 15px rgba(255, 215, 0, 0.2)" : "0 0 10px rgba(16, 185, 129, 0.1)",
-                    color: user?.is_premium ? "#FFD700" : "success.main"
+                
+                {/* Mobile User Summary capsule */}
+                <Stack 
+                  direction="row" 
+                  spacing={2} 
+                  sx={{ 
+                    p: 2, 
+                    borderRadius: "16px", 
+                    bgcolor: "rgba(255,255,255,0.02)", 
+                    border: "1px solid rgba(255,255,255,0.05)",
+                    alignItems: "center" 
                   }}
-                />
+                >
+                  <Box sx={{ width: 38, height: 38, borderRadius: "10px", overflow: "hidden", display: "flex" }}>
+                    <BoringAvatar 
+                      size={38} 
+                      name={user?.username || walletAddress || "guest"} 
+                      variant="marble" 
+                      colors={[brandColor, secondaryColor, "#00F0FF", "#FF007A", "#FFB800"]} 
+                    />
+                  </Box>
+                  <Box>
+                    <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#fff" }}>
+                        {user?.username || shortAddress}
+                      </Typography>
+                      <CheckCircleIcon sx={{ color: "success.main", fontSize: "1rem" }} />
+                    </Stack>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      {user?.is_premium ? "Gold Premium Member 👑" : "Standard Verified Creator"}
+                    </Typography>
+                  </Box>
+                </Stack>
 
                 <Button
                   component={RouterLink}
@@ -432,10 +748,23 @@ export default function Navbar() {
                   color="primary"
                   fullWidth
                   onClick={() => setMobileOpen(false)}
-                  sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800 }}
+                  sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800 }}
                   startIcon={<PersonIcon />}
                 >
-                  My Profile
+                  My Public Profile
+                </Button>
+
+                <Button
+                  component={RouterLink}
+                  to="/settings"
+                  variant="outlined"
+                  color="inherit"
+                  fullWidth
+                  onClick={() => setMobileOpen(false)}
+                  sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800, color: "text.secondary" }}
+                  startIcon={<SettingsIcon />}
+                >
+                  Profile Settings
                 </Button>
 
                 {!user?.is_premium && (
@@ -448,23 +777,21 @@ export default function Navbar() {
                     }}
                     sx={{
                       py: 1.5,
-                      borderRadius: "14px",
+                      borderRadius: "12px",
                       fontWeight: 800,
                       background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
                       color: "#000",
-                      boxShadow: "0 0 15px rgba(255, 215, 0, 0.3)",
-                      "&:hover": {
-                        background: "linear-gradient(135deg, #ffea00 0%, #ffb400 100%)"
-                      }
+                      boxShadow: "0 0 15px rgba(255, 215, 0, 0.3)"
                     }}
                     startIcon={<DiamondIcon />}
                   >
-                    Go Premium
+                    Go Premium Gold 👑
                   </Button>
                 )}
               </Box>
             )}
 
+            {/* Send Tip trigger */}
             {connected && (
               <Button
                 variant="contained"
@@ -474,27 +801,38 @@ export default function Navbar() {
                   setTipModalOpen(true);
                 }}
                 sx={{
-                  py: 1.5, borderRadius: "14px", fontWeight: 800,
-                  background: (theme) => `linear-gradient(135deg, ${theme.palette.secondary?.main || theme.palette.primary.main} 0%, ${theme.palette.primary.main} 100%)`,
-                  color: "#fff",
-                  boxShadow: (theme) => `0 4px 15px ${theme.palette.primary.main}4d`
+                  py: 1.5, 
+                  borderRadius: "12px", 
+                  fontWeight: 800,
+                  bgcolor: brandColor,
+                  color: "#000",
+                  boxShadow: `0 4px 15px ${brandColor}4d`
                 }}
               >
                 Send Tip
               </Button>
             )}
 
+            {/* Connected but unauthenticated signature trigger */}
             {connected && !isAuthenticated && (
               <Button
                 variant="contained"
                 fullWidth
                 onClick={login}
-                sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, bgcolor: "rgba(255,255,255,0.1)", color: "#fff" }}
+                sx={{ 
+                  py: 1.5, 
+                  borderRadius: "12px", 
+                  fontWeight: 800, 
+                  background: `linear-gradient(135deg, ${brandColor} 0%, ${secondaryColor} 100%)`,
+                  color: "#000",
+                  boxShadow: `0 0 15px ${brandColor}66`
+                }}
               >
-                Sign In
+                Authenticate Profile
               </Button>
             )}
 
+            {/* Authenticated Logout */}
             {isAuthenticated && (
               <Button
                 variant="outlined"
@@ -504,17 +842,19 @@ export default function Navbar() {
                   logout();
                   setMobileOpen(false);
                 }}
-                sx={{ py: 1.5, borderRadius: "14px", fontWeight: 800, borderColor: "rgba(239, 68, 68, 0.3)" }}
+                sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800, borderColor: "rgba(239, 68, 68, 0.3)" }}
                 startIcon={<LogoutIcon />}
               >
-                Logout
+                Sign Out
               </Button>
             )}
+
           </Box>
+
         </Box>
       </Drawer>
 
-      {/* Tipping Modal */}
+      {/* Tipping Dialog Modal */}
       <Dialog
         open={tipModalOpen}
         onClose={() => setTipModalOpen(false)}
@@ -548,7 +888,8 @@ export default function Navbar() {
           <TipForm />
         </Box>
       </Dialog>
-      {/* Subscription Modal */}
+
+      {/* Premium Subscription Modal */}
       <SubscriptionModal
         open={subModalOpen}
         onClose={() => setSubModalOpen(false)}
