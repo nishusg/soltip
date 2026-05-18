@@ -87,7 +87,7 @@ export default function RecentTips() {
       const hrs = Math.floor(diff / 3600000);
       return `${hrs}h ago`;
     }
-    return date.toLocaleDateString();
+    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
   return (
