@@ -23,11 +23,11 @@ interface SEOProps {
 }
 
 export default function SEO({ 
-  title = "SolChat — Solana-Powered Superchats", 
-  description = "The premier superchat and tipping platform for Solana creators. Experience instant on-stream alerts and non-custodial tipping.",
+  title = "SolChat — Solana-Powered Creator Superchats & OBS stream alerts", 
+  description = "The premier superchat, alerts, and tipping platform for Solana creators. Experience instant on-stream alerts and non-custodial tipping.",
   image = "/og-image.png",
   url,
-  keywords = "solana, superchat, tips, streamers, crypto tipping, obs alerts, web3, creator tools",
+  keywords = "crypto donations for streamers, solana donations, web3 superchat, obs crypto overlay, twitch crypto tipping, youtube crypto donations, phantom wallet donations, instant creator payments, wallet based tipping, on chain superchat, decentralized creator monetization, solana, superchats, creator monetization, live stream alerts",
   faqs,
   creatorProfile
 }: SEOProps) {
