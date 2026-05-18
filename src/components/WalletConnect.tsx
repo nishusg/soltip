@@ -4,6 +4,7 @@ import { Box, Typography, Card, CardContent, Button, Container, Grid, TextField,
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import BoringAvatar from "boring-avatars";
 import toast from "react-hot-toast";
+import SEO from "./SEO";
 
 // Material Icons
 import FlashOnIcon from "@mui/icons-material/FlashOn";
@@ -73,6 +74,11 @@ export default function WalletConnect() {
 
   return (
     <Box sx={{ position: "relative", overflow: "hidden", pb: 12 }}>
+      <SEO 
+        title="Solana-Powered Creator Superchats & OBS stream alerts"
+        description="The premier superchat, alerts, and tipping layer for Solana creators. Connect Phantom or Solflare, claim your public username, and set up dynamic OBS overlay triggers."
+        faqs={faqs}
+      />
       
       {/* Spinning Conic Orbs Backdrop */}
       <Box

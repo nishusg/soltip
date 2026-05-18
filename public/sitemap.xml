@@ -1,15 +1,114 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Core Landing Page -->
   <url>
     <loc>https://solchat.io/</loc>
-    <lastmod>2026-05-11</lastmod>
+    <lastmod>2026-05-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- High-converting Pricing Hub -->
   <url>
-    <loc>https://solchat.io/leaderboard</loc>
-    <lastmod>2026-05-11</lastmod>
+    <loc>https://solchat.io/pricing</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- How It Works Tipping Guide -->
+  <url>
+    <loc>https://solchat.io/how-it-works</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- OBS Overlay Setup Guide -->
+  <url>
+    <loc>https://solchat.io/obs-overlay</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Platform Verticals -->
+  <url>
+    <loc>https://solchat.io/for-youtube</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://solchat.io/for-kick</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://solchat.io/for-streamlabs</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://solchat.io/for-content-creators</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Transparency & Audits -->
+  <url>
+    <loc>https://solchat.io/security</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Blog Hub -->
+  <url>
+    <loc>https://solchat.io/blog</loc>
+    <lastmod>2026-05-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
+  </url>
+
+  <!-- Individual SEO Blog Posts -->
+  <url>
+    <loc>https://solchat.io/blog/how-to-accept-crypto-donations-on-twitch</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://solchat.io/blog/best-obs-overlay-for-solana-donations</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://solchat.io/blog/how-streamers-avoid-high-platform-fees</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://solchat.io/blog/crypto-superchat-vs-youtube-superchat</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://solchat.io/blog/how-wallet-based-donations-work</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://solchat.io/blog/best-solana-tools-for-creators</loc>
+    <lastmod>2026-05-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>

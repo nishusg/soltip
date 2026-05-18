@@ -318,6 +318,15 @@ export default function PublicProfilePage() {
           <SEO 
             title={`${creator.name || creator.username} (@${creator.username})`}
             description={creator.bio || `Watch streams, click social links, and send instant tip superchats to @${creator.username} on SolChat.`}
+            image={creator.avatar_url || "/og-image.png"}
+            keywords={`solana, tipping, superchat, creator, ${creator.username}, ${creator.name || ""}, stream alerts, web3`}
+            creatorProfile={{
+              name: creator.name || creator.username || "",
+              bio: creator.bio || `Solana stream creator on SolChat.`,
+              avatarUrl: creator.avatar_url || "",
+              walletAddress: creator.wallet_address || "",
+              socials: creator.socials
+            }}
           />
 
           {/* ---- Banner Profile Header Card ---- */}

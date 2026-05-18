@@ -163,6 +163,24 @@ export default function ObsOverlayPage() {
       <SEO 
         title="OBS Overlay Integration — Setup Twitch & OBS Crypto Alerts" 
         description="Configure your OBS superchat overlay with SolChat. Full guide for Twitch crypto donations OBS, transparency settings, Streamlabs support, and Solana stream alerts."
+        faqs={[
+          {
+            q: "What are OBS crypto alerts and how fast do they display?",
+            a: "OBS crypto alerts are live graphic and audio stream notifications triggered when a supporter sends cryptocurrency (like SOL) directly to your wallet. SolChat’s WebSocket gateway monitors the Solana blockchain in real-time, displaying alert updates on your Twitch stream in under 300 milliseconds."
+          },
+          {
+            q: "Do I need to chroma key my OBS superchat overlay to make it transparent?",
+            a: "No! Our OBS superchat overlay outputs clean HTML rendering with a 0% alpha background. OBS Studio and Streamlabs automatically read this transparent layer natively. You do not need to apply green-screen or chroma key filters to make it float perfectly above your gaming layout."
+          },
+          {
+            q: "How do I connect Twitch crypto donations in OBS with SolChat?",
+            a: "Accepting Twitch crypto donations OBS alerts is incredibly simple. Connect your Solana browser wallet (like Phantom or Solflare) to SolChat, copy your custom tip link, and add it to your Twitch panels or chat bots (like Nightbot or Streamlabs Cloudbot). Then, add the secret overlay URL as a browser source inside OBS Studio. When viewers click your link and send a tip, the overlay alerts automatically fire."
+          },
+          {
+            q: "Can I configure custom audios for different Solana stream alerts?",
+            a: "Absolutely! Inside your creator dashboard, you can fully configure different alert sounds, customized alert GIF graphics, custom CSS, custom volumes, and sound settings that automatically update your Solana stream alerts overlay without needing to adjust the OBS browser source settings."
+          }
+        ]}
       />
 
       {/* Background radial ambient lights */}

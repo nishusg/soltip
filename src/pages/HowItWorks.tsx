@@ -102,6 +102,24 @@ export default function HowItWorks() {
       <SEO 
         title="How It Works — Streaming Crypto Tips Overlay Guide" 
         description="Learn how SolChat connects viewers to creators using secure wallet based tipping, instant crypto donations for streamers, and customizable OBS stream tipping overlays."
+        faqs={[
+          {
+            q: "What is SolChat and how does a solana superchat work?",
+            a: "SolChat is a non-custodial crypto monetization gateway built explicitly for creators and broadcasters. A solana superchat is an on-stream donation alert backed by instant P2P blockchain transactions. When a viewer donates SOL, our web socket integration senses the cryptographic ledger update instantly and triggers an visual notification directly in the streamer's OBS stream."
+          },
+          {
+            q: "How does the platform fee compare to traditional portals?",
+            a: "We charge a minimal flat 5% platform fee to fund hostings, stream overlays, and high-speed websocket gateways. In comparison, traditional streaming portals take 30% to 50% commission cuts and hold your funds for weeks. On SolChat, 95% of the tip splits directly to your personal wallet in under 2 seconds, offering high-speed payouts with maximum creator margins."
+          },
+          {
+            q: "What wallets are supported for wallet based tipping?",
+            a: "We support all standard web3 Solana wallets including Phantom, Solflare, Backpack, and Ledger through the Solana Wallet Adapter. On mobile devices, SolChat interfaces seamlessly using Mobile Wallet Adapter (MWA) links, allowing viewers to securely sign transactions inside their local wallet app in one tap."
+          },
+          {
+            q: "How do I set up a stream tipping overlay inside OBS Studio?",
+            a: "Setup is extremely simple! Connect your wallet, click on the Dashboard inside the navigation bar, and select 'Generate OBS Overlay Token'. Copy your unique secret URL, open OBS Studio, add a new 'Browser Source', paste the link, and configure the resolution to 1920x1080. You can now use the live 'Send Test Alert' button on your dashboard to test and verify animations and sounds immediately."
+          }
+        ]}
       />
 
       {/* Decorative Orbs */}

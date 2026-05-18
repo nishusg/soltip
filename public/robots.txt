@@ -2,6 +2,9 @@ User-agent: *
 Allow: /
 Disallow: /settings
 Disallow: /dashboard
-Disallow: /overlay
+Disallow: /activity
+Disallow: /obs-overlay
+Disallow: /overlay/
+Disallow: /unauthorized
 
 Sitemap: https://solchat.io/sitemap.xml

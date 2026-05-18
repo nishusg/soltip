@@ -146,6 +146,7 @@ export default function PricingPage() {
       <SEO 
         title="Creator-First Pricing & Fee Transparency | SolChat" 
         description="Simple, open, and transparent pricing. Flat 5% platform fee + micro Solana network gas. No monthly subscriptions, no chargebacks, and instant P2P payouts." 
+        faqs={faqs}
       />
 
       {/* Dynamic Background Glowing Orbs */}
