@@ -101,6 +101,11 @@ export async function getTransactionStatus(tx_hash: string) {
   return api(`/tx/status/${tx_hash}`);
 }
 
+/** Request a refund for a transaction (creator auth required) */
+// export async function refundTransaction(txId: string) {
+//   return api(`/tx/${txId}/refund`, { method: "POST" });
+// }
+
 // ---------------------------------------------------------------------------
 // Stats endpoints
 // ---------------------------------------------------------------------------
