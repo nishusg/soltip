@@ -125,8 +125,29 @@ export async function getUserProfile(wallet: string) {
   return api(`/stats/user/${wallet}`);
 }
 
+/** Get a public creator's profile by their unique username slug */
+export async function getPublicProfileByUsername(username: string) {
+  return api(`/stats/username/${username}`);
+}
+
 /** Update the creator profile for the authenticated user */
-export async function updateProfile(data: { name?: string; bio?: string; avatar_url?: string }) {
+export async function updateProfile(data: {
+  name?: string;
+  bio?: string;
+  avatar_url?: string;
+  username?: string;
+  socials?: {
+    twitter?: string;
+    twitch?: string;
+    youtube?: string;
+    kick?: string;
+    discord?: string;
+  };
+  stream_embed?: {
+    platform?: string;
+    channel?: string;
+  };
+}) {
   return api("/creators/profile", {
     method: "PUT",
     body: JSON.stringify(data),

@@ -43,6 +43,7 @@ const PricingPage = React.lazy(() => import("./pages/PricingPage"));
 const SecurityPage = React.lazy(() => import("./pages/SecurityPage"));
 const BlogPage = React.lazy(() => import("./pages/BlogPage"));
 const BlogPostPage = React.lazy(() => import("./pages/BlogPostPage"));
+const PublicProfilePage = React.lazy(() => import("./pages/PublicProfilePage"));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -125,6 +126,8 @@ function AppLayout() {
           <Route path="/settings" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
           <Route path="/overlay/:walletAddress" element={<OverlayPage />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          {/* Public SEO profile page — must be last to avoid intercepting static routes */}
+          <Route path="/:username" element={<PublicProfilePage />} />
         </Routes>
       </Suspense>
 

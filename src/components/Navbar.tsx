@@ -159,7 +159,7 @@ export default function Navbar() {
             color: "inherit",
             cursor: "pointer",
             "&:hover .brand-icon-box": { 
-              transform: "rotate(360deg) scale(1.05)",
+              transform: "scale(1.05)",
               boxShadow: `0 0 30px ${brandColor}99`
             },
             "&:hover .brand-text": {
@@ -179,7 +179,7 @@ export default function Navbar() {
               justifyContent: "center",
               mr: 1.8,
               boxShadow: `0 0 20px ${brandColor}4d`,
-              transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease",
+              transition: "transform 0.3s ease, box-shadow 0.3s ease",
               position: "relative"
             }}
           >
