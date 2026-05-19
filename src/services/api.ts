@@ -120,6 +120,13 @@ export async function getDashboardData() {
   return api("/stats/dashboard");
 }
 
+/** Get creator leaderboard with optional timeframe */
+export async function getLeaderboard(timeframe?: string) {
+  const query = timeframe ? `?timeframe=${timeframe}` : "";
+  return api(`/stats/leaderboard${query}`);
+}
+
+
 /** Get a user's profile and recent tips (both sent and received) */
 export async function getUserProfile(wallet: string) {
   return api(`/stats/user/${wallet}`);

@@ -1,31 +1,126 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { API_BASE } from "../shared/constants";
 import { useRealtimeTips } from "../hooks/useRealtimeTips";
-import { Box, Typography, Card, CardContent, CircularProgress, List, Avatar, Chip, Pagination } from "@mui/material";
+import { getLeaderboard, getUserProfile } from "../services/api";
+import { useWalletAuth } from "../hooks/useWalletAuth";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  CircularProgress,
+  List,
+  Avatar,
+  Chip,
+  Pagination,
+  Tabs,
+  Tab,
+  TextField,
+  InputAdornment,
+  Collapse,
+  Button,
+  Grid,
+  Divider,
+  Paper,
+  Tooltip,
+  Zoom,
+  Fade,
+  Grow,
+  IconButton
+} from "@mui/material";
 import BoringAvatar from "boring-avatars";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import PersonIcon from "@mui/icons-material/Person";
+import SearchIcon from "@mui/icons-material/Search";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import LaunchIcon from "@mui/icons-material/Launch";
+import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
+import StarIcon from "@mui/icons-material/Star";
 
 interface Creator {
   wallet_address: string;
   name: string;
+  avatar_url?: string;
   total_received: number;
   is_premium?: boolean;
+}
+
+interface TipDetail {
+  tx_hash: string;
+  sender_wallet: string;
+  sender_name?: string;
+  amount: number;
+  message: string;
+  timestamp: string;
+}
+
+interface CreatorDetailsState {
+  loading: boolean;
+  tips: TipDetail[];
+  error?: string;
 }
 
 export default function CreatorLeaderboard() {
   const [creators, setCreators] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const { newTip } = useRealtimeTips();
+  const [timeframe, setTimeframe] = useState<"alltime" | "monthly" | "weekly">("alltime");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedCreator, setExpandedCreator] = useState<string | null>(null);
+  const [creatorDetails, setCreatorDetails] = useState<Record<string, CreatorDetailsState>>({});
+  const [recentUpdates, setRecentUpdates] = useState<Record<string, { amount: number; timestamp: number }>>({});
 
+  const { newTip } = useRealtimeTips();
+  const { user } = useWalletAuth();
+
+  const itemsPerPage = 10;
+
+  // ---------------------------------------------------------------------------
+  // Load Leaderboard
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    async function fetchLeaderboard() {
+      setLoading(true);
+      try {
+        const data = await getLeaderboard(timeframe);
+        setCreators(data.creators || []);
+      } catch (err) {
+        console.error("Failed to fetch leaderboard:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchLeaderboard();
+  }, [timeframe]);
+
+  // ---------------------------------------------------------------------------
+  // Handle Realtime Socket Tips
+  // ---------------------------------------------------------------------------
   useEffect(() => {
     if (newTip && newTip.creator_wallet && newTip.amount) {
       setCreators((prev) => {
         const existingIndex = prev.findIndex((c) => c.wallet_address === newTip.creator_wallet);
         let updatedList = [...prev];
+
+        // Trigger visual pulse/glowing feedback for this creator
+        setRecentUpdates((prevUpdates) => ({
+          ...prevUpdates,
+          [newTip.creator_wallet]: {
+            amount: newTip.amount,
+            timestamp: Date.now()
+          }
+        }));
+
+        // Reset the animation class after 3 seconds
+        setTimeout(() => {
+          setRecentUpdates((prevUpdates) => {
+            const next = { ...prevUpdates };
+            delete next[newTip.creator_wallet];
+            return next;
+          });
+        }, 3000);
 
         if (existingIndex >= 0) {
           updatedList[existingIndex] = {
@@ -35,8 +130,9 @@ export default function CreatorLeaderboard() {
         } else {
           updatedList.push({
             wallet_address: newTip.creator_wallet,
-            name: "",
+            name: newTip.sender_name || "", // fall back
             total_received: newTip.amount,
+            is_premium: false,
           });
         }
 
@@ -46,27 +142,45 @@ export default function CreatorLeaderboard() {
     }
   }, [newTip]);
 
-  useEffect(() => {
-    async function fetchLeaderboard() {
-      setLoading(true);
+  // ---------------------------------------------------------------------------
+  // On-demand Tip Detail Expansion
+  // ---------------------------------------------------------------------------
+  const handleExpandRow = async (walletAddress: string) => {
+    if (expandedCreator === walletAddress) {
+      setExpandedCreator(null);
+      return;
+    }
+    setExpandedCreator(walletAddress);
+
+    if (!creatorDetails[walletAddress]) {
+      setCreatorDetails((prev) => ({
+        ...prev,
+        [walletAddress]: { loading: true, tips: [] }
+      }));
+
       try {
-        const res = await fetch(
-          `${API_BASE}/stats/leaderboard`
+        const profileData = await getUserProfile(walletAddress);
+        const receivedTips = (profileData.recent_tips || []).filter(
+          (tip: TipDetail) => tip.sender_wallet !== walletAddress
         );
-        if (res.ok) {
-          const data = await res.json();
-          setCreators(data.creators || []);
-        }
+
+        setCreatorDetails((prev) => ({
+          ...prev,
+          [walletAddress]: { loading: false, tips: receivedTips.slice(0, 5) }
+        }));
       } catch (err) {
-        console.error("Failed to fetch leaderboard:", err);
-      } finally {
-        setLoading(false);
+        console.error("Failed to load creator tips details:", err);
+        setCreatorDetails((prev) => ({
+          ...prev,
+          [walletAddress]: { loading: false, tips: [], error: "Failed to load recent activity." }
+        }));
       }
     }
+  };
 
-    fetchLeaderboard();
-  }, []);
-
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
   function shorten(addr: string): string {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   }
@@ -75,141 +189,524 @@ export default function CreatorLeaderboard() {
     return (lamports / LAMPORTS_PER_SOL).toFixed(4);
   }
 
+  // ---------------------------------------------------------------------------
+  // Search & Filtering
+  // ---------------------------------------------------------------------------
+  const filteredCreators = useMemo(() => {
+    return creators.filter((c) => {
+      const nameMatch = c.name?.toLowerCase().includes(searchQuery.toLowerCase());
+      const walletMatch = c.wallet_address.toLowerCase().includes(searchQuery.toLowerCase());
+      return nameMatch || walletMatch;
+    });
+  }, [creators, searchQuery]);
+
+  // ---------------------------------------------------------------------------
+  // Podium Logic (Top 3)
+  // ---------------------------------------------------------------------------
+  // We only show the separate visual podium on larger screens when there's no active search
+  const showPodium = creators.length >= 3 && !searchQuery;
+
+  const firstPlace = showPodium ? creators[0] : null;
+  const secondPlace = showPodium ? creators[1] : null;
+  const thirdPlace = showPodium ? creators[2] : null;
+
+  // The remaining list of creators displayed underneath
+  const remainingCreators = useMemo(() => {
+    return showPodium ? filteredCreators.slice(3) : filteredCreators;
+  }, [filteredCreators, showPodium]);
+
+  // Pagination slicing
+  const totalPages = Math.ceil(remainingCreators.length / itemsPerPage);
+  const paginatedCreators = useMemo(() => {
+    return remainingCreators.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  }, [remainingCreators, page]);
+
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+    document.getElementById("leaderboard-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  // Current logged in user's rank
+  const loggedInUserRank = useMemo(() => {
+    if (!user || !user.wallet_address) return null;
+    const index = creators.findIndex((c) => c.wallet_address === user.wallet_address);
+    return index >= 0 ? index + 1 : null;
+  }, [creators, user]);
+
   return (
-    <Box sx={{ maxWidth: 900, mx: "auto", py: { xs: 4, md: 8 }, px: 2, position: "relative" }}>
-      {/* Decorative Blur Backgrounds */}
+    <Box sx={{ maxWidth: 1000, mx: "auto", py: { xs: 4, md: 8 }, px: 2, position: "relative", pb: loggedInUserRank ? 16 : 8 }}>
+      {/* Dynamic CSS animations for new tip pulsing */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes realTimeTipPulse {
+          0% {
+            border-color: #14F195;
+            box-shadow: 0 0 0 0 rgba(20, 241, 149, 0.7);
+            transform: translateY(-4px) scale(1.015);
+          }
+          50% {
+            border-color: #14F195;
+            box-shadow: 0 0 25px 8px rgba(20, 241, 149, 0.4);
+            transform: translateY(-4px) scale(1.015);
+          }
+          100% {
+            transform: translateY(0) scale(1);
+          }
+        }
+        .pulse-new-tip {
+          animation: realTimeTipPulse 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+          background: linear-gradient(135deg, rgba(20, 241, 149, 0.15) 0%, rgba(20, 241, 149, 0.03) 100%) !important;
+        }
+        @keyframes shine {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .gold-shine {
+          background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.15), transparent);
+          background-size: 200% 100%;
+          animation: shine 3s infinite linear;
+        }
+      `}} />
+
+      {/* Background Decorative Mesh Gradients */}
       <Box
         sx={{
-          position: "absolute", top: "10%", left: "-10%", width: "40%", height: "40%",
-          background: (theme: any) => `radial-gradient(circle, ${theme.palette.primary.main}26 0%, transparent 70%)`,
-          zIndex: -1, filter: "blur(80px)"
+          position: "absolute", top: "5%", left: "-5%", width: "45%", height: "40%",
+          background: (theme: any) => `radial-gradient(circle, ${theme.palette.primary.main}1a 0%, transparent 70%)`,
+          zIndex: -1, filter: "blur(90px)"
         }}
       />
       <Box
         sx={{
-          position: "absolute", bottom: "10%", right: "-10%", width: "40%", height: "40%",
-          background: (theme: any) => `radial-gradient(circle, ${theme.palette.secondary?.main || theme.palette.primary.main}26 0%, transparent 70%)`,
-          zIndex: -1, filter: "blur(80px)"
+          position: "absolute", bottom: "15%", right: "-5%", width: "45%", height: "40%",
+          background: (theme: any) => `radial-gradient(circle, ${theme.palette.secondary?.main || theme.palette.primary.main}1a 0%, transparent 70%)`,
+          zIndex: -1, filter: "blur(90px)"
         }}
       />
 
-      <Box sx={{ textAlign: "center", mb: 8 }} className="fade-in-up">
+      {/* Leaderboard Header */}
+      <Box sx={{ textAlign: "center", mb: 6 }} className="fade-in-up">
         <Typography
           id="leaderboard-title"
           variant="h2"
-          component="h2"
+          component="h1"
           gutterBottom
           sx={{
-            fontWeight: 800,
+            fontWeight: 900,
+            fontSize: { xs: "2.5rem", sm: "3.75rem" },
             background: (theme: any) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary?.main || theme.palette.primary.main} 100%)`,
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
-            mb: 2
+            mb: 2,
+            letterSpacing: "-0.03em"
           }}
         >
           Ecosystem Leaders
         </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400, maxWidth: 600, mx: "auto" }}>
-          The absolute legends driving the Solana superchat economy. 
-          Support your favorites to push them up the ranks!
+        <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400, maxWidth: 650, mx: "auto", fontSize: { xs: "0.95rem", sm: "1.15rem" } }}>
+          The legends driving the Solana superchat economy.
+          Send a superchat tip to your favorite creator to propel them up the ranks!
         </Typography>
       </Box>
 
+      {/* Control Panel: Timeframe Tabs & Search Bar */}
+      <Card sx={{ mb: 6, p: 2, bgcolor: "rgba(255, 255, 255, 0.02)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.06)" }}>
+        <Grid container spacing={3} sx={{ alignItems: "center" }}>
+          <Grid size={{ xs: 12, md: 7 }}>
+            <Tabs
+              value={timeframe}
+              onChange={(_e, v) => { setTimeframe(v); setPage(1); }}
+              indicatorColor="primary"
+              textColor="primary"
+              sx={{
+                minHeight: 48,
+                "& .MuiTabs-flexContainer": {
+                  gap: 1.5
+                },
+                "& .MuiTab-root": {
+                  borderRadius: "12px",
+                  fontWeight: 800,
+                  fontSize: "0.9rem",
+                  minHeight: 40,
+                  py: 1,
+                  px: 3,
+                  color: "rgba(255, 255, 255, 0.5)",
+                  transition: "all 0.2s ease",
+                  "&.Mui-selected": {
+                    color: "#fff",
+                    bgcolor: "rgba(255,255,255,0.05)",
+                  },
+                  "&:hover": {
+                    color: "#fff",
+                    bgcolor: "rgba(255,255,255,0.02)",
+                  }
+                },
+                "& .MuiTabs-indicator": {
+                  height: 3,
+                  borderRadius: "3px"
+                }
+              }}
+            >
+              <Tab value="alltime" label="All Time" />
+              <Tab value="monthly" label="Monthly (30d)" />
+              <Tab value="weekly" label="Weekly (7d)" />
+            </Tabs>
+          </Grid>
+          <Grid size={{ xs: 12, md: 5 }}>
+            <TextField
+              fullWidth
+              value={searchQuery}
+              onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+              placeholder="Search by name or wallet..."
+              variant="outlined"
+              size="small"
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: "text.secondary" }} />
+                    </InputAdornment>
+                  ),
+                }
+              }}
+            />
+          </Grid>
+        </Grid>
+      </Card>
+
+      {/* Loading State */}
       {loading && (
         <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", py: 12 }}>
-          <CircularProgress size={48} thickness={4} sx={{ mb: 3, color: "primary.main" }} />
-          <Typography color="text.secondary" sx={{ letterSpacing: "0.1em", textTransform: "uppercase", fontSize: "0.8rem", fontWeight: 700 }}>
-            Fetching Legends...
+          <CircularProgress size={52} thickness={4.5} sx={{ mb: 3 }} />
+          <Typography color="text.secondary" sx={{ letterSpacing: "0.15em", textTransform: "uppercase", fontSize: "0.75rem", fontWeight: 900 }}>
+            Loading Leaderboard...
           </Typography>
         </Box>
       )}
 
-      {!loading && creators.length === 0 && (
-        <Card sx={{ textAlign: "center", py: 10, bgcolor: "rgba(255,255,255,0.02)", backdropFilter: "blur(10px)" }}>
+      {/* Empty State */}
+      {!loading && filteredCreators.length === 0 && (
+        <Card sx={{ textAlign: "center", py: 10, bgcolor: "rgba(255,255,255,0.01)", backdropFilter: "blur(10px)", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: "24px" }}>
           <CardContent>
-            <EmojiEventsIcon sx={{ fontSize: 80, color: "rgba(255,255,255,0.1)", mb: 3 }} />
-            <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
-              No legends yet.
+            <EmojiEventsIcon sx={{ fontSize: 72, color: "rgba(255,255,255,0.06)", mb: 3 }} />
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 800 }}>
+              No creators found
             </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Be the first to send a tip and start the journey!
+            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, mx: "auto" }}>
+              {searchQuery ? "Try refining your search query or check the wallet address." : "Be the first to tip a creator and launch the leaderboard!"}
             </Typography>
           </CardContent>
         </Card>
       )}
 
-      {!loading && creators.length > 0 && (() => {
-        const itemsPerPage = 10;
-        const totalPages = Math.ceil(creators.length / itemsPerPage);
-        const paginatedCreators = creators.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+      {/* Podium Display (Top 3 on larger screens) */}
+      {!loading && showPodium && (
+        <Grid
+          container
+          spacing={3}
+          sx={{
+            mb: 8,
+            display: { xs: "none", md: "flex" },
+            justifyContent: "center",
+            alignItems: "flex-end"
+          }}
+        >
+          {/* 2ND PLACE (SILVER) */}
+          {secondPlace && (
+            <Grid size={{ xs: 12, md: 3.8 }}>
+              <Grow in={true} timeout={600}>
+                <Card
+                  onClick={() => handleExpandRow(secondPlace.wallet_address)}
+                  className={recentUpdates[secondPlace.wallet_address] ? "pulse-new-tip" : ""}
+                  sx={{
+                    position: "relative",
+                    borderRadius: "24px",
+                    border: "1px solid rgba(192, 192, 192, 0.3)",
+                    boxShadow: "0 10px 30px rgba(192, 192, 192, 0.05)",
+                    textAlign: "center",
+                    p: 3,
+                    cursor: "pointer",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    "&:hover": {
+                      transform: "translateY(-6px)",
+                      borderColor: "rgba(192, 192, 192, 0.8)",
+                      boxShadow: "0 20px 40px rgba(192, 192, 192, 0.15)",
+                    }
+                  }}
+                >
+                  {/* Platform Glow Side Border */}
+                  <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: 5, bgcolor: "#c0c0c0" }} />
+                  <Typography variant="h4" sx={{ fontWeight: 900, color: "#c0c0c0", opacity: 0.8, mb: 1 }}>🥈 2nd</Typography>
+                  <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                    <Box sx={{ p: 0.5, border: "2px solid #c0c0c0", borderRadius: "50%" }}>
+                      <BoringAvatar size={76} name={secondPlace.name || secondPlace.wallet_address} variant="beam" colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
+                    </Box>
+                  </Box>
+                  <Typography variant="h6" noWrap sx={{ fontWeight: 800 }}>{secondPlace.name || shorten(secondPlace.wallet_address)}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shorten(secondPlace.wallet_address)}</Typography>
+                  
+                  <Box sx={{ bgcolor: "rgba(192, 192, 192, 0.1)", py: 1, px: 2, borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: 0.5, mb: 2 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: "#fff", display: "flex", alignItems: "baseline" }}>
+                      {formatSol(secondPlace.total_received)}
+                      <Typography component="span" variant="caption" sx={{ ml: 0.5, fontWeight: 700, color: "#c0c0c0" }}>SOL</Typography>
+                    </Typography>
+                  </Box>
 
-        const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
-          setPage(value);
-          document.getElementById("leaderboard-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
-        };
+                  {recentUpdates[secondPlace.wallet_address] && (
+                    <Chip
+                      size="small"
+                      icon={<ElectricBoltIcon />}
+                      label={`+${formatSol(recentUpdates[secondPlace.wallet_address].amount)} SOL`}
+                      color="success"
+                      sx={{ position: "absolute", top: 12, right: 12, fontWeight: 800, animation: "bounce 1s infinite" }}
+                    />
+                  )}
 
-        return (
-          <>
-            <List sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-              {paginatedCreators.map((creator, index) => {
-                const absoluteRank = (page - 1) * itemsPerPage + index;
-                const isTop3 = absoluteRank < 3;
-                const rankColors = ["#ffd700", "#c0c0c0", "#cd7f32"];
-                const rankGlows = [
-                  "0 0 30px rgba(255, 215, 0, 0.25)",
-                  "0 0 30px rgba(192, 192, 192, 0.2)",
-                  "0 0 30px rgba(205, 127, 50, 0.15)"
-                ];
+                  <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+                    <Button component={RouterLink} to={`/profile/${secondPlace.wallet_address}`} variant="contained" color="secondary" size="small" sx={{ borderRadius: "8px", py: 0.5, px: 2 }}>
+                      Support <LaunchIcon sx={{ fontSize: 12, ml: 0.5 }} />
+                    </Button>
+                    <IconButton size="small" color="inherit">
+                      {expandedCreator === secondPlace.wallet_address ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                    </IconButton>
+                  </Box>
 
-                return (
-                  <Card
-                    key={creator.wallet_address}
-                    className="fade-in-up"
-                    component={RouterLink}
-                    to={`/profile/${creator.wallet_address}`}
+                  <Collapse in={expandedCreator === secondPlace.wallet_address}>
+                    <CreatorDetails details={creatorDetails[secondPlace.wallet_address]} />
+                  </Collapse>
+                </Card>
+              </Grow>
+            </Grid>
+          )}
+
+          {/* 1ST PLACE (GOLD) */}
+          {firstPlace && (
+            <Grid size={{ xs: 12, md: 4.4 }}>
+              <Grow in={true} timeout={300}>
+                <Card
+                  onClick={() => handleExpandRow(firstPlace.wallet_address)}
+                  className={recentUpdates[firstPlace.wallet_address] ? "pulse-new-tip" : ""}
+                  sx={{
+                    position: "relative",
+                    borderRadius: "28px",
+                    border: "2px solid #ffd700",
+                    boxShadow: "0 15px 45px rgba(255, 215, 0, 0.15)",
+                    textAlign: "center",
+                    p: 4.5,
+                    cursor: "pointer",
+                    overflow: "hidden",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    "&:hover": {
+                      transform: "translateY(-10px)",
+                      boxShadow: "0 25px 60px rgba(255, 215, 0, 0.25)",
+                    }
+                  }}
+                >
+                  <Box className="gold-shine" sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none" }} />
+                  <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: 6, bgcolor: "#ffd700" }} />
+                  
+                  <Typography variant="h3" sx={{ fontWeight: 900, color: "#ffd700", mb: 1, textShadow: "0 0 10px rgba(255,215,0,0.5)" }}>👑 1st</Typography>
+                  <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                    <Box sx={{ p: 0.5, border: "3px solid #ffd700", borderRadius: "50%", boxShadow: "0 0 20px rgba(255,215,0,0.3)" }}>
+                      <BoringAvatar size={90} name={firstPlace.name || firstPlace.wallet_address} variant="beam" colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
+                    </Box>
+                  </Box>
+                  <Typography variant="h5" noWrap sx={{ fontWeight: 900, color: "#ffd700" }}>{firstPlace.name || shorten(firstPlace.wallet_address)}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shorten(firstPlace.wallet_address)}</Typography>
+                  
+                  <Box sx={{ bgcolor: "rgba(255, 215, 0, 0.15)", py: 1, px: 2.5, borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: 0.5, mb: 2, border: "1px solid rgba(255,215,0,0.3)" }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, color: "#ffd700", display: "flex", alignItems: "baseline" }}>
+                      {formatSol(firstPlace.total_received)}
+                      <Typography component="span" variant="caption" sx={{ ml: 0.5, fontWeight: 700, color: "#ffd700" }}>SOL</Typography>
+                    </Typography>
+                  </Box>
+
+                  {recentUpdates[firstPlace.wallet_address] && (
+                    <Chip
+                      size="small"
+                      icon={<ElectricBoltIcon style={{ color: "#ffd700" }} />}
+                      label={`+${formatSol(recentUpdates[firstPlace.wallet_address].amount)} SOL`}
+                      color="success"
+                      sx={{ position: "absolute", top: 12, right: 12, fontWeight: 800 }}
+                    />
+                  )}
+
+                  <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+                    <Button component={RouterLink} to={`/profile/${firstPlace.wallet_address}`} variant="contained" size="small" sx={{ borderRadius: "8px", py: 0.5, px: 2, background: "linear-gradient(135deg, #ffd700, #ffa500)", color: "#000", "&:hover": { background: "linear-gradient(135deg, #ffe066, #ffb31a)" } }}>
+                      Support <LaunchIcon sx={{ fontSize: 12, ml: 0.5 }} />
+                    </Button>
+                    <IconButton size="small" color="inherit">
+                      {expandedCreator === firstPlace.wallet_address ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                    </IconButton>
+                  </Box>
+
+                  <Collapse in={expandedCreator === firstPlace.wallet_address}>
+                    <CreatorDetails details={creatorDetails[firstPlace.wallet_address]} />
+                  </Collapse>
+                </Card>
+              </Grow>
+            </Grid>
+          )}
+
+          {/* 3RD PLACE (BRONZE) */}
+          {thirdPlace && (
+            <Grid size={{ xs: 12, md: 3.8 }}>
+              <Grow in={true} timeout={900}>
+                <Card
+                  onClick={() => handleExpandRow(thirdPlace.wallet_address)}
+                  className={recentUpdates[thirdPlace.wallet_address] ? "pulse-new-tip" : ""}
+                  sx={{
+                    position: "relative",
+                    borderRadius: "24px",
+                    border: "1px solid rgba(205, 127, 50, 0.3)",
+                    boxShadow: "0 10px 30px rgba(205, 127, 50, 0.05)",
+                    textAlign: "center",
+                    p: 3,
+                    cursor: "pointer",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    "&:hover": {
+                      transform: "translateY(-6px)",
+                      borderColor: "rgba(205, 127, 50, 0.8)",
+                      boxShadow: "0 20px 40px rgba(205, 127, 50, 0.15)",
+                    }
+                  }}
+                >
+                  <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: 5, bgcolor: "#cd7f32" }} />
+                  <Typography variant="h4" sx={{ fontWeight: 900, color: "#cd7f32", opacity: 0.8, mb: 1 }}>🥉 3rd</Typography>
+                  <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+                    <Box sx={{ p: 0.5, border: "2px solid #cd7f32", borderRadius: "50%" }}>
+                      <BoringAvatar size={70} name={thirdPlace.name || thirdPlace.wallet_address} variant="beam" colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
+                    </Box>
+                  </Box>
+                  <Typography variant="h6" noWrap sx={{ fontWeight: 800 }}>{thirdPlace.name || shorten(thirdPlace.wallet_address)}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shorten(thirdPlace.wallet_address)}</Typography>
+                  
+                  <Box sx={{ bgcolor: "rgba(205, 127, 50, 0.1)", py: 1, px: 2, borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: 0.5, mb: 2 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: "#fff", display: "flex", alignItems: "baseline" }}>
+                      {formatSol(thirdPlace.total_received)}
+                      <Typography component="span" variant="caption" sx={{ ml: 0.5, fontWeight: 700, color: "#cd7f32" }}>SOL</Typography>
+                    </Typography>
+                  </Box>
+
+                  {recentUpdates[thirdPlace.wallet_address] && (
+                    <Chip
+                      size="small"
+                      icon={<ElectricBoltIcon />}
+                      label={`+${formatSol(recentUpdates[thirdPlace.wallet_address].amount)} SOL`}
+                      color="success"
+                      sx={{ position: "absolute", top: 12, right: 12, fontWeight: 800 }}
+                    />
+                  )}
+
+                  <Box sx={{ display: "flex", justifyContent: "center", gap: 1 }}>
+                    <Button component={RouterLink} to={`/profile/${thirdPlace.wallet_address}`} variant="contained" color="secondary" size="small" sx={{ borderRadius: "8px", py: 0.5, px: 2 }}>
+                      Support <LaunchIcon sx={{ fontSize: 12, ml: 0.5 }} />
+                    </Button>
+                    <IconButton size="small" color="inherit">
+                      {expandedCreator === thirdPlace.wallet_address ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                    </IconButton>
+                  </Box>
+
+                  <Collapse in={expandedCreator === thirdPlace.wallet_address}>
+                    <CreatorDetails details={creatorDetails[thirdPlace.wallet_address]} />
+                  </Collapse>
+                </Card>
+              </Grow>
+            </Grid>
+          )}
+        </Grid>
+      )}
+
+      {/* Main Leaderboard List */}
+      {!loading && remainingCreators.length > 0 && (
+        <Box sx={{ mt: 2 }}>
+          {showPodium && (
+            <Typography variant="h5" sx={{ fontWeight: 900, mb: 3, letterSpacing: "-0.01em" }}>
+              Legend Rankings
+            </Typography>
+          )}
+
+          <List sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {paginatedCreators.map((creator, index) => {
+              // Rank index relative to the main collection
+              const globalIndex = showPodium ? index + 3 + (page - 1) * itemsPerPage : index + (page - 1) * itemsPerPage;
+              const isTop3 = globalIndex < 3;
+              const isCurrentUser = user && user.wallet_address === creator.wallet_address;
+              const isUpdating = !!recentUpdates[creator.wallet_address];
+
+              // Colors based on ranking
+              const rankColors = ["#ffd700", "#c0c0c0", "#cd7f32"];
+              const borderStyle = isCurrentUser
+                ? "2px solid #38BDF8"
+                : creator.is_premium
+                  ? "1px solid rgba(255, 215, 0, 0.4)"
+                  : isTop3
+                    ? `1px solid ${rankColors[globalIndex]}66`
+                    : "1px solid rgba(255,255,255,0.06)";
+
+              const backgroundStyle = isCurrentUser
+                ? "rgba(56, 189, 248, 0.08)"
+                : creator.is_premium
+                  ? "linear-gradient(135deg, rgba(255, 215, 0, 0.07) 0%, rgba(255, 215, 0, 0.02) 100%)"
+                  : isTop3
+                    ? `linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%)`
+                    : "rgba(255,255,255,0.02)";
+
+              const glowBoxShadow = isCurrentUser
+                ? "0 0 25px rgba(56, 189, 248, 0.15)"
+                : creator.is_premium
+                  ? "0 0 25px rgba(255, 215, 0, 0.08)"
+                  : isTop3
+                    ? `0 0 25px ${rankColors[globalIndex]}1a`
+                    : "0 4px 15px rgba(0,0,0,0.15)";
+
+              return (
+                <Card
+                  key={creator.wallet_address}
+                  id={`creator-card-${creator.wallet_address}`}
+                  onClick={() => handleExpandRow(creator.wallet_address)}
+                  className={`fade-in-up ${isUpdating ? "pulse-new-tip" : ""}`}
+                  sx={{
+                    display: "block",
+                    p: 0,
+                    textDecoration: "none",
+                    color: "inherit",
+                    background: backgroundStyle,
+                    border: borderStyle,
+                    boxShadow: glowBoxShadow,
+                    borderRadius: "20px",
+                    cursor: "pointer",
+                    overflow: "hidden",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      borderColor: isCurrentUser ? "#38BDF8" : creator.is_premium ? "#FFD700" : "rgba(255,255,255,0.25)",
+                      boxShadow: isCurrentUser
+                        ? "0 10px 30px rgba(56, 189, 248, 0.25)"
+                        : creator.is_premium
+                          ? "0 10px 30px rgba(255, 215, 0, 0.18)"
+                          : "0 10px 30px rgba(255,255,255,0.05)"
+                    }
+                  }}
+                >
+                  <Box
                     sx={{
                       display: "flex",
                       alignItems: "center",
-                      p: { xs: 2.5, sm: 3.5 },
-                      position: "relative",
-                      overflow: "hidden",
-                      textDecoration: "none",
-                      color: "inherit",
-                      background: creator.is_premium
-                        ? "linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%)"
-                        : isTop3
-                          ? `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)`
-                          : "rgba(255,255,255,0.03)",
-                      backdropFilter: "blur(16px)",
-                      border: creator.is_premium
-                        ? "1px solid rgba(255, 215, 0, 0.4)"
-                        : isTop3 
-                          ? `1px solid ${rankColors[absoluteRank]}66` 
-                          : "1px solid rgba(255,255,255,0.05)",
-                      boxShadow: creator.is_premium
-                        ? "0 0 30px rgba(255, 215, 0, 0.15)"
-                        : isTop3 ? rankGlows[absoluteRank] : "0 4px 20px rgba(0,0,0,0.2)",
-                      borderRadius: "20px",
-                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                      "&:hover": {
-                        transform: "translateY(-6px) scale(1.01)",
-                        border: creator.is_premium ? "1px solid #FFD700" : undefined,
-                        boxShadow: creator.is_premium ? "0 20px 40px rgba(255, 215, 0, 0.2)" : undefined
-                      },
-                      animationDelay: `${index * 0.05}s`,
+                      p: { xs: 2, sm: 3.5 },
+                      position: "relative"
                     }}
                   >
-                    {/* Accent Line for Top 3 or Premium */}
-                    {(isTop3 || creator.is_premium) && (
+                    {/* Visual Indicator Lines */}
+                    {(isTop3 || creator.is_premium || isCurrentUser) && (
                       <Box
                         sx={{
                           position: "absolute",
                           top: 0,
                           left: 0,
-                          width: 6,
+                          width: 5,
                           height: "100%",
-                          bgcolor: creator.is_premium ? "#FFD700" : rankColors[absoluteRank],
-                          boxShadow: `0 0 10px ${creator.is_premium ? "#FFD700" : rankColors[absoluteRank]}`
+                          bgcolor: isCurrentUser ? "#38BDF8" : creator.is_premium ? "#FFD700" : rankColors[globalIndex],
+                          boxShadow: `0 0 10px ${isCurrentUser ? "#38BDF8" : creator.is_premium ? "#FFD700" : rankColors[globalIndex]}`
                         }}
                       />
                     )}
@@ -217,37 +714,61 @@ export default function CreatorLeaderboard() {
                     {/* Rank Badge */}
                     <Box
                       sx={{
-                        width: { xs: 45, sm: 60 },
-                        height: { xs: 45, sm: 60 },
+                        width: { xs: 40, sm: 50 },
+                        height: { xs: 40, sm: 50 },
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         borderRadius: "50%",
-                        bgcolor: creator.is_premium ? "rgba(255, 215, 0, 0.1)" : isTop3 ? `${rankColors[absoluteRank]}15` : "rgba(255,255,255,0.04)",
-                        border: `2px solid ${creator.is_premium ? "#FFD700" : isTop3 ? rankColors[absoluteRank] + "66" : "rgba(255,255,255,0.1)"}`,
-                        color: creator.is_premium ? "#FFD700" : isTop3 ? rankColors[absoluteRank] : "text.secondary",
-                        fontSize: isTop3 ? { xs: "1.2rem", sm: "1.5rem" } : "1.1rem",
+                        bgcolor: isCurrentUser
+                          ? "rgba(56, 189, 248, 0.1)"
+                          : creator.is_premium
+                            ? "rgba(255, 215, 0, 0.08)"
+                            : isTop3
+                              ? `${rankColors[globalIndex]}12`
+                              : "rgba(255,255,255,0.03)",
+                        border: `1.5px solid ${isCurrentUser ? "#38BDF8" : creator.is_premium ? "#FFD700" : isTop3 ? rankColors[globalIndex] + "66" : "rgba(255,255,255,0.08)"}`,
+                        color: isCurrentUser
+                          ? "#38BDF8"
+                          : creator.is_premium
+                            ? "#FFD700"
+                            : isTop3
+                              ? rankColors[globalIndex]
+                              : "text.secondary",
+                        fontSize: isTop3 ? { xs: "1rem", sm: "1.25rem" } : "0.95rem",
                         fontWeight: 900,
-                        mr: { xs: 2, sm: 3 },
+                        mr: { xs: 1.5, sm: 3 },
                         flexShrink: 0
                       }}
                     >
-                      {absoluteRank === 0 ? "👑" : absoluteRank + 1}
+                      {globalIndex === 0 ? "👑" : globalIndex + 1}
                     </Box>
 
                     {/* Avatar */}
                     <Box
                       sx={{
-                        width: { xs: 45, sm: 55 },
-                        height: { xs: 45, sm: 55 },
-                        mr: { xs: 2, sm: 3 },
-                        p: 0.4,
+                        width: { xs: 44, sm: 52 },
+                        height: { xs: 44, sm: 52 },
+                        mr: { xs: 1.5, sm: 3 },
+                        p: 0.3,
                         borderRadius: "50%",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        bgcolor: creator.is_premium ? 'rgba(255, 215, 0, 0.2)' : isTop3 ? `${rankColors[absoluteRank]}33` : 'rgba(255,255,255,0.1)',
-                        border: creator.is_premium ? '1px solid #FFD700' : isTop3 ? `1px solid ${rankColors[absoluteRank]}88` : '1px solid rgba(255,255,255,0.1)',
+                        bgcolor: isCurrentUser
+                          ? "rgba(56, 189, 248, 0.2)"
+                          : creator.is_premium
+                            ? "rgba(255, 215, 0, 0.15)"
+                            : isTop3
+                              ? `${rankColors[globalIndex]}22`
+                              : "rgba(255,255,255,0.08)",
+                        border: isCurrentUser
+                          ? "1px solid #38BDF8"
+                          : creator.is_premium
+                            ? "1px solid #FFD700"
+                            : isTop3
+                              ? `1px solid ${rankColors[globalIndex]}66`
+                              : "1px solid rgba(255,255,255,0.08)",
                         flexShrink: 0
                       }}
                     >
@@ -261,17 +782,33 @@ export default function CreatorLeaderboard() {
 
                     {/* Info */}
                     <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                        <Typography variant="h6" noWrap sx={{ fontWeight: 800, fontSize: { xs: "1rem", sm: "1.25rem" }, color: creator.is_premium ? "#FFD700" : "inherit" }}>
+                      <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1, mb: 0.5 }}>
+                        <Typography variant="h6" noWrap sx={{ fontWeight: 800, fontSize: { xs: "0.95rem", sm: "1.15rem" }, color: creator.is_premium ? "#FFD700" : isCurrentUser ? "#38BDF8" : "inherit" }}>
                           {creator.name || shorten(creator.wallet_address)}
                         </Typography>
+
+                        {isCurrentUser && (
+                          <Chip
+                            label="YOU"
+                            size="small"
+                            sx={{
+                              height: 18,
+                              fontSize: "0.6rem",
+                              fontWeight: 900,
+                              bgcolor: "primary.main",
+                              color: "#000",
+                              px: 0.5
+                            }}
+                          />
+                        )}
+
                         {creator.is_premium && (
                           <Chip
                             label="PREMIUM"
                             size="small"
                             sx={{
-                              height: 20,
-                              fontSize: "0.65rem",
+                              height: 18,
+                              fontSize: "0.6rem",
                               fontWeight: 900,
                               background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
                               color: "#000",
@@ -280,85 +817,320 @@ export default function CreatorLeaderboard() {
                             }}
                           />
                         )}
+
                         {isTop3 && !creator.is_premium && (
                           <Chip
-                            label={["Champion", "Runner-up", "Bronze"][absoluteRank]}
+                            label={["Champion", "Runner-up", "Bronze"][globalIndex]}
                             size="small"
                             sx={{
-                              height: 20,
-                              fontSize: "0.65rem",
+                              height: 18,
+                              fontSize: "0.6rem",
                               fontWeight: 800,
                               textTransform: "uppercase",
-                              bgcolor: `${rankColors[absoluteRank]}22`,
-                              color: rankColors[absoluteRank],
-                              border: `1px solid ${rankColors[absoluteRank]}44`,
-                              display: { xs: "none", sm: "flex" }
+                              bgcolor: `${rankColors[globalIndex]}18`,
+                              color: rankColors[globalIndex],
+                              border: `1px solid ${rankColors[globalIndex]}33`,
+                              display: { xs: "none", sm: "inline-flex" }
                             }}
                           />
                         )}
                       </Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "monospace", opacity: 0.7, fontSize: { xs: "0.75rem", sm: "0.875rem" } }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "monospace", opacity: 0.65, fontSize: { xs: "0.7rem", sm: "0.8rem" } }}>
                         {shorten(creator.wallet_address)}
                       </Typography>
                     </Box>
 
                     {/* Amount */}
-                    <Box sx={{ textAlign: "right", pl: 2 }}>
-                      <Typography
-                        variant="h5"
-                        sx={{
-                          fontWeight: 900,
-                          fontSize: { xs: "1.2rem", sm: "1.7rem" },
-                          color: isTop3 ? rankColors[absoluteRank] : "primary.main",
-                          textShadow: (theme: any) => isTop3 ? `0 0 20px ${rankColors[absoluteRank]}66` : `0 0 10px ${theme.palette.primary.main}66`,
-                          display: "flex",
-                          alignItems: "baseline",
-                          justifyContent: "flex-end"
-                        }}
-                      >
-                        {formatSol(creator.total_received)}
-                        <Box component="span" sx={{ fontSize: { xs: "0.7rem", sm: "0.9rem" }, ml: 0.5, opacity: 0.8, fontWeight: 700 }}>SOL</Box>
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, display: { xs: "none", sm: "block" } }}>
-                        Total Tipped
-                      </Typography>
-                    </Box>
-                  </Card>
-                );
-              })}
-            </List>
+                    <Box sx={{ textAlign: "right", pl: 1.5, display: "flex", alignItems: "center", gap: 1.5 }}>
+                      <Box>
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            fontWeight: 900,
+                            fontSize: { xs: "1.1rem", sm: "1.5rem" },
+                            color: isCurrentUser ? "primary.main" : isTop3 ? rankColors[globalIndex] : "text.primary",
+                            textShadow: isCurrentUser
+                              ? "0 0 15px rgba(56, 189, 248, 0.2)"
+                              : isTop3
+                                ? `0 0 15px ${rankColors[globalIndex]}44`
+                                : "none",
+                            display: "flex",
+                            alignItems: "baseline",
+                            justifyContent: "flex-end"
+                          }}
+                        >
+                          {formatSol(creator.total_received)}
+                          <Box component="span" sx={{ fontSize: { xs: "0.65rem", sm: "0.8rem" }, ml: 0.5, opacity: 0.8, fontWeight: 700 }}>SOL</Box>
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, display: { xs: "none", sm: "block" } }}>
+                          Total Tipped
+                        </Typography>
+                      </Box>
 
-            {totalPages > 1 && (
-              <Box sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
-                <Pagination
-                  count={totalPages}
-                  page={page}
-                  onChange={handlePageChange}
-                  color="primary"
-                  size="large"
-                  sx={{
-                    "& .MuiPaginationItem-root": {
-                      color: "rgba(255,255,255,0.6)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      bgcolor: "rgba(255,255,255,0.02)",
-                      fontFamily: "Space Grotesk, sans-serif",
-                      fontWeight: 700,
-                      borderRadius: "8px",
-                      "&:hover": {
-                        bgcolor: "rgba(255,255,255,0.08)",
-                      },
-                      "&.Mui-selected": {
-                        boxShadow: "0 0 10px rgba(153, 69, 255, 0.3)",
-                        fontWeight: 900
-                      }
+                      {/* Expand / Launch icons */}
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                        <Tooltip title="View Profile" arrow>
+                          <Button
+                            component={RouterLink}
+                            to={`/profile/${creator.wallet_address}`}
+                            size="small"
+                            variant="text"
+                            sx={{ minWidth: 0, p: 0.5, color: "text.secondary", "&:hover": { color: "primary.main" } }}
+                          >
+                            <LaunchIcon sx={{ fontSize: 18 }} />
+                          </Button>
+                        </Tooltip>
+                        {expandedCreator === creator.wallet_address ? <ExpandLessIcon sx={{ color: "text.secondary" }} /> : <ExpandMoreIcon sx={{ color: "text.secondary" }} />}
+                      </Box>
+                    </Box>
+                  </Box>
+
+                  {/* Dynamic Expand Section */}
+                  <Collapse in={expandedCreator === creator.wallet_address}>
+                    <Box sx={{ px: { xs: 2, sm: 8 }, pb: 3 }}>
+                      <CreatorDetails details={creatorDetails[creator.wallet_address]} />
+                    </Box>
+                  </Collapse>
+                </Card>
+              );
+            })}
+          </List>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <Box sx={{ mt: 5, display: "flex", justifyContent: "center" }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+                sx={{
+                  "& .MuiPaginationItem-root": {
+                    color: "rgba(255,255,255,0.6)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    bgcolor: "rgba(255,255,255,0.02)",
+                    borderRadius: "8px",
+                    fontWeight: 700,
+                    "&:hover": {
+                      bgcolor: "rgba(255,255,255,0.08)",
+                    },
+                    "&.Mui-selected": {
+                      boxShadow: "0 0 10px rgba(56, 189, 248, 0.25)",
+                      fontWeight: 900
                     }
-                  }}
-                />
+                  }
+                }}
+              />
+            </Box>
+          )}
+        </Box>
+      )}
+
+      {/* Sticky Bottom Rank Bar for the Logged-In User */}
+      {user && loggedInUserRank && (
+        <Fade in={true}>
+          <Paper
+            elevation={8}
+            sx={{
+              position: "fixed",
+              bottom: 24,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "92%",
+              maxWidth: 680,
+              background: "linear-gradient(135deg, rgba(21, 29, 43, 0.9) 0%, rgba(11, 15, 23, 0.95) 100%)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(56, 189, 248, 0.4)",
+              borderRadius: "20px",
+              boxShadow: "0 20px 45px rgba(0,0,0,0.6), 0 0 25px rgba(56, 189, 248, 0.15)",
+              p: { xs: 1.5, sm: 2 },
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              zIndex: 1000,
+              transition: "all 0.3s ease"
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, sm: 2 } }}>
+              <Box
+                sx={{
+                  bgcolor: "primary.main",
+                  color: "#000",
+                  fontWeight: 900,
+                  fontSize: { xs: "0.95rem", sm: "1.2rem" },
+                  width: { xs: 36, sm: 44 },
+                  height: { xs: 36, sm: 44 },
+                  borderRadius: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 4px 10px rgba(56,189,248,0.3)"
+                }}
+              >
+                #{loggedInUserRank}
+              </Box>
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "primary.main", display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <StarIcon sx={{ fontSize: 16 }} /> Your Ranking
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: { xs: "none", sm: "block" } }}>
+                  Support creators to rank higher!
+                </Typography>
+              </Box>
+            </Box>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, sm: 3 } }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 900,
+                  fontSize: { xs: "1.1rem", sm: "1.4rem" },
+                  color: "#fff",
+                  display: "flex",
+                  alignItems: "baseline"
+                }}
+              >
+                {formatSol(creators[loggedInUserRank - 1]?.total_received || 0)}
+                <Typography component="span" variant="caption" sx={{ ml: 0.5, fontWeight: 700, opacity: 0.8 }}>SOL</Typography>
+              </Typography>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => {
+                  const targetCard = document.getElementById(`creator-card-${user.wallet_address}`);
+                  if (targetCard) {
+                    targetCard.scrollIntoView({ behavior: "smooth", block: "center" });
+                    // Briefly highlight or open details
+                    handleExpandRow(user.wallet_address);
+                  }
+                }}
+                sx={{
+                  borderRadius: "10px",
+                  fontWeight: 800,
+                  fontSize: "0.8rem",
+                  py: 1,
+                  px: 2
+                }}
+              >
+                Locate Me
+              </Button>
+            </Box>
+          </Paper>
+        </Fade>
+      )}
+    </Box>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Subcomponent: CreatorDetails
+// ---------------------------------------------------------------------------
+function CreatorDetails({ details }: { details?: CreatorDetailsState }) {
+  function formatSol(lamports: number): string {
+    return (lamports / LAMPORTS_PER_SOL).toFixed(4);
+  }
+
+  function formatTime(ts: string): string {
+    const date = new Date(ts);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+
+    if (diff < 60000) return "Just now";
+    if (diff < 3600000) {
+      const mins = Math.floor(diff / 60000);
+      return `${mins}m ago`;
+    }
+    if (diff < 86400000) {
+      const hrs = Math.floor(diff / 3600000);
+      return `${hrs}h ago`;
+    }
+    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+
+  if (!details) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+        <CircularProgress size={28} />
+      </Box>
+    );
+  }
+
+  if (details.loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+        <CircularProgress size={28} />
+      </Box>
+    );
+  }
+
+  if (details.error) {
+    return (
+      <Typography color="error" variant="body2" sx={{ textAlign: "center", py: 2, fontWeight: 700 }}>
+        {details.error}
+      </Typography>
+    );
+  }
+
+  if (details.tips.length === 0) {
+    return (
+      <Box sx={{ py: 3, textAlign: "center", bgcolor: "rgba(0,0,0,0.15)", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.04)" }}>
+        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+          No recent verified superchats found for this creator.
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ mt: 2, p: { xs: 2, sm: 3 }, bgcolor: "rgba(0,0,0,0.18)", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.05)" }}>
+      <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 2, color: "text.secondary", letterSpacing: "0.05em", textTransform: "uppercase", fontSize: "0.75rem" }}>
+        Recent Supporter Activity
+      </Typography>
+      
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+        {details.tips.map((tip) => (
+          <Box
+            key={tip.tx_hash}
+            sx={{
+              p: 2,
+              bgcolor: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(255,255,255,0.03)",
+              borderRadius: "12px",
+              transition: "all 0.2s",
+              "&:hover": {
+                bgcolor: "rgba(255,255,255,0.04)",
+                borderColor: "rgba(255,255,255,0.08)"
+              }
+            }}
+          >
+            <Grid container spacing={1} sx={{ justifyContent: "space-between", alignItems: "center" }}>
+              <Grid size={{ xs: 7 }}>
+                <Typography variant="body2" sx={{ fontWeight: 800, color: "text.primary" }}>
+                  {tip.sender_name || `${tip.sender_wallet.slice(0, 4)}...${tip.sender_wallet.slice(-4)}`}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {formatTime(tip.timestamp)}
+                </Typography>
+              </Grid>
+              <Grid size={{ xs: 5 }} sx={{ textAlign: "right" }}>
+                <Typography variant="body2" sx={{ color: "primary.main", fontWeight: 900, display: "inline-flex", alignItems: "baseline" }}>
+                  {formatSol(tip.amount)}
+                  <Typography component="span" variant="caption" sx={{ ml: 0.5, fontWeight: 700 }}>SOL</Typography>
+                </Typography>
+              </Grid>
+            </Grid>
+            
+            {tip.message && (
+              <Box sx={{ mt: 1.5, p: 1.5, bgcolor: "rgba(0,0,0,0.15)", borderRadius: "8px", borderLeft: "3px solid", borderColor: "secondary.main" }}>
+                <Typography variant="body2" sx={{ fontStyle: "italic", opacity: 0.9 }}>
+                  "{tip.message}"
+                </Typography>
               </Box>
             )}
-          </>
-        );
-      })()}
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 }
