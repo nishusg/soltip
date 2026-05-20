@@ -14,26 +14,26 @@
 // ============================================================================
 
 import { useState } from "react";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWalletAuth } from "../hooks/useWalletAuth";
-import { 
-  AppBar, 
-  Toolbar, 
-  Button, 
-  Box, 
-  Typography, 
-  Chip, 
-  IconButton, 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemButton, 
-  ListItemText, 
-  Divider, 
-  useTheme, 
-  useMediaQuery, 
-  Dialog, 
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  Box,
+  Typography,
+  Chip,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
+  useTheme,
+  useMediaQuery,
+  Dialog,
   Tooltip,
   Stack,
   Menu,
@@ -62,7 +62,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tipModalOpen, setTipModalOpen] = useState(false);
   const [subModalOpen, setSubModalOpen] = useState(false);
-  
+
   // Dropdown menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
@@ -70,6 +70,7 @@ export default function Navbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Theme-aware palette colors
   const brandColor = theme.palette.primary.main;
@@ -151,7 +152,7 @@ export default function Navbar() {
       <Box sx={{ height: "3px", width: "100%", background: `linear-gradient(90deg, ${brandColor} 0%, ${secondaryColor} 100%)` }} />
 
       <Toolbar sx={{ justifyContent: "space-between", py: 1.5, px: { xs: 2.5, md: 4 } }}>
-        
+
         {/* Conic Glow Brand Logo */}
         <Box
           component={RouterLink}
@@ -162,7 +163,7 @@ export default function Navbar() {
             textDecoration: "none",
             color: "inherit",
             cursor: "pointer",
-            "&:hover .brand-icon-box": { 
+            "&:hover .brand-icon-box": {
               transform: "scale(1.05)",
               boxShadow: `0 0 30px ${brandColor}99`
             },
@@ -340,7 +341,7 @@ export default function Navbar() {
 
         {/* Right Side Actions & Authentication controls */}
         <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-          
+
           {/* Send Tip (when connected) */}
           {connected && !isMobile && (
             <Button
@@ -368,7 +369,7 @@ export default function Navbar() {
           )}
 
           {/* Standard Web3 Wallet Adapter Button */}
-          <Box 
+          <Box
             sx={{
               display: "block",
               "& .wallet-adapter-button": {
@@ -407,33 +408,33 @@ export default function Navbar() {
                 color: "#000",
                 boxShadow: `0 0 15px ${brandColor}66`,
                 transition: "all 0.3s ease",
-                "&:hover": { 
+                "&:hover": {
                   transform: "translateY(-1px)",
                   boxShadow: `0 0 25px ${brandColor}99`
                 }
               }}
             >
-              {isLoading ? "Signing..." : "Authenticate Profile"}
+              {isLoading ? "Signing..." : "Login"}
             </Button>
           )}
 
           {/* Dynamic Creator Control Hub Capsule (Authenticated) */}
           {isAuthenticated && !isMobile && (
             <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-              
+
               {/* Profile glass Capsule */}
-              <Stack 
-                direction="row" 
-                spacing={1.8} 
+              <Stack
+                direction="row"
+                spacing={1.8}
                 component={RouterLink}
                 to={`/profile/${walletAddress}`}
-                sx={{ 
-                  alignItems: "center", 
-                  p: 0.4, 
-                  pl: 0.4, 
-                  pr: 2, 
-                  borderRadius: "16px", 
-                  bgcolor: "rgba(255,255,255,0.02)", 
+                sx={{
+                  alignItems: "center",
+                  p: 0.4,
+                  pl: 0.4,
+                  pr: 2,
+                  borderRadius: "16px",
+                  bgcolor: "rgba(255,255,255,0.02)",
                   border: "1px solid rgba(255,255,255,0.06)",
                   textDecoration: "none",
                   transition: "all 0.2s ease",
@@ -446,14 +447,14 @@ export default function Navbar() {
               >
                 {/* Boring Avatar */}
                 <Box sx={{ width: 34, height: 34, borderRadius: "10px", overflow: "hidden", display: "flex" }}>
-                  <BoringAvatar 
-                    size={34} 
-                    name={user?.username || walletAddress || "guest"} 
-                    variant="marble" 
-                    colors={[brandColor, secondaryColor, "#00F0FF", "#FF007A", "#FFB800"]} 
+                  <BoringAvatar
+                    size={34}
+                    name={user?.username || walletAddress || "guest"}
+                    variant="marble"
+                    colors={[brandColor, secondaryColor, "#00F0FF", "#FF007A", "#FFB800"]}
                   />
                 </Box>
-                
+
                 <Box>
                   <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#fff", fontSize: "0.85rem", lineHeight: 1.1 }}>
@@ -461,9 +462,9 @@ export default function Navbar() {
                     </Typography>
                     <CheckCircleIcon sx={{ color: "success.main", fontSize: "0.95rem" }} />
                   </Stack>
-                  
+
                   {user?.is_premium ? (
-                    <Box sx={{ 
+                    <Box sx={{
                       mt: 0.4,
                       display: "inline-flex",
                       alignItems: "center",
@@ -577,7 +578,10 @@ export default function Navbar() {
                 {/* Logout trigger */}
                 <Tooltip title="Sign Out Profile" arrow>
                   <IconButton
-                    onClick={logout}
+                    onClick={() => {
+                      logout();
+                      navigate("/");
+                    }}
                     sx={{
                       width: 38,
                       height: 38,
@@ -641,15 +645,15 @@ export default function Navbar() {
         }}
       >
         <Box sx={{ p: 3.5, display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" }}>
-          
+
           {/* Header Mobile Drawer */}
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Box 
-                sx={{ 
-                  width: 32, height: 32, borderRadius: "8px", 
-                  background: `linear-gradient(135deg, ${brandColor} 0%, ${secondaryColor} 100%)`, 
-                  display: "flex", alignItems: "center", justifyContent: "center", mr: 1.5 
+              <Box
+                sx={{
+                  width: 32, height: 32, borderRadius: "8px",
+                  background: `linear-gradient(135deg, ${brandColor} 0%, ${secondaryColor} 100%)`,
+                  display: "flex", alignItems: "center", justifyContent: "center", mr: 1.5
                 }}
               >
                 <BoltIcon sx={{ color: "#000", fontSize: 20 }} />
@@ -693,7 +697,7 @@ export default function Navbar() {
           <Typography variant="overline" sx={{ fontWeight: 900, px: 2, py: 1, letterSpacing: "0.15em", color: brandColor, fontSize: "0.68rem" }}>
             Explore Resources
           </Typography>
-          
+
           <List sx={{ mb: 2 }}>
             {resources.map((res, idx) => {
               const active = isActive(res.path);
@@ -717,7 +721,7 @@ export default function Navbar() {
                       <ListItemText
                         primary={res.label}
                         secondary={res.desc}
-                        slotProps={{ 
+                        slotProps={{
                           primary: { sx: { fontWeight: active ? 800 : 700, color: active ? "#fff" : "text.primary", fontSize: "0.88rem" } },
                           secondary: { sx: { fontSize: "0.68rem", color: "text.secondary" } }
                         }}
@@ -733,29 +737,29 @@ export default function Navbar() {
 
           {/* Mobile Profile & Authorization Actions Drawer Footer */}
           <Box sx={{ mt: "auto", display: "flex", flexDirection: "column", gap: 2 }}>
-            
+
             {/* Authenticated User mobile Capsule */}
             {isAuthenticated && (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                
+
                 {/* Mobile User Summary capsule */}
-                <Stack 
-                  direction="row" 
-                  spacing={2} 
-                  sx={{ 
-                    p: 2, 
-                    borderRadius: "16px", 
-                    bgcolor: "rgba(255,255,255,0.02)", 
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  sx={{
+                    p: 2,
+                    borderRadius: "16px",
+                    bgcolor: "rgba(255,255,255,0.02)",
                     border: "1px solid rgba(255,255,255,0.05)",
-                    alignItems: "center" 
+                    alignItems: "center"
                   }}
                 >
                   <Box sx={{ width: 38, height: 38, borderRadius: "10px", overflow: "hidden", display: "flex" }}>
-                    <BoringAvatar 
-                      size={38} 
-                      name={user?.username || walletAddress || "guest"} 
-                      variant="marble" 
-                      colors={[brandColor, secondaryColor, "#00F0FF", "#FF007A", "#FFB800"]} 
+                    <BoringAvatar
+                      size={38}
+                      name={user?.username || walletAddress || "guest"}
+                      variant="marble"
+                      colors={[brandColor, secondaryColor, "#00F0FF", "#FF007A", "#FFB800"]}
                     />
                   </Box>
                   <Box>
@@ -766,7 +770,7 @@ export default function Navbar() {
                       <CheckCircleIcon sx={{ color: "success.main", fontSize: "1rem" }} />
                     </Stack>
                     {user?.is_premium ? (
-                      <Box sx={{ 
+                      <Box sx={{
                         mt: 0.6,
                         display: "inline-flex",
                         alignItems: "center",
@@ -863,8 +867,8 @@ export default function Navbar() {
                   setTipModalOpen(true);
                 }}
                 sx={{
-                  py: 1.5, 
-                  borderRadius: "12px", 
+                  py: 1.5,
+                  borderRadius: "12px",
                   fontWeight: 800,
                   bgcolor: brandColor,
                   color: "#000",
@@ -881,16 +885,16 @@ export default function Navbar() {
                 variant="contained"
                 fullWidth
                 onClick={login}
-                sx={{ 
-                  py: 1.5, 
-                  borderRadius: "12px", 
-                  fontWeight: 800, 
+                sx={{
+                  py: 1.5,
+                  borderRadius: "12px",
+                  fontWeight: 800,
                   background: `linear-gradient(135deg, ${brandColor} 0%, ${secondaryColor} 100%)`,
                   color: "#000",
                   boxShadow: `0 0 15px ${brandColor}66`
                 }}
               >
-                Authenticate Profile
+                Login
               </Button>
             )}
 
@@ -903,6 +907,7 @@ export default function Navbar() {
                 onClick={() => {
                   logout();
                   setMobileOpen(false);
+                  navigate("/");
                 }}
                 sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800, borderColor: "rgba(239, 68, 68, 0.3)" }}
                 startIcon={<LogoutIcon />}
