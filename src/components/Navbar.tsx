@@ -13,7 +13,7 @@
 //   6. Beautifully structured and polished Mobile drawer
 // ============================================================================
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWalletAuth } from "../hooks/useWalletAuth";
@@ -67,6 +67,13 @@ export default function Navbar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
 
+  // Consolidated profile dropdown menu state
+  const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
+  const openProfileMenu = Boolean(profileAnchorEl);
+
+  // Scroll detection state
+  const [scrolled, setScrolled] = useState(false);
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const location = useLocation();
@@ -76,11 +83,30 @@ export default function Navbar() {
   const brandColor = theme.palette.primary.main;
   const secondaryColor = theme.palette.secondary?.main || brandColor;
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
   const handleCloseMenu = () => {
     setAnchorEl(null);
+  };
+
+  const handleOpenProfileMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setProfileAnchorEl(event.currentTarget);
+  };
+  const handleCloseProfileMenu = () => {
+    setProfileAnchorEl(null);
   };
 
   // Swapping nav links (landing vs creator workflow)
@@ -141,15 +167,27 @@ export default function Navbar() {
       position="sticky"
       elevation={0}
       sx={{
-        backgroundColor: theme.palette.background.default + "cc", // Soft glassmorphic backdrop
-        backdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        backgroundColor: scrolled ? `${theme.palette.background.default}cc` : "transparent",
+        backdropFilter: scrolled ? "blur(24px)" : "none",
+        borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "1px solid transparent",
         zIndex: 1100,
-        boxShadow: "0 10px 40px rgba(0, 0, 0, 0.25)"
+        boxShadow: scrolled ? "0 10px 40px rgba(0, 0, 0, 0.25)" : "none",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
       }}
     >
-      {/* Dynamic Top Neon Border glow matching brand skin */}
-      <Box sx={{ height: "3px", width: "100%", background: `linear-gradient(90deg, ${brandColor} 0%, ${secondaryColor} 100%)` }} />
+      {/* Dynamic bottom neon border that fades in when scrolled */}
+      <Box
+        sx={{
+          height: "1.5px",
+          width: "100%",
+          background: `linear-gradient(90deg, transparent 0%, ${brandColor} 50%, transparent 100%)`,
+          opacity: scrolled ? 0.7 : 0,
+          transition: "opacity 0.3s ease",
+          position: "absolute",
+          bottom: 0,
+          left: 0
+        }}
+      />
 
       <Toolbar sx={{ justifyContent: "space-between", py: 1.5, px: { xs: 2.5, md: 4 } }}>
 
@@ -213,11 +251,11 @@ export default function Navbar() {
             sx={{
               display: "flex",
               gap: 0.5,
-              p: 0.5,
-              borderRadius: "16px",
-              bgcolor: "rgba(255,255,255,0.01)",
-              border: "1px solid rgba(255,255,255,0.05)",
-              backdropFilter: "blur(10px)",
+              p: 0.4,
+              borderRadius: "14px",
+              bgcolor: scrolled ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              transition: "all 0.3s ease",
               alignItems: "center"
             }}
           >
@@ -231,18 +269,27 @@ export default function Navbar() {
                   sx={{
                     px: 2.2,
                     py: 0.8,
-                    borderRadius: "12px",
-                    fontWeight: active ? 800 : 600,
+                    borderRadius: "10px",
+                    fontWeight: active ? 750 : 500,
                     fontSize: "0.88rem",
-                    color: active ? "#fff" : "rgba(255,255,255,0.6)",
-                    bgcolor: active ? "rgba(255,255,255,0.04)" : "transparent",
-                    border: active ? "1px solid rgba(255,255,255,0.05)" : "1px solid transparent",
+                    color: active ? "#fff" : "rgba(255,255,255,0.55)",
                     transition: "all 0.2s ease",
+                    position: "relative",
                     "&:hover": {
-                      bgcolor: "rgba(255,255,255,0.06)",
                       color: "#fff",
-                      borderColor: "rgba(255,255,255,0.08)"
-                    }
+                      bgcolor: "rgba(255,255,255,0.04)"
+                    },
+                    "&::after": active ? {
+                      content: '""',
+                      position: "absolute",
+                      bottom: "4px",
+                      left: "20%",
+                      right: "20%",
+                      height: "2px",
+                      borderRadius: "2px",
+                      background: `linear-gradient(90deg, ${brandColor}, ${secondaryColor})`,
+                      boxShadow: `0 0 10px ${brandColor}`
+                    } : {}
                   }}
                 >
                   {item.label}
@@ -260,18 +307,27 @@ export default function Navbar() {
               sx={{
                 px: 2.2,
                 py: 0.8,
-                borderRadius: "12px",
-                fontWeight: openMenu || isDropdownActive() ? 800 : 600,
+                borderRadius: "10px",
+                fontWeight: openMenu || isDropdownActive() ? 750 : 500,
                 fontSize: "0.88rem",
-                color: openMenu || isDropdownActive() ? brandColor : "rgba(255,255,255,0.6)",
-                bgcolor: openMenu || isDropdownActive() ? "rgba(255,255,255,0.04)" : "transparent",
-                border: openMenu || isDropdownActive() ? "1px solid rgba(255,255,255,0.05)" : "1px solid transparent",
+                color: openMenu || isDropdownActive() ? "#fff" : "rgba(255,255,255,0.55)",
                 transition: "all 0.2s ease",
+                position: "relative",
                 "&:hover": {
-                  bgcolor: "rgba(255,255,255,0.06)",
-                  color: brandColor,
-                  borderColor: "rgba(255,255,255,0.08)"
-                }
+                  color: "#fff",
+                  bgcolor: "rgba(255,255,255,0.04)"
+                },
+                "&::after": isDropdownActive() ? {
+                  content: '""',
+                  position: "absolute",
+                  bottom: "4px",
+                  left: "20%",
+                  right: "20%",
+                  height: "2px",
+                  borderRadius: "2px",
+                  background: `linear-gradient(90deg, ${brandColor}, ${secondaryColor})`,
+                  boxShadow: `0 0 10px ${brandColor}`
+                } : {}
               }}
             >
               Resources
@@ -423,20 +479,25 @@ export default function Navbar() {
             <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
 
               {/* Profile glass Capsule */}
-              <Stack
-                direction="row"
-                spacing={1.8}
-                component={RouterLink}
-                to={`/profile/${walletAddress}`}
+              <Button
+                aria-controls={openProfileMenu ? 'profile-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={openProfileMenu ? 'true' : undefined}
+                onClick={handleOpenProfileMenu}
+                endIcon={<KeyboardArrowDownIcon sx={{
+                  color: "rgba(255,255,255,0.4)",
+                  transition: "transform 0.3s",
+                  transform: openProfileMenu ? "rotate(180deg)" : "rotate(0)"
+                }} />}
                 sx={{
                   alignItems: "center",
-                  p: 0.4,
-                  pl: 0.4,
-                  pr: 2,
-                  borderRadius: "16px",
+                  p: 0.5,
+                  pl: 0.5,
+                  pr: 1.5,
+                  borderRadius: "14px",
                   bgcolor: "rgba(255,255,255,0.02)",
                   border: "1px solid rgba(255,255,255,0.06)",
-                  textDecoration: "none",
+                  textTransform: "none",
                   transition: "all 0.2s ease",
                   "&:hover": {
                     bgcolor: "rgba(255,255,255,0.05)",
@@ -445,162 +506,222 @@ export default function Navbar() {
                   }
                 }}
               >
-                {/* Boring Avatar */}
-                <Box sx={{ width: 34, height: 34, borderRadius: "10px", overflow: "hidden", display: "flex" }}>
-                  <BoringAvatar
-                    size={34}
-                    name={user?.username || walletAddress || "guest"}
-                    variant="marble"
-                    colors={[brandColor, secondaryColor, "#00F0FF", "#FF007A", "#FFB800"]}
-                  />
-                </Box>
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", textAlign: "left" }}>
+                  {/* Boring Avatar */}
+                  <Box sx={{ width: 32, height: 32, borderRadius: "10px", overflow: "hidden", display: "flex" }}>
+                    <BoringAvatar
+                      size={32}
+                      name={user?.username || walletAddress || "guest"}
+                      variant="marble"
+                      colors={[brandColor, secondaryColor, "#00F0FF", "#FF007A", "#FFB800"]}
+                    />
+                  </Box>
 
-                <Box>
-                  <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#fff", fontSize: "0.85rem", lineHeight: 1.1 }}>
-                      {user?.username || shortAddress}
-                    </Typography>
-                    <CheckCircleIcon sx={{ color: "success.main", fontSize: "0.95rem" }} />
+                  <Box>
+                    <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#fff", fontSize: "0.85rem", lineHeight: 1.1 }}>
+                        {user?.username || shortAddress}
+                      </Typography>
+                      <CheckCircleIcon sx={{ color: "success.main", fontSize: "0.95rem" }} />
+                    </Stack>
+                  </Box>
+                </Stack>
+              </Button>
+
+              {/* Consolidated profile dropdown menu */}
+              <Menu
+                id="profile-menu"
+                anchorEl={profileAnchorEl}
+                open={openProfileMenu}
+                onClose={handleCloseProfileMenu}
+                slotProps={{
+                  list: {
+                    sx: { py: 1 }
+                  },
+                  paper: {
+                    sx: {
+                      bgcolor: "rgba(8, 9, 12, 0.98)",
+                      backdropFilter: "blur(24px)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      borderRadius: "20px",
+                      mt: 1.5,
+                      minWidth: 280,
+                      boxShadow: `0 20px 50px rgba(0,0,0,0.6), 0 0 30px ${brandColor}0a`
+                    }
+                  }
+                }}
+              >
+                {/* Header Section inside Menu */}
+                <Box sx={{ px: 2.5, py: 2, borderBottom: "1px solid rgba(255,255,255,0.06)", mb: 1 }}>
+                  <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 1.5 }}>
+                    <Box sx={{ width: 40, height: 40, borderRadius: "12px", overflow: "hidden", display: "flex" }}>
+                      <BoringAvatar
+                        size={40}
+                        name={user?.username || walletAddress || "guest"}
+                        variant="marble"
+                        colors={[brandColor, secondaryColor, "#00F0FF", "#FF007A", "#FFB800"]}
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 850, color: "#fff", lineHeight: 1.2 }}>
+                        {user?.name || user?.username || "Creator"}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem" }}>
+                        {shortAddress}
+                      </Typography>
+                    </Box>
                   </Stack>
 
+                  {/* Gold Member or Standard badge */}
                   {user?.is_premium ? (
                     <Box sx={{
-                      mt: 0.4,
-                      display: "inline-flex",
+                      display: "flex",
                       alignItems: "center",
+                      justifyContent: "center",
                       gap: 0.5,
-                      py: 0.2,
-                      px: 0.8,
-                      borderRadius: "6px",
+                      py: 0.6,
+                      px: 1,
+                      borderRadius: "10px",
                       background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
                       color: "#000",
                       border: "1px solid rgba(255, 215, 0, 0.4)",
                       boxShadow: "0 0 10px rgba(255, 215, 0, 0.25)"
                     }}>
-                      <Typography variant="caption" sx={{ fontWeight: 950, fontSize: "0.64rem", letterSpacing: "0.05em", fontFamily: "Space Grotesk, sans-serif" }}>
+                      <DiamondIcon sx={{ fontSize: "0.95rem" }} />
+                      <Typography variant="caption" sx={{ fontWeight: 950, fontSize: "0.68rem", letterSpacing: "0.05em", fontFamily: "Space Grotesk, sans-serif" }}>
                         GOLD MEMBER 👑
                       </Typography>
                     </Box>
                   ) : (
-                    <Box sx={{
-                      mt: 0.4,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      py: 0.2,
-                      px: 0.8,
-                      borderRadius: "6px",
-                      bgcolor: "rgba(255, 255, 255, 0.04)",
-                      border: "1px solid rgba(255, 255, 255, 0.08)",
-                      color: "rgba(255, 255, 255, 0.6)"
-                    }}>
-                      <Typography variant="caption" sx={{ fontWeight: 800, fontSize: "0.64rem", letterSpacing: "0.02em", fontFamily: "Space Grotesk, sans-serif" }}>
-                        Standard Creator
-                      </Typography>
-                    </Box>
+                    <Stack spacing={1}>
+                      <Box sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        py: 0.6,
+                        px: 1,
+                        borderRadius: "10px",
+                        bgcolor: "rgba(255, 255, 255, 0.04)",
+                        border: "1px solid rgba(255, 255, 255, 0.08)",
+                        color: "rgba(255, 255, 255, 0.6)"
+                      }}>
+                        <Typography variant="caption" sx={{ fontWeight: 800, fontSize: "0.68rem", letterSpacing: "0.02em", fontFamily: "Space Grotesk, sans-serif" }}>
+                          Standard Creator
+                        </Typography>
+                      </Box>
+
+                      {/* Go Gold subscription prompt */}
+                      <Button
+                        variant="contained"
+                        size="small"
+                        fullWidth
+                        onClick={() => {
+                          handleCloseProfileMenu();
+                          setSubModalOpen(true);
+                        }}
+                        startIcon={<DiamondIcon sx={{ color: "#000", fontSize: "0.85rem !important" }} />}
+                        sx={{
+                          height: 36,
+                          borderRadius: "10px",
+                          fontWeight: 900,
+                          fontSize: "0.72rem",
+                          background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+                          color: "#000",
+                          boxShadow: "0 0 10px rgba(255, 215, 0, 0.2)",
+                          transition: "all 0.2s",
+                          "&:hover": {
+                            background: "linear-gradient(135deg, #ffea00 0%, #ffb400 100%)",
+                            transform: "scale(1.02)",
+                            boxShadow: "0 0 18px rgba(255, 215, 0, 0.4)"
+                          }
+                        }}
+                      >
+                        Go Premium Gold 👑
+                      </Button>
+                    </Stack>
                   )}
                 </Box>
-              </Stack>
 
-              {/* Gold subscription sweep trigger */}
-              {!user?.is_premium ? (
-                <Tooltip title="Unlock Gold Theme & Custom Skins" arrow>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => setSubModalOpen(true)}
-                    startIcon={<DiamondIcon sx={{ color: "#000", fontSize: "0.85rem !important" }} />}
-                    sx={{
-                      height: 38,
-                      borderRadius: "10px",
-                      fontWeight: 900,
-                      fontSize: "0.75rem",
-                      px: 2,
-                      background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
-                      color: "#000",
-                      boxShadow: "0 0 10px rgba(255, 215, 0, 0.2)",
-                      transition: "all 0.2s",
-                      "&:hover": {
-                        background: "linear-gradient(135deg, #ffea00 0%, #ffb400 100%)",
-                        transform: "scale(1.03)",
-                        boxShadow: "0 0 18px rgba(255, 215, 0, 0.4)"
-                      }
-                    }}
-                  >
-                    Go Gold 👑
-                  </Button>
-                </Tooltip>
-              ) : (
-                <Tooltip title="Premium Gold Enabled" arrow>
-                  <IconButton
-                    disableRipple
-                    sx={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: "10px",
-                      border: "1px solid rgba(255, 215, 0, 0.3)",
-                      bgcolor: "rgba(255, 215, 0, 0.05)",
-                      color: "#FFD700",
-                      boxShadow: "0 0 15px rgba(255, 215, 0, 0.2)",
-                      cursor: "default"
-                    }}
-                  >
-                    <DiamondIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
+                {/* Dropdown Items */}
+                <MenuItem
+                  component={RouterLink}
+                  to={`/profile/${walletAddress}`}
+                  onClick={handleCloseProfileMenu}
+                  sx={{
+                    py: 1.2,
+                    px: 2.5,
+                    mx: 1.2,
+                    borderRadius: "10px",
+                    fontSize: "0.88rem",
+                    fontWeight: 600,
+                    color: "text.primary",
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      bgcolor: "rgba(255,255,255,0.04)",
+                      color: brandColor
+                    }
+                  }}
+                >
+                  <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                    <PersonIcon sx={{ fontSize: "1.1rem", color: "rgba(255,255,255,0.4)" }} />
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>My Public Profile</Typography>
+                  </Stack>
+                </MenuItem>
 
-              {/* Utility actions */}
-              <Stack direction="row" spacing={0.8} sx={{ alignItems: "center" }}>
-                {/* Settings gears icon */}
-                <Tooltip title="Creator Profile Settings" arrow>
-                  <IconButton
-                    component={RouterLink}
-                    to="/settings"
-                    sx={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: "10px",
-                      border: "1px solid rgba(255, 255, 255, 0.06)",
-                      bgcolor: "rgba(255, 255, 255, 0.02)",
-                      color: "text.secondary",
-                      transition: "all 0.2s",
-                      "&:hover": {
-                        color: brandColor,
-                        borderColor: brandColor,
-                        bgcolor: `${brandColor}08`
-                      }
-                    }}
-                  >
-                    <SettingsIcon sx={{ fontSize: "1.1rem" }} />
-                  </IconButton>
-                </Tooltip>
+                <MenuItem
+                  component={RouterLink}
+                  to="/settings"
+                  onClick={handleCloseProfileMenu}
+                  sx={{
+                    py: 1.2,
+                    px: 2.5,
+                    mx: 1.2,
+                    borderRadius: "10px",
+                    fontSize: "0.88rem",
+                    fontWeight: 600,
+                    color: "text.primary",
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      bgcolor: "rgba(255,255,255,0.04)",
+                      color: brandColor
+                    }
+                  }}
+                >
+                  <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                    <SettingsIcon sx={{ fontSize: "1.1rem", color: "rgba(255,255,255,0.4)" }} />
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Profile Settings</Typography>
+                  </Stack>
+                </MenuItem>
 
-                {/* Logout trigger */}
-                <Tooltip title="Sign Out Profile" arrow>
-                  <IconButton
-                    onClick={() => {
-                      logout();
-                      navigate("/");
-                    }}
-                    sx={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: "10px",
-                      border: "1px solid rgba(239, 68, 68, 0.15)",
-                      bgcolor: "rgba(239, 68, 68, 0.03)",
-                      color: "error.main",
-                      transition: "all 0.2s",
-                      "&:hover": {
-                        bgcolor: "rgba(239, 68, 68, 0.08)",
-                        borderColor: "rgba(239, 68, 68, 0.4)",
-                        transform: "scale(1.03)"
-                      }
-                    }}
-                  >
+                <Divider sx={{ my: 1, opacity: 0.08 }} />
+
+                <MenuItem
+                  onClick={() => {
+                    handleCloseProfileMenu();
+                    logout();
+                    navigate("/");
+                  }}
+                  sx={{
+                    py: 1.2,
+                    px: 2.5,
+                    mx: 1.2,
+                    borderRadius: "10px",
+                    fontSize: "0.88rem",
+                    fontWeight: 700,
+                    color: "error.main",
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      bgcolor: "rgba(239, 68, 68, 0.08)"
+                    }
+                  }}
+                >
+                  <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                     <LogoutIcon sx={{ fontSize: "1.1rem" }} />
-                  </IconButton>
-                </Tooltip>
-              </Stack>
+                    <Typography variant="body2" sx={{ fontWeight: 800 }}>Sign Out</Typography>
+                  </Stack>
+                </MenuItem>
+
+              </Menu>
 
             </Stack>
           )}
@@ -807,6 +928,29 @@ export default function Navbar() {
                   </Box>
                 </Stack>
 
+                {/* Send Tip (when connected and authenticated) */}
+                {connected && (
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setTipModalOpen(true);
+                    }}
+                    startIcon={<BoltIcon sx={{ color: "#000" }} />}
+                    sx={{
+                      py: 1.5,
+                      borderRadius: "12px",
+                      fontWeight: 800,
+                      bgcolor: brandColor,
+                      color: "#000",
+                      boxShadow: `0 4px 15px ${brandColor}4d`
+                    }}
+                  >
+                    Send Tip
+                  </Button>
+                )}
+
                 <Button
                   component={RouterLink}
                   to={`/profile/${walletAddress}`}
@@ -857,8 +1001,8 @@ export default function Navbar() {
               </Box>
             )}
 
-            {/* Send Tip trigger */}
-            {connected && (
+            {/* Send Tip trigger (when connected but unauthenticated) */}
+            {connected && !isAuthenticated && (
               <Button
                 variant="contained"
                 fullWidth
@@ -866,6 +1010,7 @@ export default function Navbar() {
                   setMobileOpen(false);
                   setTipModalOpen(true);
                 }}
+                startIcon={<BoltIcon sx={{ color: "#000" }} />}
                 sx={{
                   py: 1.5,
                   borderRadius: "12px",
