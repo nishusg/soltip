@@ -19,6 +19,8 @@ import { createContext, useContext, useState, useCallback, useEffect } from "rea
 import { useWallet } from "@solana/wallet-adapter-react";
 import { authenticate, getToken, removeToken, getStoredAddress } from "../services/auth";
 import toast from "react-hot-toast";
+import { logger } from "../utils/logger";
+import type { User } from "../types";
 
 // ---------------------------------------------------------------------------
 // Type definitions
@@ -30,7 +32,7 @@ interface AuthContextType {
   /** The current JWT token (or null) */
   token: string | null;
   /** The current user profile data */
-  user: any | null;
+  user: User | null;
   /** Whether an auth operation is in progress */
   isLoading: boolean;
   /** Error message from the last auth attempt (or null) */
@@ -65,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Auth state
   const [token, setToken] = useState<string | null>(getToken());
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await getMe();
       setUser(data.user);
     } catch (err) {
-      console.error("Failed to fetch user profile:", err);
+      logger.error("Failed to fetch user profile:", err);
     }
   }, [token]);
 
@@ -107,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(jwt);
     } catch (err: any) {
       setError(err.message || "Authentication failed");
-      console.error("Auth error:", err);
+      logger.error("Auth error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const sessionWallet = getStoredAddress();
 
       if (sessionWallet && currentWallet !== sessionWallet) {
-        console.log("Wallet switch detected. Logging out...");
+        logger.log("Wallet switch detected. Logging out...");
         logout();
       }
     }

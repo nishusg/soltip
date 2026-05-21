@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import toast from "react-hot-toast";
+import { SOCKET_URL } from "../shared/constants";
+import { logger } from "../utils/logger";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -15,7 +17,6 @@ const SocketContext = createContext<SocketContextType>({
 
 export const useSocket = () => useContext(SocketContext);
 
-import { SOCKET_URL } from "../shared/constants";
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -30,7 +31,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     s.on("connect", () => {
       setConnected(true);
-      console.log("Connected to WebSocket");
+      logger.log("Connected to WebSocket");
       
       // Register wallet if authenticated
       if (isAuthenticated && walletAddress) {
@@ -40,11 +41,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     s.on("disconnect", () => {
       setConnected(false);
-      console.log("Disconnected from WebSocket");
+      logger.log("Disconnected from WebSocket");
     });
 
     s.on("notification", (notif: any) => {
-      console.log("New notification:", notif);
+      logger.log("New notification:", notif);
       
       if (notif.type === "tip_received") {
         toast.success(`You received a ${notif.data.amount / 1e9} SOL Super Chat from ${notif.data.sender}!`, { duration: 5000 });

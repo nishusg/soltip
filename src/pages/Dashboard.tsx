@@ -6,6 +6,8 @@ import SEO from "../components/common/SEO";
 import { useSocket } from "../context/SocketContext";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import BoringAvatar from "boring-avatars";
+import { logger } from "../utils/logger";
+import type { DashboardData, Tip, DailyEarning, OverlaySettings } from "../types";
 import {
   Container,
   Grid,
@@ -64,11 +66,7 @@ import {
 const OBS_DEFAULT_WIDTH = 1920;
 const OBS_DEFAULT_HEIGHT = 1080;
 
-interface DailyEarning {
-  _id: string;
-  total_earned: number;
-  tips_count: number;
-}
+
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -169,7 +167,7 @@ function calculateStreaks(dailyEarnings: DailyEarning[]): { current: number; max
 }
 
 export default function Dashboard() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -200,14 +198,13 @@ export default function Dashboard() {
         const bal = await connection.getBalance(publicKey);
         setWalletBalance(bal / LAMPORTS_PER_SOL);
       } catch (err) {
-        console.error("Failed to fetch wallet balance:", err);
-        // Devnet mock/public endpoint fallback for beautiful demo persistence
-        setWalletBalance(12.456);
+        logger.error("Failed to fetch wallet balance:", err);
+        setWalletBalance(null);
       } finally {
         setFetchingBalance(false);
       }
     } else {
-      setWalletBalance(8.324); // Fallback mock value
+      setWalletBalance(null);
     }
   };
 
@@ -216,14 +213,14 @@ export default function Dashboard() {
   }, [publicKey, connection]);
 
   // Save overlay customizer settings and refresh local user stats
-  const handleSaveOverlaySettings = async (settings: any) => {
+  const handleSaveOverlaySettings = async (settings: Partial<OverlaySettings>) => {
     await saveOverlaySettings(settings);
     toast.success("Overlay settings saved successfully!");
     try {
       const refreshed = await getDashboardData();
       setData(refreshed);
     } catch (e) {
-      console.error("Failed to refresh dashboard stats:", e);
+      logger.error("Failed to refresh dashboard stats:", e);
     }
   };
 
@@ -310,6 +307,8 @@ export default function Dashboard() {
     );
   }
 
+  if (!data) return null;
+
   const { user, recentTips, dailyEarnings } = data;
 
   // Calculate stats
@@ -317,14 +316,14 @@ export default function Dashboard() {
   const totalTips = recentTips?.length || 0;
   const totalDays = dailyEarnings?.length || 0;
   const avgPerDay = totalDays > 0
-    ? dailyEarnings.reduce((sum: number, d: any) => sum + d.total_earned, 0) / totalDays
+    ? dailyEarnings.reduce((sum: number, d: DailyEarning) => sum + d.total_earned, 0) / totalDays
     : 0;
 
   // Streak calculations
   const streaks = calculateStreaks(dailyEarnings);
 
   // Filter recent tips by selected date in local timezone
-  const filteredTips = recentTips?.filter((tip: any) => {
+  const filteredTips = recentTips?.filter((tip: Tip) => {
     if (!filterDate) return true;
     try {
       const d = new Date(tip.timestamp);
@@ -351,7 +350,7 @@ export default function Dashboard() {
     if (!dailyEarnings) return [];
 
     const dataMap = new Map<string, { total_earned: number; tips_count: number }>();
-    dailyEarnings.forEach((e: any) => {
+    dailyEarnings.forEach((e: DailyEarning) => {
       dataMap.set(e._id, {
         total_earned: e.total_earned / LAMPORTS_PER_SOL,
         tips_count: e.tips_count
@@ -418,7 +417,7 @@ export default function Dashboard() {
         let total = 0;
         let tips = 0;
 
-        dailyEarnings.forEach((e: any) => {
+        dailyEarnings.forEach((e: DailyEarning) => {
           const eDate = new Date(e._id);
           if (eDate.getFullYear() === year && eDate.getMonth() === month) {
             total += e.total_earned / LAMPORTS_PER_SOL;
@@ -1150,7 +1149,7 @@ export default function Dashboard() {
           {/* Stream Alert & TTS Settings Customizer Component */}
           <Grid size={{ xs: 12 }}>
             <AlertCustomizer
-              initialSettings={data?.user?.overlay_settings}
+              initialSettings={data?.user?.overlay_settings || {}}
               onSave={handleSaveOverlaySettings}
               testLoading={testLoading}
               onSendTestAlert={handleSendTestAlert}

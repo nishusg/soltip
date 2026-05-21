@@ -38,10 +38,12 @@ import StarIcon from "@mui/icons-material/Star";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import toast from "react-hot-toast";
+import { logger } from "../../../utils/logger";
+import type { OverlaySettings } from "../../../types";
 
 interface AlertCustomizerProps {
-  initialSettings: any;
-  onSave: (settings: any) => Promise<void>;
+  initialSettings: Partial<OverlaySettings>;
+  onSave: (settings: Partial<OverlaySettings>) => Promise<void>;
   testLoading: boolean;
   onSendTestAlert: () => Promise<void>;
   tokenLoading: boolean;
@@ -234,14 +236,14 @@ export default function AlertCustomizer({
         const audio = new Audio(alertSoundUrl);
         audio.volume = volume;
         audio.play().catch(e => {
-          console.error("Audio preview failed:", e);
+          logger.error("Audio preview failed:", e);
           toast.error("Failed to play custom sound. Verify audio format or upload again.");
         });
       } else {
         toast.error("Please enter a custom sound URL or upload a file to preview");
       }
     } catch (e) {
-      console.error("Sound preview synthesis error:", e);
+      logger.error("Sound preview synthesis error:", e);
     }
   };
 

@@ -4,6 +4,7 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useRealtimeTips } from "../hooks/useRealtimeTips";
 import { getLeaderboard, getUserProfile } from "../services/api";
 import { useWalletAuth } from "../hooks/useWalletAuth";
+import { logger } from "../utils/logger";
 import {
   Box,
   Typography,
@@ -86,7 +87,7 @@ export default function CreatorLeaderboard() {
         const data = await getLeaderboard(timeframe);
         setCreators(data.creators || []);
       } catch (err) {
-        console.error("Failed to fetch leaderboard:", err);
+        logger.error("Failed to fetch leaderboard:", err);
       } finally {
         setLoading(false);
       }
@@ -169,7 +170,7 @@ export default function CreatorLeaderboard() {
           [walletAddress]: { loading: false, tips: receivedTips.slice(0, 5) }
         }));
       } catch (err) {
-        console.error("Failed to load creator tips details:", err);
+        logger.error("Failed to load creator tips details:", err);
         setCreatorDetails((prev) => ({
           ...prev,
           [walletAddress]: { loading: false, tips: [], error: "Failed to load recent activity." }

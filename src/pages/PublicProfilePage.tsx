@@ -43,6 +43,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ShareIcon from "@mui/icons-material/Share";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import toast from "react-hot-toast";
+import { logger } from "../utils/logger";
 
 interface CreatorProfile {
   wallet_address: string;
@@ -176,7 +177,7 @@ export default function PublicProfilePage() {
         });
         setVerificationStatus("pending");
       } catch (verifyErr) {
-        console.warn("Backend verification error:", verifyErr);
+        logger.warn("Backend verification error:", verifyErr);
         toast.error("Tip sent, but backend indexing failed");
       }
 
@@ -204,7 +205,7 @@ export default function PublicProfilePage() {
       const res = await getTransactionStatus(txHash);
       setVerificationStatus(res.status);
     } catch (err: any) {
-      console.error("Status check failed:", err);
+      logger.error("Status check failed:", err);
     } finally {
       setCheckingStatus(false);
     }

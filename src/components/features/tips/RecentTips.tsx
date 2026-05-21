@@ -10,25 +10,13 @@ import CallMadeIcon from "@mui/icons-material/CallMade";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import BoringAvatar from "boring-avatars";
-
-interface Transaction {
-  _id: string;
-  tx_hash: string;
-  sender_wallet: string;
-  creator_wallet: string;
-  sender_name?: string;
-  creator_name?: string;
-  amount: number;
-  fee: number;
-  message: string;
-  timestamp: string;
-  status: string;
-}
+import { logger } from "../../../utils/logger";
+import type { Tip } from "../../../types";
 
 export default function RecentTips() {
   const { walletAddress, isAuthenticated } = useWalletAuth();
   const { newTip, clearNewTip } = useRealtimeTips();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<Tip[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -55,7 +43,7 @@ export default function RecentTips() {
         const data = await listTransactions(walletAddress!);
         setTransactions(data.transactions || []);
       } catch (err) {
-        console.error("Failed to fetch transactions:", err);
+        logger.error("Failed to fetch transactions:", err);
       } finally {
         setLoading(false);
       }

@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material/styles";
+import { createTheme, Theme } from "@mui/material/styles";
 import { sharedThemeOptions } from "./shared";
 import { goldThemeOptions } from "./gold";
 import { discordThemeOptions } from "./discord";
@@ -32,7 +32,7 @@ export const baseTheme = createTheme({
   },
 });
 
-export const premiumThemes: Record<string, any> = {
+export const premiumThemes: Record<string, Theme> = {
   gold: createTheme({
     ...sharedThemeOptions,
     ...goldThemeOptions,

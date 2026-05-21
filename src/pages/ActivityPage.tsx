@@ -13,6 +13,7 @@
 // ============================================================================
 
 import { useState, useEffect, useMemo } from "react";
+import { logger } from "../utils/logger";
 import { Link as RouterLink } from "react-router-dom";
 import { 
   Container, 
@@ -108,7 +109,7 @@ export default function ActivityPage() {
         const data = await listTransactions(walletAddress!);
         setTransactions(data.transactions || []);
       } catch (err) {
-        console.error("Failed to fetch transactions:", err);
+        logger.error("Failed to fetch transactions:", err);
         toast.error("Failed to sync your activity log.");
       } finally {
         setLoading(false);
@@ -272,7 +273,7 @@ export default function ActivityPage() {
       toast.success("Transaction marked as refunded! Statistics updated.");
       setRefundTarget(null);
     } catch (err: any) {
-      console.error("Refund failed:", err);
+      logger.error("Refund failed:", err);
       toast.error(err.message || "Failed to process refund.");
     } finally {
       setRefundLoading(false);

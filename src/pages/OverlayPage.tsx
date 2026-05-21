@@ -6,6 +6,8 @@ import { API_BASE } from "../shared/constants";
 import BoltIcon from "@mui/icons-material/Bolt";
 import LockIcon from "@mui/icons-material/Lock";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import { logger } from "../utils/logger";
+import type { OverlaySettings } from "../types";
 
 // Animation for new tip entry
 const slideInLeft = keyframes`
@@ -89,7 +91,7 @@ function getTierGlow(amount: number): string {
   return "none";
 }
 
-const OverlayPage: React.FC = () => {
+export default function OverlayPage() {
   const { walletAddress } = useParams<{ walletAddress: string }>();
   const [searchParams] = useSearchParams();
   const overlayKey = searchParams.get("key");
@@ -106,7 +108,7 @@ const OverlayPage: React.FC = () => {
   }, [alertQueue]);
 
   // Overlay Settings State with default fallbacks
-  const [settings, setSettings] = useState<any>({
+  const [settings, setSettings] = useState<OverlaySettings>({
     tts_enabled: true,
     tts_min_amount: 0.05,
     alert_duration: 6500,
@@ -213,10 +215,10 @@ const OverlayPage: React.FC = () => {
       } else if (soundPreset === "custom" && settingsRef.current.alert_sound_url) {
         const audio = new Audio(settingsRef.current.alert_sound_url);
         audio.volume = vol;
-        audio.play().catch(e => console.error("Overlay direct sound play failed:", e));
+        audio.play().catch(e => logger.error("Overlay direct sound play failed:", e));
       }
     } catch (e) {
-      console.error("Alert sound playback error:", e);
+      logger.error("Alert sound playback error:", e);
     }
   };
 
@@ -358,7 +360,7 @@ const OverlayPage: React.FC = () => {
       const data = await res.json();
       if (data.valid) {
         if (data.settings) {
-          setSettings((prev: any) => ({ ...prev, ...data.settings }));
+          setSettings((prev: OverlaySettings) => ({ ...prev, ...data.settings }));
         }
         setAuthStatus("ok");
       } else {
@@ -443,7 +445,7 @@ const OverlayPage: React.FC = () => {
     };
 
     const handleSettingsUpdated = (newSettings: any) => {
-      setSettings((prev: any) => ({ ...prev, ...newSettings }));
+      setSettings((prev: OverlaySettings) => ({ ...prev, ...newSettings }));
     };
 
     socket.on("new_superchat", handleSuperChat);
@@ -706,6 +708,4 @@ const OverlayPage: React.FC = () => {
       })()}
     </Box>
   );
-};
-
-export default OverlayPage;
+}

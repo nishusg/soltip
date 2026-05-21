@@ -9,10 +9,12 @@
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { SOCKET_URL } from "../shared/constants";
+import { logger } from "../utils/logger";
+import type { Tip } from "../types";
 
 export function useRealtimeTips() {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [newTip, setNewTip] = useState<any | null>(null);
+  const [newTip, setNewTip] = useState<Tip | null>(null);
 
   useEffect(() => {
     const socketInstance = io(SOCKET_URL, {
@@ -20,11 +22,11 @@ export function useRealtimeTips() {
     });
 
     socketInstance.on("connect", () => {
-      console.log("Connected to WebSocket server:", socketInstance.id);
+      logger.log("Connected to WebSocket server:", socketInstance.id);
     });
 
     socketInstance.on("new_tip", (tip: any) => {
-      console.log("New tip received via WebSocket:", tip);
+      logger.log("New tip received via WebSocket:", tip);
       setNewTip(tip);
     });
 

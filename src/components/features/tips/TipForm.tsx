@@ -6,6 +6,7 @@ import { sendTip, getExplorerUrl, calculateFeeBreakdown } from "../../../service
 import { verifyAndStoreTransaction, getTransactionStatus } from "../../../services/api";
 import { PublicKey } from "@solana/web3.js";
 import toast from "react-hot-toast";
+import { logger } from "../../../utils/logger";
 import { Card, CardContent, Typography, TextField, Button, Box, CircularProgress, Link, Alert, Stack, Chip } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
 import SendIcon from "@mui/icons-material/Send";
@@ -90,7 +91,7 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
         });
         setVerificationStatus("pending");
       } catch (verifyErr) {
-        console.warn("Backend verification failed:", verifyErr);
+        logger.warn("Backend verification failed:", verifyErr);
         toast.error("Transaction sent, but backend verification failed");
       }
 
@@ -105,7 +106,7 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
       const msg = err.message || "Transaction failed";
       setErrorMsg(msg);
       toast.error(msg);
-      console.error("Tip error:", err);
+      logger.error("Tip error:", err);
     } finally {
       isSubmitting.current = false;
     }

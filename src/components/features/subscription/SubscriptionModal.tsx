@@ -25,6 +25,7 @@ import { PLATFORM_WALLET } from "../../../shared/constants";
 import { activateSubscription } from "../../../services/api";
 import toast from "react-hot-toast";
 import { useAuth } from "../../../context/AuthContext";
+import { logger } from "../../../utils/logger";
 
 interface SubscriptionModalProps {
   open: boolean;
@@ -71,7 +72,7 @@ export default function SubscriptionModal({ open, onClose }: SubscriptionModalPr
       await refreshUser();
       onClose();
     } catch (err: any) {
-      console.error("Upgrade error:", err);
+      logger.error("Upgrade error:", err);
       toast.error(err.message || "Failed to upgrade. Please try again.", { id: "sub-loading" });
     } finally {
       setLoading(false);

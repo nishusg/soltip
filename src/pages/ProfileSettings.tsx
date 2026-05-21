@@ -2,6 +2,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import { getUserProfile, updateProfile, updateTheme } from "../services/api";
 import toast from "react-hot-toast";
+import { logger } from "../utils/logger";
 import SEO from "../components/common/SEO";
 import { 
   Container, 
@@ -85,7 +86,7 @@ export default function ProfileSettings() {
         setEmbedChannel(data.user.stream_embed?.channel || "");
       }
     } catch (err) {
-      console.log("No existing profile found or error:", err);
+      logger.log("No existing profile found or error:", err);
     } finally {
       setFetching(false);
     }
