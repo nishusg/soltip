@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { useWalletAuth } from "../hooks/useWalletAuth";
-import { useRealtimeTips } from "../hooks/useRealtimeTips";
-import { listTransactions } from "../services/api";
-import { getExplorerUrl } from "../services/solana";
+import { useWalletAuth } from "../../../hooks/useWalletAuth";
+import { useRealtimeTips } from "../../../hooks/useRealtimeTips";
+import { listTransactions } from "../../../services/api";
+import { getExplorerUrl } from "../../../services/solana";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { Card, CardContent, Typography, List, ListItem, Box, CircularProgress, Link, Chip, Tooltip } from "@mui/material";
 import CallMadeIcon from "@mui/icons-material/CallMade";

@@ -39,7 +39,7 @@ import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import WarningIcon from "@mui/icons-material/Warning";
 import GppGoodIcon from "@mui/icons-material/GppGood";
 import SettingsEthernetIcon from "@mui/icons-material/SettingsEthernet";
-import SEO from "../components/SEO";
+import SEO from "../components/common/SEO";
 
 export default function SecurityPage() {
   const theme = useTheme();

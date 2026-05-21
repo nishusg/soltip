@@ -55,7 +55,7 @@ import BoringAvatar from "boring-avatars";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import { listTransactions/*, refundTransaction*/ } from "../services/api";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import SEO from "../components/SEO";
+import SEO from "../components/common/SEO";
 import toast from "react-hot-toast";
 
 interface Transaction {

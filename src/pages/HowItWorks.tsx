@@ -36,7 +36,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import StarIcon from "@mui/icons-material/Star";
-import SEO from "../components/SEO";
+import SEO from "../components/common/SEO";
 
 // Define the steps of the flow
 interface FlowStep {

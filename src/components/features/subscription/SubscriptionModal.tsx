@@ -21,10 +21,10 @@ import StarsIcon from "@mui/icons-material/Stars";
 import BoltIcon from "@mui/icons-material/Bolt";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { PLATFORM_WALLET } from "../shared/constants";
-import { activateSubscription } from "../services/api";
+import { PLATFORM_WALLET } from "../../../shared/constants";
+import { activateSubscription } from "../../../services/api";
 import toast from "react-hot-toast";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
 
 interface SubscriptionModalProps {
   open: boolean;

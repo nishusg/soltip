@@ -46,7 +46,7 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import TvIcon from "@mui/icons-material/Tv";
 import GroupIcon from "@mui/icons-material/Group";
 import ShieldIcon from "@mui/icons-material/Shield";
-import SEO from "../components/SEO";
+import SEO from "../components/common/SEO";
 
 export default function PricingPage() {
   const theme = useTheme();

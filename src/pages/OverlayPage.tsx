@@ -139,20 +139,20 @@ const OverlayPage: React.FC = () => {
         const osc1 = ctx.createOscillator();
         const osc2 = ctx.createOscillator();
         const gainNode = ctx.createGain();
-        
+
         osc1.type = "sine";
         osc1.frequency.setValueAtTime(880, now); // A5
-        
+
         osc2.type = "sine";
         osc2.frequency.setValueAtTime(1200, now); // High overtone
-        
+
         gainNode.gain.setValueAtTime(vol, now);
         gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
-        
+
         osc1.connect(gainNode);
         osc2.connect(gainNode);
         gainNode.connect(ctx.destination);
-        
+
         osc1.start();
         osc2.start();
         osc1.stop(now + 1.2);
@@ -160,18 +160,18 @@ const OverlayPage: React.FC = () => {
       } else if (soundPreset === "swoosh") {
         const osc = ctx.createOscillator();
         const gainNode = ctx.createGain();
-        
+
         osc.type = "triangle";
         osc.frequency.setValueAtTime(80, now);
         osc.frequency.exponentialRampToValueAtTime(880, now + 0.6);
-        
+
         gainNode.gain.setValueAtTime(0.0001, now);
         gainNode.gain.linearRampToValueAtTime(vol, now + 0.2);
         gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
-        
+
         osc.connect(gainNode);
         gainNode.connect(ctx.destination);
-        
+
         osc.start();
         osc.stop(now + 0.6);
       } else if (soundPreset === "chime") {
@@ -226,7 +226,7 @@ const OverlayPage: React.FC = () => {
     if (!currentSettings.tts_enabled || amount < currentSettings.tts_min_amount || !window.speechSynthesis) return;
 
     // Polish the TTS phrase to sound beautiful
-    const textToSpeak = message 
+    const textToSpeak = message
       ? `${name} tipped ${amount.toFixed(amount >= 1 ? 2 : 3)} SOL. ${message}`
       : `${name} tipped ${amount.toFixed(amount >= 1 ? 2 : 3)} SOL!`;
 
@@ -242,26 +242,26 @@ const OverlayPage: React.FC = () => {
       // Look for a standard English female voice
       selectedVoice = voices.find(v => {
         const nameLower = v.name.toLowerCase();
-        return v.lang.startsWith("en") && 
-          (nameLower.includes("female") || 
-           nameLower.includes("zira") || 
-           nameLower.includes("samantha") || 
-           nameLower.includes("google us english") || 
-           nameLower.includes("susan") || 
-           nameLower.includes("hazel") ||
-           nameLower.includes("karen"));
+        return v.lang.startsWith("en") &&
+          (nameLower.includes("female") ||
+            nameLower.includes("zira") ||
+            nameLower.includes("samantha") ||
+            nameLower.includes("google us english") ||
+            nameLower.includes("susan") ||
+            nameLower.includes("hazel") ||
+            nameLower.includes("karen"));
       }) || null;
     } else if (voiceOption === "male") {
       // Look for a standard English male voice
       selectedVoice = voices.find(v => {
         const nameLower = v.name.toLowerCase();
-        return v.lang.startsWith("en") && 
-          (nameLower.includes("male") || 
-           nameLower.includes("david") || 
-           nameLower.includes("daniel") || 
-           nameLower.includes("george") || 
-           nameLower.includes("mark") || 
-           nameLower.includes("ravi"));
+        return v.lang.startsWith("en") &&
+          (nameLower.includes("male") ||
+            nameLower.includes("david") ||
+            nameLower.includes("daniel") ||
+            nameLower.includes("george") ||
+            nameLower.includes("mark") ||
+            nameLower.includes("ravi"));
       }) || null;
     }
 
@@ -344,28 +344,44 @@ const OverlayPage: React.FC = () => {
       return;
     }
 
-    fetch(`${API_BASE}/creators/overlay-verify?wallet=${walletAddress}&key=${overlayKey}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.valid) {
-          if (data.settings) {
-            setSettings((prev: any) => ({ ...prev, ...data.settings }));
-          }
-          setAuthStatus("ok");
-        } else {
-          setAuthStatus("denied");
-        }
-      })
-      .catch(() => setAuthStatus("denied"));
+    verifyOverlay();
   }, [walletAddress, overlayKey]);
+
+  const verifyOverlay = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/creators/overlay-verify?wallet=${walletAddress}&key=${overlayKey}`);
+      if (!res.ok) throw new Error("HTTP error");
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Invalid response format");
+      }
+      const data = await res.json();
+      if (data.valid) {
+        if (data.settings) {
+          setSettings((prev: any) => ({ ...prev, ...data.settings }));
+        }
+        setAuthStatus("ok");
+      } else {
+        setAuthStatus("denied");
+      }
+    } catch (err) {
+      setAuthStatus("denied");
+    }
+  };
 
   // Step 2: Load existing tips on mount (filtered to today for fresh daily streams)
   useEffect(() => {
     if (authStatus !== "ok" || !walletAddress) return;
 
-    fetch(`${API_BASE}/stats/user/${walletAddress}`)
-      .then(res => res.json())
-      .then(data => {
+    const loadRecentTips = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/stats/user/${walletAddress}`);
+        if (!res.ok) throw new Error("HTTP error");
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Invalid response format");
+        }
+        const data = await res.json();
         if (data.recent_tips && data.recent_tips.length > 0) {
           const todayStr = new Date().toDateString();
           const received = data.recent_tips
@@ -385,8 +401,12 @@ const OverlayPage: React.FC = () => {
             }));
           setTips(received);
         }
-      })
-      .catch(() => { });
+      } catch (err) {
+        // Ignore error
+      }
+    };
+
+    loadRecentTips();
   }, [authStatus, walletAddress]);
 
   // Step 3: Subscribe to real-time tips & real-time settings synchronization

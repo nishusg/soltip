@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { baseTheme, premiumThemes } from "../themes";
 import { getPremiumOverrides } from "../themes/shared";
 import BoringAvatar from "boring-avatars";
-import SEO from "../components/SEO";
+import SEO from "../components/common/SEO";
 import { 
   Container, 
   Card, 

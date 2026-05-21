@@ -37,7 +37,7 @@ import BoltIcon from "@mui/icons-material/Bolt";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import SEO from "../components/SEO";
+import SEO from "../components/common/SEO";
 import { blogArticles, BlogArticle } from "../data/blogArticles";
 
 export default function BlogPostPage() {

@@ -158,23 +158,59 @@ export const sharedThemeOptions: ThemeOptions = {
   },
 };
 
-export const getPremiumOverrides = (primary: string, secondary: string, bg: string, pattern: string) => `
+export function sanitizeColor(color: string): string {
+  const trimmed = (color || "").trim();
+  // Valid Hex colors
+  if (/^#[0-9a-fA-F]{3,8}$/.test(trimmed)) {
+    return trimmed;
+  }
+  // Valid rgb/rgba/hsl/hsla color notations (must not contain semicolon/curly brace styling breakouts)
+  if (/^(rgb|rgba|hsl|hsla)\([0-9a-fA-F\s,%./()]+?\)$/i.test(trimmed)) {
+    if (!/[;{}]/.test(trimmed)) {
+      return trimmed;
+    }
+  }
+  // Standard CSS text keywords
+  if (/^[a-zA-Z]+$/.test(trimmed)) {
+    return trimmed;
+  }
+  return "transparent";
+}
+
+export function sanitizeUrl(urlStr: string): string {
+  if (!urlStr) return "";
+  // Check if URL attempts to escape or inject styles
+  // We clean single/double quotes, braces, semicolons and backslashes
+  let safe = urlStr.replace(/'/g, "%27").replace(/"/g, "%22").replace(/\\/g, "/");
+  if (/[;{}]/.test(safe)) {
+    safe = safe.replace(/[;{}]/g, "");
+  }
+  return safe;
+}
+
+export const getPremiumOverrides = (primary: string, secondary: string, bg: string, pattern: string) => {
+  const safePrimary = sanitizeColor(primary);
+  const safeSecondary = sanitizeColor(secondary);
+  const safeBg = sanitizeColor(bg);
+  const safePattern = sanitizeUrl(pattern);
+
+  return `
   :root {
-    --neon-primary: ${primary};
-    --neon-secondary: ${secondary};
+    --neon-primary: ${safePrimary};
+    --neon-secondary: ${safeSecondary};
   }
   body {
-    background-color: ${bg};
+    background-color: ${safeBg};
     background-image: 
-      linear-gradient(${primary}0d 1px, transparent 1px),
-      linear-gradient(90deg, ${primary}0d 1px, transparent 1px);
+      linear-gradient(${safePrimary}0d 1px, transparent 1px),
+      linear-gradient(90deg, ${safePrimary}0d 1px, transparent 1px);
     background-size: 50px 50px;
   }
   body::before {
     content: "";
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at 50% 0%, ${primary}1a 0%, ${bg} 70%);
+    background: radial-gradient(circle at 50% 0%, ${safePrimary}1a 0%, ${safeBg} 70%);
     pointer-events: none;
     z-index: -1;
   }
@@ -186,7 +222,7 @@ export const getPremiumOverrides = (primary: string, secondary: string, bg: stri
     content: "";
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-image: url('${pattern}');
+    background-image: url('${safePattern}');
     opacity: 0.1;
     pointer-events: none;
     z-index: -1;
@@ -195,3 +231,4 @@ export const getPremiumOverrides = (primary: string, secondary: string, bg: stri
   @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   .fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 `;
+};

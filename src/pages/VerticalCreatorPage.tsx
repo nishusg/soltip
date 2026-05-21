@@ -43,7 +43,7 @@ import StarIcon from "@mui/icons-material/Star";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
 import LanguageIcon from "@mui/icons-material/Language";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import SEO from "../components/SEO";
+import SEO from "../components/common/SEO";
 
 export type PlatformType = "youtube" | "kick" | "streamlabs" | "general";
 

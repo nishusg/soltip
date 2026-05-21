@@ -19,8 +19,8 @@
 import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import Navbar from "./components/layout/Navbar";
+import Footer from "./components/layout/Footer";
 import { useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -35,7 +35,7 @@ const VerticalCreatorPage = React.lazy(() => import("./pages/VerticalCreatorPage
 const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
 const OverlayPage = React.lazy(() => import("./pages/OverlayPage"));
-const CreatorLeaderboard = React.lazy(() => import("./components/CreatorLeaderboard"));
+const CreatorLeaderboard = React.lazy(() => import("./pages/CreatorLeaderboard"));
 const ProfileSettings = React.lazy(() => import("./pages/ProfileSettings"));
 const ActivityPage = React.lazy(() => import("./pages/ActivityPage"));
 const UnauthorizedPage = React.lazy(() => import("./pages/UnauthorizedPage"));

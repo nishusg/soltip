@@ -16,7 +16,7 @@
 import { useState, useEffect } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { useWalletAuth } from "../hooks/useWalletAuth";
+import { useWalletAuth } from "../../hooks/useWalletAuth";
 import {
   AppBar,
   Toolbar,
@@ -54,8 +54,8 @@ import ShieldIcon from "@mui/icons-material/Shield";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import MonitorIcon from "@mui/icons-material/Monitor";
 import BoringAvatar from "boring-avatars";
-import TipForm from "../forms/TipForm";
-import SubscriptionModal from "./SubscriptionModal";
+import TipForm from "../features/tips/TipForm";
+import SubscriptionModal from "../features/subscription/SubscriptionModal";
 
 export default function Navbar() {
   const { connected, isAuthenticated, login, logout, isLoading, walletAddress, shortAddress, user } = useWalletAuth();

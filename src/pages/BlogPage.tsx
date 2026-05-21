@@ -33,7 +33,7 @@ import BoltIcon from "@mui/icons-material/Bolt";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ShieldIcon from "@mui/icons-material/Shield";
-import SEO from "../components/SEO";
+import SEO from "../components/common/SEO";
 import { blogArticles } from "../data/blogArticles";
 
 export default function BlogPage() {

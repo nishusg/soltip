@@ -45,13 +45,32 @@ async function api(endpoint: string, options: RequestInit = {}) {
     headers,
   });
 
-  const data = await res.json();
+  const contentType = res.headers.get("content-type");
+  let data: any = {};
+  let parseError = false;
+
+  if (contentType && contentType.includes("application/json")) {
+    try {
+      data = await res.json();
+    } catch (e) {
+      parseError = true;
+    }
+  } else {
+    parseError = true;
+  }
 
   if (!res.ok) {
     if (res.status === 401) {
       window.dispatchEvent(new CustomEvent("auth:expired"));
     }
-    throw new Error(data.error || "API request failed");
+    const errorMessage = parseError 
+      ? `HTTP error ${res.status}: ${res.statusText}`
+      : (data.error || "API request failed");
+    throw new Error(errorMessage);
+  }
+
+  if (parseError) {
+    throw new Error("Invalid response format received from server");
   }
 
   return data;

@@ -3,7 +3,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import SEO from "../components/SEO";
+import SEO from "../components/common/SEO";
 
 export default function UnauthorizedPage() {
   const location = useLocation();

@@ -1,4 +1,4 @@
-import WalletConnect from "../components/WalletConnect";
+import WalletConnect from "../components/features/wallet/WalletConnect";
 import { Container, Box } from "@mui/material";
 
 export default function Home() {

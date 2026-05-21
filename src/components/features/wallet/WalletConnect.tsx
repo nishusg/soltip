@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { Box, Typography, Card, CardContent, Button, Container, Grid, TextField, Divider, Chip, Paper } from "@mui/material";
-import { useWalletAuth } from "../hooks/useWalletAuth";
+import { useWalletAuth } from "../../../hooks/useWalletAuth";
 import BoringAvatar from "boring-avatars";
 import toast from "react-hot-toast";
-import SEO from "./SEO";
+import SEO from "../../common/SEO";
 
 // Material Icons
 import FlashOnIcon from "@mui/icons-material/FlashOn";

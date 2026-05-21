@@ -39,7 +39,7 @@ import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArro
 import DiamondIcon from "@mui/icons-material/Diamond";
 import StarIcon from "@mui/icons-material/Star";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
-import SEO from "../components/SEO";
+import SEO from "../components/common/SEO";
 
 // Define the alert styles for the previewer sandbox
 type AlertTheme = "standard" | "gold" | "neon" | "midnight";

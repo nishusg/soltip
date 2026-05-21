@@ -2,7 +2,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import { getUserProfile, updateProfile, updateTheme } from "../services/api";
 import toast from "react-hot-toast";
-import SEO from "../components/SEO";
+import SEO from "../components/common/SEO";
 import { 
   Container, 
   Typography, 
@@ -56,37 +56,40 @@ export default function ProfileSettings() {
 
   useEffect(() => {
     if (isAuthenticated && walletAddress) {
-      getUserProfile(walletAddress)
-        .then((data) => {
-          if (data.user) {
-            setName(data.user.name || "");
-            setBio(data.user.bio || "");
-            setAvatarUrl(data.user.avatar_url || "");
-            setSelectedTheme(data.user.selected_theme || "gold");
-            setUsername(data.user.username || "");
-            
-            // Socials
-            setTwitter(data.user.socials?.twitter || "");
-            setTwitch(data.user.socials?.twitch || "");
-            setYoutube(data.user.socials?.youtube || "");
-            setKick(data.user.socials?.kick || "");
-            setDiscord(data.user.socials?.discord || "");
-            
-            // Stream Embed
-            setEmbedPlatform(data.user.stream_embed?.platform || "");
-            setEmbedChannel(data.user.stream_embed?.channel || "");
-          }
-        })
-        .catch((err) => {
-          console.log("No existing profile found or error:", err);
-        })
-        .finally(() => {
-          setFetching(false);
-        });
+      loadProfile();
     } else {
       setFetching(false);
     }
   }, [isAuthenticated, walletAddress]);
+  
+  const loadProfile = async () => {
+    if (!walletAddress) return;
+    try {
+      const data = await getUserProfile(walletAddress);
+      if (data.user) {
+        setName(data.user.name || "");
+        setBio(data.user.bio || "");
+        setAvatarUrl(data.user.avatar_url || "");
+        setSelectedTheme(data.user.selected_theme || "gold");
+        setUsername(data.user.username || "");
+        
+        // Socials
+        setTwitter(data.user.socials?.twitter || "");
+        setTwitch(data.user.socials?.twitch || "");
+        setYoutube(data.user.socials?.youtube || "");
+        setKick(data.user.socials?.kick || "");
+        setDiscord(data.user.socials?.discord || "");
+        
+        // Stream Embed
+        setEmbedPlatform(data.user.stream_embed?.platform || "");
+        setEmbedChannel(data.user.stream_embed?.channel || "");
+      }
+    } catch (err) {
+      console.log("No existing profile found or error:", err);
+    } finally {
+      setFetching(false);
+    }
+  };
 
   async function handleSave(e: FormEvent) {
     e.preventDefault();
@@ -94,6 +97,21 @@ export default function ProfileSettings() {
 
     if (!name.trim()) {
       toast.error("Display Name is required!");
+      return;
+    }
+
+    if (name.trim().length > 50) {
+      toast.error("Display Name must be 50 characters or less!");
+      return;
+    }
+
+    if (bio.length > 300) {
+      toast.error("Bio must be 300 characters or less!");
+      return;
+    }
+
+    if (avatarUrl.length > 2048) {
+      toast.error("Avatar URL must be 2048 characters or less!");
       return;
     }
 
@@ -107,6 +125,49 @@ export default function ProfileSettings() {
         toast.error("Username must be between 3 and 15 characters!");
         return;
       }
+    }
+
+    // Socials length limits
+    if (
+      twitter.trim().length > 200 ||
+      twitch.trim().length > 200 ||
+      youtube.trim().length > 200 ||
+      kick.trim().length > 200 ||
+      discord.trim().length > 200
+    ) {
+      toast.error("Social link or username must be 200 characters or less!");
+      return;
+    }
+
+    // Stream embed validations
+    if (embedPlatform && embedChannel.trim()) {
+      const channelTrimmed = embedChannel.trim();
+      if (channelTrimmed.length > 100) {
+        toast.error("Stream channel name must be 100 characters or less!");
+        return;
+      }
+      if (embedPlatform === "twitch") {
+        if (!/^[a-zA-Z0-9_]{4,25}$/.test(channelTrimmed)) {
+          toast.error("Twitch channel must be 4 to 25 alphanumeric characters and underscores only!");
+          return;
+        }
+      } else if (embedPlatform === "kick") {
+        if (!/^[a-zA-Z0-9_]{3,30}$/.test(channelTrimmed)) {
+          toast.error("Kick channel must be 3 to 30 alphanumeric characters and underscores only!");
+          return;
+        }
+      } else if (embedPlatform === "youtube") {
+        if (!/^[a-zA-Z0-9_-]{3,30}$/.test(channelTrimmed)) {
+          toast.error("YouTube channel/video ID must be 3 to 30 alphanumeric characters, dashes, or underscores only!");
+          return;
+        }
+      }
+    } else if (embedPlatform && !embedChannel.trim()) {
+      toast.error("Stream channel is required if platform is selected!");
+      return;
+    } else if (!embedPlatform && embedChannel.trim()) {
+      toast.error("Stream platform is required if channel is specified!");
+      return;
     }
 
     setLoading(true);

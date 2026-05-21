@@ -1,9 +1,9 @@
 import type { FormEvent } from "react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useAuth } from "../context/AuthContext";
-import { sendTip, getExplorerUrl, calculateFeeBreakdown } from "../services/solana";
-import { verifyAndStoreTransaction, getTransactionStatus } from "../services/api";
+import { useAuth } from "../../../context/AuthContext";
+import { sendTip, getExplorerUrl, calculateFeeBreakdown } from "../../../services/solana";
+import { verifyAndStoreTransaction, getTransactionStatus } from "../../../services/api";
 import { PublicKey } from "@solana/web3.js";
 import toast from "react-hot-toast";
 import { Card, CardContent, Typography, TextField, Button, Box, CircularProgress, Link, Alert, Stack, Chip } from "@mui/material";
