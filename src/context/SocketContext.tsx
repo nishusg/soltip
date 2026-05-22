@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useWalletAuth } from "../hooks/useWalletAuth";
+import { getToken } from "../services/auth";
 import toast from "react-hot-toast";
 import { SOCKET_URL } from "../shared/constants";
 import { logger } from "../utils/logger";
@@ -36,7 +37,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       
       // Register wallet if authenticated
       if (isAuthenticated && walletAddress) {
-        s.emit("register_wallet", walletAddress);
+        const token = getToken();
+        if (token) {
+          s.emit("register_wallet", { wallet: walletAddress, token });
+        }
       }
     });
 
@@ -68,7 +72,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Re-register wallet if auth state changes
   useEffect(() => {
     if (socket && connected && isAuthenticated && walletAddress) {
-      socket.emit("register_wallet", walletAddress);
+      const token = getToken();
+      if (token) {
+        socket.emit("register_wallet", { wallet: walletAddress, token });
+      }
     }
   }, [socket, connected, isAuthenticated, walletAddress]);
 
