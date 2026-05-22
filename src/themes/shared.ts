@@ -160,18 +160,28 @@ export const sharedThemeOptions: ThemeOptions = {
 
 export function sanitizeColor(color: string): string {
   const trimmed = (color || "").trim();
-  // Valid Hex colors
+  // Enforce maximum length to prevent DoS via extremely long strings
+  if (trimmed.length > 100) return "transparent";
+  // Valid Hex colors (#RGB, #RRGGBB, #RRGGBBAA)
   if (/^#[0-9a-fA-F]{3,8}$/.test(trimmed)) {
     return trimmed;
   }
-  // Valid rgb/rgba/hsl/hsla color notations (must not contain semicolon/curly brace styling breakouts)
-  if (/^(rgb|rgba|hsl|hsla)\([0-9a-fA-F\s,%./()]+?\)$/i.test(trimmed)) {
-    if (!/[;{}]/.test(trimmed)) {
-      return trimmed;
-    }
+  // Valid rgb/rgba — strict numeric-only interior, no nested parens or letters
+  if (/^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/i.test(trimmed)) {
+    return trimmed;
   }
-  // Standard CSS text keywords
-  if (/^[a-zA-Z]+$/.test(trimmed)) {
+  if (/^rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*[\d.]+\s*\)$/i.test(trimmed)) {
+    return trimmed;
+  }
+  // Valid hsl/hsla — strict numeric-only interior
+  if (/^hsl\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*\)$/i.test(trimmed)) {
+    return trimmed;
+  }
+  if (/^hsla\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*,\s*[\d.]+\s*\)$/i.test(trimmed)) {
+    return trimmed;
+  }
+  // Standard CSS named colors (alphabetic only, no special chars)
+  if (/^[a-zA-Z]{1,30}$/.test(trimmed)) {
     return trimmed;
   }
   return "transparent";
@@ -179,13 +189,21 @@ export function sanitizeColor(color: string): string {
 
 export function sanitizeUrl(urlStr: string): string {
   if (!urlStr) return "";
-  // Check if URL attempts to escape or inject styles
-  // We clean single/double quotes, braces, semicolons and backslashes
-  let safe = urlStr.replace(/'/g, "%27").replace(/"/g, "%22").replace(/\\/g, "/");
-  if (/[;{}]/.test(safe)) {
-    safe = safe.replace(/[;{}]/g, "");
+  const trimmed = urlStr.trim();
+  // Enforce maximum length
+  if (trimmed.length > 2048) return "";
+  // Only allow https:// URLs for safe resource loading
+  if (!/^https:\/\//i.test(trimmed)) return "";
+  try {
+    const parsed = new URL(trimmed);
+    // Reject URLs with auth info (user:pass@host)
+    if (parsed.username || parsed.password) return "";
+    // Reject if hostname looks suspicious (contains semicolons, braces, etc.)
+    if (/[;{}'"\\]/.test(parsed.href)) return "";
+    return parsed.toString();
+  } catch {
+    return "";
   }
-  return safe;
 }
 
 export const getPremiumOverrides = (primary: string, secondary: string, bg: string, pattern: string) => {

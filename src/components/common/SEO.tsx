@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { SITE_NAME, SITE_URL } from "../../shared/constants";
 
 interface SEOProps {
   title?: string;
@@ -23,44 +24,45 @@ interface SEOProps {
 }
 
 export default function SEO({ 
-  title = "SolChat — Solana-Powered Creator Superchats & OBS Stream Alerts", 
-  description = "The premier web3 superchat, alert widgets, and peer-to-peer tipping platform for Solana creators. Connect Phantom or Solflare for instant on-stream alerts and secure, non-custodial payouts.",
+  title = `${SITE_NAME} — Solana-Powered Creator Superchats & OBS Stream Alerts`, 
+  description = `The premier web3 superchat, alert widgets, and peer-to-peer tipping platform for Solana creators. Connect Phantom or Solflare for instant on-stream alerts and secure, non-custodial payouts.`,
   image = "/og-image.png",
   url,
   keywords = "crypto donations for streamers, solana donations, web3 superchat, obs crypto overlay, twitch crypto tipping, youtube crypto donations, phantom wallet donations, instant creator payments, wallet based tipping, on chain superchat, decentralized creator monetization, solana stream alerts, non custodial streaming alerts, solana streaming widget, web3 streaming overlay, superchats, creator monetization, live stream alerts",
   faqs,
   creatorProfile
 }: SEOProps) {
-  const fullTitle = title.includes("SolChat") ? title : `${title} | SolChat`;
+  const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 
   // Dynamically resolve canonical URL
-  const canonicalUrl = url || (typeof window !== "undefined" ? window.location.origin + window.location.pathname : "https://solchat.io");
+  const canonicalUrl = url || (typeof window !== "undefined" ? window.location.origin + window.location.pathname : SITE_URL);
 
   // Dynamically resolve absolute image URL to prevent broken embeds
   const absoluteImage = image.startsWith("http") 
     ? image 
-    : (typeof window !== "undefined" ? window.location.origin + image : `https://solchat.io${image}`);
+    : (typeof window !== "undefined" ? window.location.origin + image : `${SITE_URL}${image}`);
 
   // Base structured schemas
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "SolChat",
-    "url": "https://solchat.io",
+    "name": SITE_NAME,
+    "url": SITE_URL,
     "description": "Solana-Powered Creator Superchats & OBS stream alerts"
   };
 
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "SolChat",
-    "url": "https://solchat.io",
-    "logo": "https://solchat.io/logo.png",
+    "name": SITE_NAME,
+    "url": SITE_URL,
+    "logo": `${SITE_URL}/logo.png`,
     "sameAs": [
-      "https://twitter.com/solchat_io",
-      "https://github.com/solchat-gh"
+      `https://twitter.com/${SITE_NAME.toLowerCase()}_io`,
+      `https://github.com/${SITE_NAME.toLowerCase()}-gh`
     ]
   };
+
 
   // Conditionally compile FAQ schema for Google Search Accordions
   const faqSchema = faqs && faqs.length > 0 ? {

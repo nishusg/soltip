@@ -21,3 +21,8 @@ export const SOLANA_RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL;
 
 // Fees
 export const FEE_PERCENTAGE = 0.05;
+
+// Site Metadata
+export const SITE_NAME = import.meta.env.VITE_SITE_NAME;
+export const SITE_URL = import.meta.env.VITE_SITE_URL;
+

@@ -4,6 +4,7 @@ import { useWalletAuth } from "../hooks/useWalletAuth";
 import toast from "react-hot-toast";
 import { SOCKET_URL } from "../shared/constants";
 import { logger } from "../utils/logger";
+import { sanitizeSenderName } from "../utils/security";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -48,9 +49,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       logger.log("New notification:", notif);
       
       if (notif.type === "tip_received") {
-        toast.success(`You received a ${notif.data.amount / 1e9} SOL Super Chat from ${notif.data.sender}!`, { duration: 5000 });
+        const safeSender = sanitizeSenderName(notif.data?.sender);
+        const safeAmount = Number(notif.data?.amount) || 0;
+        toast.success(`You received a ${safeAmount / 1e9} SOL Super Chat from ${safeSender}!`, { duration: 5000 });
       } else if (notif.type === "payment_confirmed") {
-        toast.success(`Your payment of ${notif.data.amount / 1e9} SOL was confirmed!`, { duration: 4000 });
+        const safeAmount = Number(notif.data?.amount) || 0;
+        toast.success(`Your payment of ${safeAmount / 1e9} SOL was confirmed!`, { duration: 4000 });
       }
     });
 

@@ -4,6 +4,8 @@ import { getUserProfile, updateProfile, updateTheme } from "../services/api";
 import toast from "react-hot-toast";
 import { logger } from "../utils/logger";
 import SEO from "../components/common/SEO";
+import { SITE_NAME } from "../shared/constants";
+
 import { 
   Container, 
   Typography, 
@@ -242,7 +244,8 @@ export default function ProfileSettings() {
   return (
     <Box sx={{ position: "relative", minHeight: "calc(100vh - 64px)", overflow: "hidden", pb: 8 }}>
       <Container maxWidth="lg" sx={{ py: { xs: 4, md: 8 }, position: "relative", zIndex: 1 }}>
-        <SEO title="Profile Settings" description="Update your SolChat profile information." />
+        <SEO title="Profile Settings" description={`Update your ${SITE_NAME} profile information.`} />
+
         
         <Box sx={{ mb: { xs: 4, md: 6 }, animation: "fadeInUp 0.3s ease-out" }}>
           <Typography 
@@ -531,7 +534,8 @@ export default function ProfileSettings() {
                           <TextField
                             variant="outlined"
                             fullWidth
-                            placeholder="e.g. discord.gg/solchat"
+                            placeholder={`e.g. discord.gg/${SITE_NAME.toLowerCase()}`}
+
                             value={discord}
                             onChange={(e) => setDiscord(e.target.value)}
                           />

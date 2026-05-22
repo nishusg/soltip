@@ -7,6 +7,7 @@ import BoltIcon from "@mui/icons-material/Bolt";
 import LockIcon from "@mui/icons-material/Lock";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { logger } from "../utils/logger";
+import { validateMediaUrl, sanitizeMessage, sanitizeSenderName } from "../utils/security";
 import type { OverlaySettings } from "../types";
 
 // Animation for new tip entry
@@ -94,7 +95,15 @@ function getTierGlow(amount: number): string {
 export default function OverlayPage() {
   const { walletAddress } = useParams<{ walletAddress: string }>();
   const [searchParams] = useSearchParams();
-  const overlayKey = searchParams.get("key");
+  // Read key from hash fragment (#key=...) for security — hash fragments are
+  // never sent in HTTP requests, preventing leakage via Referer headers and logs.
+  // Falls back to query parameter (?key=...) for backward compatibility.
+  const overlayKey = (() => {
+    const hash = window.location.hash;
+    const hashMatch = hash.match(/[#&]key=([^&]*)/);
+    if (hashMatch) return hashMatch[1];
+    return searchParams.get("key");
+  })();
   const { socket } = useSocket();
   const [tips, setTips] = useState<TipEntry[]>([]);
   const [authStatus, setAuthStatus] = useState<"loading" | "ok" | "denied">("loading");
@@ -213,9 +222,12 @@ export default function OverlayPage() {
         playNote(1174.66, now + 0.75, 0.8, "sine"); // D6
         playNote(1318.51, now + 0.75, 0.8, "triangle"); // E6
       } else if (soundPreset === "custom" && settingsRef.current.alert_sound_url) {
-        const audio = new Audio(settingsRef.current.alert_sound_url);
-        audio.volume = vol;
-        audio.play().catch(e => logger.error("Overlay direct sound play failed:", e));
+        const safeUrl = validateMediaUrl(settingsRef.current.alert_sound_url);
+        if (safeUrl) {
+          const audio = new Audio(safeUrl);
+          audio.volume = vol;
+          audio.play().catch(e => logger.error("Overlay direct sound play failed:", e));
+        }
       }
     } catch (e) {
       logger.error("Alert sound playback error:", e);
@@ -420,9 +432,9 @@ export default function OverlayPage() {
     const handleSuperChat = (data: any) => {
       const newTip: TipEntry = {
         id: data._id || data.tx_hash || Math.random().toString(),
-        sender: data.name || (data.wallet.slice(0, 4) + "..." + data.wallet.slice(-4)),
+        sender: sanitizeSenderName(data.name || (data.wallet.slice(0, 4) + "..." + data.wallet.slice(-4))),
         amount: data.amount / 1e9,
-        message: data.message || "",
+        message: sanitizeMessage(data.message || ""),
         timestamp: new Date().toISOString()
       };
 
@@ -634,13 +646,14 @@ export default function OverlayPage() {
                     );
                   }
                   if (computedHeaderIcon === "custom" && settings.alert_gif_url) {
-                    return (
+                    const safeGifUrl = validateMediaUrl(settings.alert_gif_url);
+                    return safeGifUrl ? (
                       <img
-                        src={settings.alert_gif_url}
+                        src={safeGifUrl}
                         alt="custom-alert"
                         style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: "10px" }}
                       />
-                    );
+                    ) : <BoltIcon sx={{ fontSize: 40, color: accentColor }} />;
                   }
                   return <BoltIcon sx={{ fontSize: 40, color: accentColor }} />;
                 })()}

@@ -34,7 +34,9 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ShieldIcon from "@mui/icons-material/Shield";
 import SEO from "../components/common/SEO";
+import { SITE_NAME } from "../shared/constants";
 import { blogArticles } from "../data/blogArticles";
+
 
 export default function BlogPage() {
   const theme = useTheme();
@@ -66,9 +68,10 @@ export default function BlogPage() {
   return (
     <Box sx={{ position: "relative", minHeight: "calc(100vh - 64px)", overflow: "hidden", pb: 10 }}>
       <SEO 
-        title="Creator Tipping Guides, Solana OBS Alerts & Monetization Blog | SolChat" 
+        title={`Creator Tipping Guides, Solana OBS Alerts & Monetization Blog | ${SITE_NAME}`} 
         description="Compounding strategies for streamers. Learn how to set up Solana live overlays, avoid platform commissions, and integrate non-custodial crypto tips." 
       />
+
 
       {/* Background Glowing Orbs */}
       <Box 
@@ -122,7 +125,8 @@ export default function BlogPage() {
               WebkitTextFillColor: "transparent"
             }}
           >
-            The SolChat Creator Hub
+            The {SITE_NAME} Creator Hub
+
           </Typography>
 
           <Typography 

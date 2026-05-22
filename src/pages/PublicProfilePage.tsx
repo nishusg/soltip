@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { buildSafeSocialUrl, isValidChannel, sanitizeMessage, sanitizeSenderName } from "../utils/security";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { getPublicProfileByUsername, verifyAndStoreTransaction, getTransactionStatus } from "../services/api";
 import { getExplorerUrl, sendTip, calculateFeeBreakdown } from "../services/solana";
@@ -44,6 +45,8 @@ import ShareIcon from "@mui/icons-material/Share";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import toast from "react-hot-toast";
 import { logger } from "../utils/logger";
+import { SITE_NAME } from "../shared/constants";
+
 
 interface CreatorProfile {
   wallet_address: string;
@@ -287,7 +290,8 @@ export default function PublicProfilePage() {
             {error || "Creator Profile Not Found"}
           </Typography>
           <Typography color="text.secondary" sx={{ mb: 4 }}>
-            Verify the username slug or check if the creator is registered on SolChat.
+            Verify the username slug or check if the creator is registered on {SITE_NAME}.
+
           </Typography>
           <Button component={RouterLink} to="/" variant="outlined" startIcon={<ArrowBackIcon />}>
             Back to Home
@@ -334,12 +338,14 @@ export default function PublicProfilePage() {
         <Container maxWidth="lg" sx={{ py: { xs: 4, md: 8 } }}>
           <SEO 
             title={`${creator.name || creator.username} (@${creator.username})`}
-            description={creator.bio || `Watch streams, click social links, and send instant tip superchats to @${creator.username} on SolChat.`}
+            description={creator.bio || `Watch streams, click social links, and send instant tip superchats to @${creator.username} on ${SITE_NAME}.`}
+
             image={creator.avatar_url || "/og-image.png"}
             keywords={`solana, tipping, superchat, creator, ${creator.username}, ${creator.name || ""}, stream alerts, web3`}
             creatorProfile={{
               name: creator.name || creator.username || "",
-              bio: creator.bio || `Solana stream creator on SolChat.`,
+              bio: creator.bio || `Solana stream creator on ${SITE_NAME}.`,
+
               avatarUrl: creator.avatar_url || "",
               walletAddress: creator.wallet_address || "",
               socials: creator.socials
@@ -517,61 +523,66 @@ export default function PublicProfilePage() {
                     Social Networks
                   </Typography>
                   <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap", gap: 1.5 }}>
-                    {creator.socials.twitter && (
+                    {(() => { const url = buildSafeSocialUrl("twitter", creator.socials.twitter); return url ? (
                       <Button
-                        href={`https://twitter.com/${creator.socials.twitter}`}
+                        href={url}
                         target="_blank"
+                        rel="noopener noreferrer"
                         variant="outlined"
                         startIcon={<TwitterIcon />}
                         sx={{ borderRadius: "10px", fontWeight: 700 }}
                       >
                         Twitter
                       </Button>
-                    )}
-                    {creator.socials.twitch && (
+                    ) : null; })()}
+                    {(() => { const url = buildSafeSocialUrl("twitch", creator.socials.twitch); return url ? (
                       <Button
-                        href={`https://twitch.tv/${creator.socials.twitch}`}
+                        href={url}
                         target="_blank"
+                        rel="noopener noreferrer"
                         variant="outlined"
                         startIcon={<LanguageIcon />}
                         sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#6441a5", color: "#b9a3e3", "&:hover": { bgcolor: "rgba(100,65,165,0.1)", borderColor: "#7d5bbe" } }}
                       >
                         Twitch
                       </Button>
-                    )}
-                    {creator.socials.youtube && (
+                    ) : null; })()}
+                    {(() => { const url = buildSafeSocialUrl("youtube", creator.socials.youtube); return url ? (
                       <Button
-                        href={creator.socials.youtube.startsWith("http") ? creator.socials.youtube : `https://youtube.com/${creator.socials.youtube}`}
+                        href={url}
                         target="_blank"
+                        rel="noopener noreferrer"
                         variant="outlined"
                         startIcon={<YouTubeIcon />}
                         sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#ff0000", color: "#ff8080", "&:hover": { bgcolor: "rgba(255,0,0,0.1)", borderColor: "#cc0000" } }}
                       >
                         YouTube
                       </Button>
-                    )}
-                    {creator.socials.kick && (
+                    ) : null; })()}
+                    {(() => { const url = buildSafeSocialUrl("kick", creator.socials.kick); return url ? (
                       <Button
-                        href={`https://kick.com/${creator.socials.kick}`}
+                        href={url}
                         target="_blank"
+                        rel="noopener noreferrer"
                         variant="outlined"
                         startIcon={<TvIcon />}
                         sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#53fc18", color: "#9fff7d", "&:hover": { bgcolor: "rgba(83,252,24,0.1)", borderColor: "#41d60f" } }}
                       >
                         Kick
                       </Button>
-                    )}
-                    {creator.socials.discord && (
+                    ) : null; })()}
+                    {(() => { const url = buildSafeSocialUrl("discord", creator.socials.discord); return url ? (
                       <Button
-                        href={creator.socials.discord.startsWith("http") ? creator.socials.discord : `https://${creator.socials.discord}`}
+                        href={url}
                         target="_blank"
+                        rel="noopener noreferrer"
                         variant="outlined"
                         startIcon={<ChatIcon />}
                         sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#5865F2", color: "#8ea1ff", "&:hover": { bgcolor: "rgba(88,101,242,0.1)", borderColor: "#4752c4" } }}
                       >
                         Discord
                       </Button>
-                    )}
+                    ) : null; })()}
                   </Stack>
                 </Box>
               )}
@@ -593,30 +604,36 @@ export default function PublicProfilePage() {
                         📺 Creator Live Broadcast
                       </Typography>
                       <Box sx={{ width: "100%", overflow: "hidden", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.06)", position: "relative" }}>
-                        {creator.stream_embed.platform === "twitch" && (
+                        {creator.stream_embed.platform === "twitch" && isValidChannel("twitch", creator.stream_embed.channel || "") && (
                           <iframe
-                            src={`https://player.twitch.tv/?channel=${creator.stream_embed.channel}&parent=${window.location.hostname}&muted=false`}
+                            src={`https://player.twitch.tv/?channel=${encodeURIComponent(creator.stream_embed.channel!)}&parent=${encodeURIComponent(window.location.hostname)}&muted=false`}
                             height="400"
                             width="100%"
                             allowFullScreen
+                            sandbox="allow-scripts allow-same-origin allow-popups"
+                            referrerPolicy="no-referrer"
                             style={{ border: "none" }}
                           />
                         )}
-                        {creator.stream_embed.platform === "youtube" && (
+                        {creator.stream_embed.platform === "youtube" && isValidChannel("youtube", creator.stream_embed.channel || "") && (
                           <iframe
-                            src={`https://www.youtube.com/embed/${creator.stream_embed.channel}?autoplay=0`}
+                            src={`https://www.youtube.com/embed/${encodeURIComponent(creator.stream_embed.channel!)}?autoplay=0`}
                             height="400"
                             width="100%"
                             allowFullScreen
+                            sandbox="allow-scripts allow-same-origin allow-popups"
+                            referrerPolicy="no-referrer"
                             style={{ border: "none" }}
                           />
                         )}
-                        {creator.stream_embed.platform === "kick" && (
+                        {creator.stream_embed.platform === "kick" && isValidChannel("kick", creator.stream_embed.channel || "") && (
                           <iframe
-                            src={`https://player.kick.com/${creator.stream_embed.channel}`}
+                            src={`https://player.kick.com/${encodeURIComponent(creator.stream_embed.channel!)}`}
                             height="400"
                             width="100%"
                             allowFullScreen
+                            sandbox="allow-scripts allow-same-origin allow-popups"
+                            referrerPolicy="no-referrer"
                             style={{ border: "none" }}
                           />
                         )}

@@ -3,11 +3,13 @@
 // ============================================================================
 //
 // A premium, glassmorphic footer loaded with Quick Links, Solana integrations,
-// and natural SEO keywords to optimize SolChat search ranking.
+// and natural SEO keywords to optimize search ranking.
 // ============================================================================
 
 import { Link as RouterLink } from "react-router-dom";
 import { Box, Container, Grid, Typography, Link, IconButton, useTheme, Tooltip, Divider } from "@mui/material";
+import { SITE_NAME } from "../../shared/constants";
+
 import BoltIcon from "@mui/icons-material/Bolt";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import TwitterIcon from "@mui/icons-material/Twitter";
@@ -79,18 +81,20 @@ export default function Footer() {
                   WebkitTextFillColor: "transparent"
                 }}
               >
-                SolChat
+                {SITE_NAME}
+
               </Typography>
             </Box>
             <Typography variant="body2" sx={{ color: "text.secondary", mb: 3, mr: { md: 4 }, lineHeight: 1.7 }}>
-              SolChat enables instant <strong>solana superchat</strong> alerts and peer-to-peer <strong>crypto donations for streamers</strong>. 
+              {SITE_NAME} enables instant <strong>solana superchat</strong> alerts and peer-to-peer <strong>crypto donations for streamers</strong>. 
+
               Our non-custodial, <strong>wallet based tipping</strong> protocol minimizes fee cuts and eliminates middle-men, pushing real-time alerts to your custom <strong>stream tipping overlay</strong> in milliseconds.
             </Typography>
             <Box sx={{ display: "flex", gap: 1.5 }}>
               <IconButton 
                 href="https://twitter.com" 
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
                 sx={{ 
                   color: "text.secondary", 
                   bgcolor: "rgba(255,255,255,0.03)", 
@@ -103,7 +107,7 @@ export default function Footer() {
               <IconButton 
                 href="https://github.com" 
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
                 sx={{ 
                   color: "text.secondary", 
                   bgcolor: "rgba(255,255,255,0.03)", 
@@ -116,7 +120,7 @@ export default function Footer() {
               <IconButton 
                 href="https://solana.com" 
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
                 sx={{ 
                   color: "text.secondary", 
                   bgcolor: "rgba(255,255,255,0.03)", 
@@ -189,16 +193,16 @@ export default function Footer() {
               Resources
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-              <Link href="https://solflare.com" target="_blank" rel="noopener" sx={{ color: "text.secondary", textDecoration: "none", fontSize: "0.9rem", transition: "color 0.2s", "&:hover": { color: "primary.main" } }}>
+              <Link href="https://solflare.com" target="_blank" rel="noopener noreferrer" sx={{ color: "text.secondary", textDecoration: "none", fontSize: "0.9rem", transition: "color 0.2s", "&:hover": { color: "primary.main" } }}>
                 Solflare Wallet
               </Link>
-              <Link href="https://phantom.app" target="_blank" rel="noopener" sx={{ color: "text.secondary", textDecoration: "none", fontSize: "0.9rem", transition: "color 0.2s", "&:hover": { color: "primary.main" } }}>
+              <Link href="https://phantom.app" target="_blank" rel="noopener noreferrer" sx={{ color: "text.secondary", textDecoration: "none", fontSize: "0.9rem", transition: "color 0.2s", "&:hover": { color: "primary.main" } }}>
                 Phantom Wallet
               </Link>
-              <Link href="https://solana.fm" target="_blank" rel="noopener" sx={{ color: "text.secondary", textDecoration: "none", fontSize: "0.9rem", transition: "color 0.2s", "&:hover": { color: "primary.main" } }}>
+              <Link href="https://solana.fm" target="_blank" rel="noopener noreferrer" sx={{ color: "text.secondary", textDecoration: "none", fontSize: "0.9rem", transition: "color 0.2s", "&:hover": { color: "primary.main" } }}>
                 Solana Explorer
               </Link>
-              <Link href="https://obsproject.com" target="_blank" rel="noopener" sx={{ color: "text.secondary", textDecoration: "none", fontSize: "0.9rem", transition: "color 0.2s", "&:hover": { color: "primary.main" } }}>
+              <Link href="https://obsproject.com" target="_blank" rel="noopener noreferrer" sx={{ color: "text.secondary", textDecoration: "none", fontSize: "0.9rem", transition: "color 0.2s", "&:hover": { color: "primary.main" } }}>
                 OBS Studio
               </Link>
             </Box>
@@ -248,7 +252,8 @@ export default function Footer() {
             fontSize: "0.72rem"
           }}
         >
-          <strong>Legal Disclaimer:</strong> SolChat is a decentralized, non-custodial software protocol. Digital assets, including Solana (SOL) and USD Coin (USDC), are subject to extreme market volatility, technical network risks, and potential total loss of value. SolChat does not operate as a financial institution, custodian, or broker-dealer, and does not provide investment, financial, tax, or legal advice. Tipping transactions are settled directly peer-to-peer on-chain between fans and creators. Creators are solely responsible for self-reporting and paying any income, capital gains, sales, or self-employment taxes required under their local jurisdictions. Brand names, logos, and simulated creator slugs (e.g., AeroDegen, GigaStreamer) are shown for technical demonstration and illustrative compatibility purposes only, and do not constitute an active endorsement, affiliation, or sponsorship.
+          <strong>Legal Disclaimer:</strong> {SITE_NAME} is a decentralized, non-custodial software protocol. Digital assets, including Solana (SOL) and USD Coin (USDC), are subject to extreme market volatility, technical network risks, and potential total loss of value. {SITE_NAME} does not operate as a financial institution, custodian, or broker-dealer, and does not provide investment, financial, tax, or legal advice. Tipping transactions are settled directly peer-to-peer on-chain between fans and creators. Creators are solely responsible for self-reporting and paying any income, capital gains, sales, or self-employment taxes required under their local jurisdictions. Brand names, logos, and simulated creator slugs (e.g., AeroDegen, GigaStreamer) are shown for technical demonstration and illustrative compatibility purposes only, and do not constitute an active endorsement, affiliation, or sponsorship.
+
         </Typography>
 
         {/* Legal & Copyright */}
@@ -262,10 +267,11 @@ export default function Footer() {
           }}
         >
           <Typography variant="caption" sx={{ color: "text.secondary", fontFamily: "Space Mono, monospace" }}>
-            &copy; {new Date().getFullYear()} SolChat. All rights reserved.
+            &copy; {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
+
           </Typography>
           <Typography variant="caption" sx={{ color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5 }}>
-            Built with ⚡ by <Link href="https://solana.com" target="_blank" rel="noopener" sx={{ color: "primary.main", textDecoration: "none", fontWeight: 700, "&:hover": { textDecoration: "underline" } }}>Solana Developers</Link>
+            Built with ⚡ by <Link href="https://solana.com" target="_blank" rel="noopener noreferrer" sx={{ color: "primary.main", textDecoration: "none", fontWeight: 700, "&:hover": { textDecoration: "underline" } }}>Solana Developers</Link>
           </Typography>
         </Box>
       </Container>

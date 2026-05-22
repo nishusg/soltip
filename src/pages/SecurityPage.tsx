@@ -40,6 +40,8 @@ import WarningIcon from "@mui/icons-material/Warning";
 import GppGoodIcon from "@mui/icons-material/GppGood";
 import SettingsEthernetIcon from "@mui/icons-material/SettingsEthernet";
 import SEO from "../components/common/SEO";
+import { SITE_NAME } from "../shared/constants";
+
 
 export default function SecurityPage() {
   const theme = useTheme();
@@ -74,7 +76,7 @@ export default function SecurityPage() {
     {
       icon: <VpnKeyIcon sx={{ color: "error.main" }} />,
       title: "Seed Phrase Confidentiality",
-      desc: "We will NEVER ask for your seed phrase, private key, or personal passwords. Your cryptographic credentials reside exclusively inside your secure, non-custodial browser wallet (Phantom, Solflare, Ledger). SolChat initiates tip routing entirely via standard client-side browser adapters."
+      desc: `We will NEVER ask for your seed phrase, private key, or personal passwords. Your cryptographic credentials reside exclusively inside your secure, non-custodial browser wallet (Phantom, Solflare, Ledger). ${SITE_NAME} initiates tip routing entirely via standard client-side browser adapters.`
     },
     {
       icon: <GppGoodIcon sx={{ color: "success.main" }} />,
@@ -89,18 +91,19 @@ export default function SecurityPage() {
     {
       icon: <WarningIcon sx={{ color: "warning.main" }} />,
       title: "Anti-Fraud P2P Ledger Protection",
-      desc: "Traditional card systems are highly vulnerable to chargebacks and credit fraud claims. Because blockchain settlements are mathematically irreversible once confirmed in a block, SolChat creators are highly protected from traditional card chargeback fraud and credit penalties."
+      desc: `Traditional card systems are highly vulnerable to chargebacks and credit fraud claims. Because blockchain settlements are mathematically irreversible once confirmed in a block, ${SITE_NAME} creators are highly protected from traditional card chargeback fraud and credit penalties.`
     }
   ];
 
+
   const faqs = [
     {
-      q: "What does 'non-custodial' mean for SolChat creators?",
-      a: "Non-custodial means SolChat never acts as a bank or custodian. We do not store your earnings, hold account balances, or keep custody of your funds. Every time a fan tips you, the transaction transfers directly on the Solana blockchain from the fan's wallet straight to your personal wallet address. Payouts are instantaneous because they bypass our systems completely."
+      q: `What does 'non-custodial' mean for ${SITE_NAME} creators?`,
+      a: `Non-custodial means ${SITE_NAME} never acts as a bank or custodian. We do not store your earnings, hold account balances, or keep custody of your funds. Every time a fan tips you, the transaction transfers directly on the Solana blockchain from the fan's wallet straight to your personal wallet address. Payouts are instantaneous because they bypass our systems completely.`
     },
     {
       q: "Is it safe to connect my Phantom or Solflare wallet?",
-      a: "Yes! Connecting your wallet to SolChat uses the industry-standard Solana Wallet Adapter. This adapter acts as a secure firewall. It only allows SolChat to request transaction signatures—it never shares your private keys, private seeds, or funds. You retain 100% control, and every transaction must be manually approved by you within your wallet popup."
+      a: `Yes! Connecting your wallet to ${SITE_NAME} uses the industry-standard Solana Wallet Adapter. This adapter acts as a secure firewall. It only allows ${SITE_NAME} to request transaction signatures—it never shares your private keys, private seeds, or funds. You retain 100% control, and every transaction must be manually approved by you within your wallet popup.`
     },
     {
       q: "How does the platform prevent spam tips and alert hijacking?",
@@ -112,12 +115,14 @@ export default function SecurityPage() {
     }
   ];
 
+
   return (
     <Box sx={{ position: "relative", minHeight: "calc(100vh - 64px)", overflow: "hidden", pb: 10 }}>
       <SEO 
-        title="Decentralized Security, Non-Custodial Trust & Anti-Spam | SolChat" 
-        description="Bank-grade security. SolChat is a non-custodial platform that never collects seed phrases or private keys. Cryptographically signed transactions, rate-limiting, and OBS overlay protection." 
+        title={`Decentralized Security, Non-Custodial Trust & Anti-Spam | ${SITE_NAME}`} 
+        description={`Bank-grade security. ${SITE_NAME} is a non-custodial platform that never collects seed phrases or private keys. Cryptographically signed transactions, rate-limiting, and OBS overlay protection.`} 
       />
+
 
       {/* Dynamic Background Glowing Orbs */}
       <Box 
@@ -179,8 +184,9 @@ export default function SecurityPage() {
             color="text.secondary" 
             sx={{ maxWidth: "800px", mx: "auto", fontWeight: 400, lineHeight: 1.7 }}
           >
-            Non-custodial by design. SolChat is engineered to ensure that your private keys, seed phrases, and funds never leave your secure wallet adapter.
+            Non-custodial by design. {SITE_NAME} is engineered to ensure that your private keys, seed phrases, and funds never leave your secure wallet adapter.
           </Typography>
+
         </Box>
 
         {/* Dynamic Security Pillars Grid */}
@@ -397,8 +403,9 @@ export default function SecurityPage() {
             Regulatory Disclaimer & Risk Disclosure
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", lineHeight: 1.6 }}>
-            SolChat is a decentralized, non-custodial software protocol. By connecting your wallet and using the tipping software, you agree that you are solely responsible for your own private credentials, keys, transactions, and local tax reporting compliance. Cryptocurrency transactions carry high price volatility, smart-contract risks, and blockchain validation delays. SolChat does not act as a custodian, fiduciary, financial advisor, bank, money service business (MSB), or licensed payment processor. Tipping services are provided "as-is" without explicit or implied guarantees of future yields or earnings. Smart contract audits are part of our developmental roadmap but do not eliminate decentralized software vulnerabilities.
+            {SITE_NAME} is a decentralized, non-custodial software protocol. By connecting your wallet and using the tipping software, you agree that you are solely responsible for your own private credentials, keys, transactions, and local tax reporting compliance. Cryptocurrency transactions carry high price volatility, smart-contract risks, and blockchain validation delays. {SITE_NAME} does not act as a custodian, fiduciary, financial advisor, bank, money service business (MSB), or licensed payment processor. Tipping services are provided "as-is" without explicit or implied guarantees of future yields or earnings. Smart contract audits are part of our developmental roadmap but do not eliminate decentralized software vulnerabilities.
           </Typography>
+
         </Box>
       </Container>
     </Box>

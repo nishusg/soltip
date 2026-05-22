@@ -19,6 +19,7 @@
 
 import bs58 from "bs58";
 import { getNonce, verifySignature } from "./api";
+import { isTokenValid } from "../utils/security";
 
 /** localStorage key for the JWT token */
 const TOKEN_KEY = "superchat_token";
@@ -68,9 +69,15 @@ export async function authenticate(
   return token;
 }
 
-/** Get the stored JWT token */
+/** Get the stored JWT token (returns null if missing or expired) */
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token && !isTokenValid(token)) {
+    // Token is expired — proactively clear it
+    removeToken();
+    return null;
+  }
+  return token;
 }
 
 /** Remove the stored JWT token and wallet (logout) */
@@ -84,7 +91,7 @@ export function getStoredAddress(): string | null {
   return localStorage.getItem(ADDRESS_KEY);
 }
 
-/** Check if the user has a stored token */
+/** Check if the user has a stored, non-expired token */
 export function isAuthenticated(): boolean {
   return !!getToken();
 }

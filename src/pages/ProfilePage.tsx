@@ -12,6 +12,8 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ErrorIcon from "@mui/icons-material/Error";
 import TipForm from "../components/features/tips/TipForm";
 import SEO from "../components/common/SEO";
+import { SITE_NAME } from "../shared/constants";
+
 import BoringAvatar from "boring-avatars";
 
 interface UserProfile {
@@ -129,7 +131,7 @@ export default function ProfilePage() {
         <Box sx={{ animation: "fadeInUp 0.6s ease-out" }}>
           <SEO 
             title={user.name || shorten(user.wallet_address)} 
-            description={user.bio || `Send a superchat to ${user.name || shorten(user.wallet_address)} on SolChat — the ultimate Solana engagement platform.`}
+            description={user.bio || `Send a superchat to ${user.name || shorten(user.wallet_address)} on ${SITE_NAME} — the ultimate Solana engagement platform.`}
           />
           {/* Profile Card */}
           <Card sx={{ mb: 4, textAlign: "center", px: 4, pb: 4, pt: 0, overflow: "visible" }}>

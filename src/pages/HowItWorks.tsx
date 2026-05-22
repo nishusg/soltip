@@ -2,7 +2,7 @@
 // How It Works Page — HowItWorks.tsx
 // ============================================================================
 //
-// An interactive, premium landing page designed to explain the SolChat stream
+// An interactive, premium landing page designed to explain the stream
 // tipping ecosystem while boosting SEO authority using highly curated content
 // and metadata.
 // ============================================================================
@@ -37,6 +37,9 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import StarIcon from "@mui/icons-material/Star";
 import SEO from "../components/common/SEO";
+import { SITE_NAME, SITE_URL } from "../shared/constants";
+
+
 
 // Define the steps of the flow
 interface FlowStep {
@@ -59,7 +62,7 @@ export default function HowItWorks() {
       shortDesc: "Visits tipping page",
       icon: <StarIcon />,
       title: "1. Viewer Visits Tipping Page",
-      detailedDesc: "Stream viewers land directly on your customized donation page using your unique SolChat address. The interface is optimized to showcase your custom branding, active community tier goals, and previous tips list in a premium monospace style.",
+      detailedDesc: `Stream viewers land directly on your customized donation page using your unique ${SITE_NAME} address. The interface is optimized to showcase your custom branding, active community tier goals, and previous tips list in a premium monospace style.`,
       tipText: "No logins or accounts are required for viewers. They just access your custom URL link to start supporting.",
     },
     {
@@ -67,7 +70,7 @@ export default function HowItWorks() {
       shortDesc: "Secure authentication",
       icon: <AccountBalanceWalletIcon />,
       title: "2. Secure Solana Wallet Connection",
-      detailedDesc: "With a single click, viewers connect their web3 browser-based wallet (such as Phantom, Solflare, or Backpack). SolChat utilizes cryptographic web3 handshakes to authorize transactions instantly, preserving user privacy while securing payment lines.",
+      detailedDesc: `With a single click, viewers connect their web3 browser-based wallet (such as Phantom, Solflare, or Backpack). ${SITE_NAME} utilizes cryptographic web3 handshakes to authorize transactions instantly, preserving user privacy while securing payment lines.`,
       tipText: "Supports both desktop extension wallets and mobile wallet adapters with industry-grade security protocols.",
     },
     {
@@ -83,7 +86,7 @@ export default function HowItWorks() {
       shortDesc: "Peer-to-peer payout",
       icon: <FlashOnIcon />,
       title: "4. Peer-to-Peer Instant Settlement",
-      detailedDesc: "Donation splits are processed on-chain straight from the viewer's wallet to your wallet. SolChat is fully non-custodial: we charge a minimal flat 5% platform cut to support maintenance while 95% is transferred directly, settling in under 2 seconds.",
+      detailedDesc: `Donation splits are processed on-chain straight from the viewer's wallet to your wallet. ${SITE_NAME} is fully non-custodial: we charge a minimal flat 5% platform cut to support maintenance while 95% is transferred directly, settling in under 2 seconds.`,
       tipText: "Your SOL donations are directly yours immediately. No weekly cycles, no platform holds, and no payout delay.",
     },
     {
@@ -96,24 +99,25 @@ export default function HowItWorks() {
     }
   ];
 
+
   return (
     <Box sx={{ position: "relative", minHeight: "calc(100vh - 64px)", overflow: "hidden", pb: 10 }}>
       {/* Dynamic SEO Tags */}
       <SEO 
         title="How It Works — Streaming Crypto Tips Overlay Guide" 
-        description="Learn how SolChat connects viewers to creators using secure wallet based tipping, instant crypto donations for streamers, and customizable OBS stream tipping overlays."
+        description={`Learn how ${SITE_NAME} connects viewers to creators using secure wallet based tipping, instant crypto donations for streamers, and customizable OBS stream tipping overlays.`}
         faqs={[
           {
-            q: "What is SolChat and how does a solana superchat work?",
-            a: "SolChat is a non-custodial crypto monetization gateway built explicitly for creators and broadcasters. A solana superchat is an on-stream donation alert backed by instant P2P blockchain transactions. When a viewer donates SOL, our web socket integration senses the cryptographic ledger update instantly and triggers an visual notification directly in the streamer's OBS stream."
+            q: `What is ${SITE_NAME} and how does a solana superchat work?`,
+            a: `${SITE_NAME} is a non-custodial crypto monetization gateway built explicitly for creators and broadcasters. A solana superchat is an on-stream donation alert backed by instant P2P blockchain transactions. When a viewer donates SOL, our web socket integration senses the cryptographic ledger update instantly and triggers an visual notification directly in the streamer's OBS stream.`
           },
           {
             q: "How does the platform fee compare to traditional portals?",
-            a: "We charge a minimal flat 5% platform fee to fund hostings, stream overlays, and high-speed websocket gateways. In comparison, traditional streaming portals take 30% to 50% commission cuts and hold your funds for weeks. On SolChat, 95% of the tip splits directly to your personal wallet in under 2 seconds, offering high-speed payouts with maximum creator margins."
+            a: `We charge a minimal flat 5% platform fee to fund hostings, stream overlays, and high-speed websocket gateways. In comparison, traditional streaming portals take 30% to 50% commission cuts and hold your funds for weeks. On ${SITE_NAME}, 95% of the tip splits directly to your personal wallet in under 2 seconds, offering high-speed payouts with maximum creator margins.`
           },
           {
             q: "What wallets are supported for wallet based tipping?",
-            a: "We support all standard web3 Solana wallets including Phantom, Solflare, Backpack, and Ledger through the Solana Wallet Adapter. On mobile devices, SolChat interfaces seamlessly using Mobile Wallet Adapter (MWA) links, allowing viewers to securely sign transactions inside their local wallet app in one tap."
+            a: `We support all standard web3 Solana wallets including Phantom, Solflare, Backpack, and Ledger through the Solana Wallet Adapter. On mobile devices, ${SITE_NAME} interfaces seamlessly using Mobile Wallet Adapter (MWA) links, allowing viewers to securely sign transactions inside their local wallet app in one tap.`
           },
           {
             q: "How do I set up a stream tipping overlay inside OBS Studio?",
@@ -121,6 +125,7 @@ export default function HowItWorks() {
           }
         ]}
       />
+
 
       {/* Decorative Orbs */}
       <Box 
@@ -173,7 +178,8 @@ export default function HowItWorks() {
               WebkitTextFillColor: "transparent"
             }}
           >
-            How SolChat Works
+            How {SITE_NAME} Works
+
           </Typography>
 
           <Typography 
@@ -181,8 +187,9 @@ export default function HowItWorks() {
             color="text.secondary" 
             sx={{ maxWidth: "750px", mx: "auto", fontWeight: 400, lineHeight: 1.6 }}
           >
-            SolChat bridges web3 decentralized ledger payments directly with stream overlays. 
+            {SITE_NAME} bridges web3 decentralized ledger payments directly with stream overlays. 
             Discover how viewers send instant <strong>crypto donations for streamers</strong> using high-fidelity blockchain transactions.
+
           </Typography>
         </Box>
 
@@ -397,8 +404,9 @@ export default function HowItWorks() {
                   <Box sx={{ position: "relative", zIndex: 1, animation: "fadeInUp 0.4s ease" }}>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
                       <Typography variant="caption" sx={{ fontFamily: "Space Mono, monospace", color: "rgba(255,255,255,0.4)" }}>
-                        BROWSER // SOLCHAT.IO/MONETIZE
+                        BROWSER // {SITE_URL.replace(/^https?:\/\//i, "").toUpperCase()}/MONETIZE
                       </Typography>
+
                       <Box sx={{ display: "flex", gap: 0.5 }}>
                         <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "error.main" }} />
                         <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "warning.main" }} />
@@ -571,7 +579,8 @@ export default function HowItWorks() {
               WebkitTextFillColor: "transparent"
             }}
           >
-            Why Streamers Choose SolChat
+            Why Streamers Choose {SITE_NAME}
+
           </Typography>
 
           <Grid container spacing={3.5}>
@@ -643,12 +652,12 @@ export default function HowItWorks() {
             <Accordion sx={{ bgcolor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px !important", "&::before": { display: "none" } }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: "primary.main" }} />} sx={{ py: 1 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                  What is SolChat and how does a solana superchat work?
+                  What is {SITE_NAME} and how does a solana superchat work?
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 3, pb: 3 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                  SolChat is a non-custodial crypto monetization gateway built explicitly for creators and broadcasters. A <strong>solana superchat</strong> is an on-stream donation alert backed by instant P2P blockchain transactions. When a viewer donates SOL, our web socket integration senses the cryptographic ledger update instantly and triggers an visual notification directly in the streamer's OBS stream.
+                  {SITE_NAME} is a non-custodial crypto monetization gateway built explicitly for creators and broadcasters. A <strong>solana superchat</strong> is an on-stream donation alert backed by instant P2P blockchain transactions. When a viewer donates SOL, our web socket integration senses the cryptographic ledger update instantly and triggers an visual notification directly in the streamer's OBS stream.
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -662,7 +671,7 @@ export default function HowItWorks() {
               </AccordionSummary>
               <AccordionDetails sx={{ px: 3, pb: 3 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                  We charge a minimal flat 5% platform fee to fund hostings, stream overlays, and high-speed websocket gateways. In comparison, traditional streaming portals take 30% to 50% commission cuts and hold your funds for weeks. On SolChat, 95% of the tip splits directly to your personal wallet in under 2 seconds, offering high-speed payouts with maximum creator margins.
+                  We charge a minimal flat 5% platform fee to fund hostings, stream overlays, and high-speed websocket gateways. In comparison, traditional streaming portals take 30% to 50% commission cuts and hold your funds for weeks. On {SITE_NAME}, 95% of the tip splits directly to your personal wallet in under 2 seconds, offering high-speed payouts with maximum creator margins.
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -676,10 +685,11 @@ export default function HowItWorks() {
               </AccordionSummary>
               <AccordionDetails sx={{ px: 3, pb: 3 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                  We support all standard web3 Solana wallets including Phantom, Solflare, Backpack, and Ledger through the Solana Wallet Adapter. On mobile devices, SolChat interfaces seamlessly using Mobile Wallet Adapter (MWA) links, allowing viewers to securely sign transactions inside their local wallet app in one tap.
+                  We support all standard web3 Solana wallets including Phantom, Solflare, Backpack, and Ledger through the Solana Wallet Adapter. On mobile devices, {SITE_NAME} interfaces seamlessly using Mobile Wallet Adapter (MWA) links, allowing viewers to securely sign transactions inside their local wallet app in one tap.
                 </Typography>
               </AccordionDetails>
             </Accordion>
+
 
             {/* FAQ 4 */}
             <Accordion sx={{ bgcolor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px !important", "&::before": { display: "none" } }}>

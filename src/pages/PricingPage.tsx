@@ -6,7 +6,7 @@
 // Integrates:
 //   1. Dynamic theme integration (before login standard, after login premium)
 //   2. Platform vs. network fee specs
-//   3. High-fidelity comparative pricing tables (Twitch, Patreon, PayPal, SolChat)
+//   3. High-fidelity comparative pricing tables (Twitch, Patreon, PayPal, and platforms)
 //   4. Interactive Split-Fee visual layout (Viewer -> Solana -> Creator)
 //   5. Retention profit calculators and FAQs
 // ============================================================================
@@ -47,6 +47,8 @@ import TvIcon from "@mui/icons-material/Tv";
 import GroupIcon from "@mui/icons-material/Group";
 import ShieldIcon from "@mui/icons-material/Shield";
 import SEO from "../components/common/SEO";
+import { SITE_NAME } from "../shared/constants";
+
 
 export default function PricingPage() {
   const theme = useTheme();
@@ -58,8 +60,9 @@ export default function PricingPage() {
   const secondaryColor = theme.palette.secondary?.main || brandColor;
 
   // Pricing calculations
-  const platformFee = Math.round(tipVolume * 0.05); // SolChat 5% platform fee
+  const platformFee = Math.round(tipVolume * 0.05); // dynamic platform fee
   const networkFees = Math.round(tipVolume * 0.0005); // Solana devnet/mainnet average gas
+
   const creatorRetained = Math.round(tipVolume - platformFee - networkFees);
   
   // Traditional platform comparisons
@@ -93,10 +96,11 @@ export default function PricingPage() {
   ];
 
   const comparisonRows = [
-    { name: "Twitch Bits / Subs", fee: "30% - 50% commission split", payout: "15-day hold period", chargebacks: "Creator holds liability" },
+    { name: `Twitch Bits / Subs`, fee: "30% - 50% commission split", payout: "15-day hold period", chargebacks: "Creator holds liability" },
     { name: "Patreon Premium", fee: "8% - 12% cut + merchant splits", payout: "Monthly cycle payouts", chargebacks: "Subject to fraud claims" },
     { name: "PayPal / Credit Cards", fee: "3.4% + $0.30 standard cuts", payout: "7-day rolling holds", chargebacks: "High chargeback penalty fees" },
-    { name: "🚀 SolChat Protocol", fee: "Flat 5% + Solana network gas", payout: "Instant (under 2 seconds)", chargebacks: "Ledger Irreversible (No Chargebacks)", highlight: true }
+    { name: `🚀 ${SITE_NAME} Protocol`, fee: "Flat 5% + Solana network gas", payout: "Instant (under 2 seconds)", chargebacks: "Ledger Irreversible (No Chargebacks)", highlight: true }
+
   ];
 
   const payoutSteps = [
@@ -124,12 +128,12 @@ export default function PricingPage() {
 
   const faqs = [
     {
-      q: "Why does SolChat charge a flat 5% platform fee?",
-      a: "Our flat 5% platform fee helps fund the development of our high-speed websocket servers, customizable OBS alert engines, non-custodial wallet integrations, and monorepo hosting. Unlike traditional portals that take 30-50% cuts or charge high monthly subscription fees, you only pay a tiny fraction when you actually receive support."
+      q: `Why does ${SITE_NAME} charge a flat 5% platform fee?`,
+      a: `Our flat 5% platform fee helps fund the development of our high-speed websocket servers, customizable OBS alert engines, non-custodial wallet integrations, and monorepo hosting. Unlike traditional portals that take 30-50% cuts or charge high monthly subscription fees, you only pay a tiny fraction when you actually receive support.`
     },
     {
       q: "What is a Solana gas fee and who receives it?",
-      a: "A gas fee (or transaction fee) is a micro-payment paid directly to Solana validators to cryptographically secure and process your transaction on the blockchain. SolChat takes absolutely zero commission from this network gas fee, which averages under $0.00025."
+      a: `A gas fee (or transaction fee) is a micro-payment paid directly to Solana validators to cryptographically secure and process your transaction on the blockchain. ${SITE_NAME} takes absolutely zero commission from this network gas fee, which averages under $0.00025.`
     },
     {
       q: "Are peer-to-peer crypto tips protected against chargebacks?",
@@ -137,17 +141,19 @@ export default function PricingPage() {
     },
     {
       q: "Do I have to wait to withdraw my earnings?",
-      a: "Not at all. SolChat is fully decentralized and non-custodial. We never hold your donations. All support goes directly from your viewer's wallet into your personal Solana wallet instantly in under 2 seconds. The funds are yours to hold, spend, or stake immediately."
+      a: `Not at all. ${SITE_NAME} is fully decentralized and non-custodial. We never hold your donations. All support goes directly from your viewer's wallet into your personal Solana wallet instantly in under 2 seconds. The funds are yours to hold, spend, or stake immediately.`
     }
   ];
+
 
   return (
     <Box sx={{ position: "relative", minHeight: "calc(100vh - 64px)", overflow: "hidden", pb: 10 }}>
       <SEO 
-        title="Creator-First Pricing & Fee Transparency | SolChat" 
+        title={`Creator-First Pricing & Fee Transparency | ${SITE_NAME}`} 
         description="Simple, open, and transparent pricing. Flat 5% platform fee + micro Solana network gas. No monthly subscriptions, no chargebacks, and instant P2P payouts." 
         faqs={faqs}
       />
+
 
       {/* Dynamic Background Glowing Orbs */}
       <Box 
@@ -413,7 +419,8 @@ export default function PricingPage() {
                   Fee Savings Calculator
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 4, lineHeight: 1.6 }}>
-                  Simulate your tipping revenues. Drag the volume slider to see how much traditional platform fees drain your profit compared to SolChat splits.
+                  Simulate your tipping revenues. Drag the volume slider to see how much traditional platform fees drain your profit compared to {SITE_NAME} splits.
+
                 </Typography>
 
                 <Box sx={{ mb: 4 }}>
@@ -475,12 +482,13 @@ export default function PricingPage() {
                     </Box>
                   </Box>
 
-                  {/* SolChat Bar */}
+                  {/* Platform Bar */}
                   <Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                       <Typography variant="caption" sx={{ color: brandColor, fontWeight: 800 }}>
-                        🚀 SolChat Net Support (5% platform + gas)
+                        🚀 {SITE_NAME} Net Support (5% platform + gas)
                       </Typography>
+
                       <Typography variant="caption" sx={{ color: "success.main", fontWeight: 900, fontFamily: "Space Mono" }}>
                         ${creatorRetained.toLocaleString()} (loses only ${platformFee.toLocaleString()})
                       </Typography>
@@ -621,7 +629,8 @@ export default function PricingPage() {
             Regulatory Disclaimer & Risk Disclosure
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", lineHeight: 1.6 }}>
-            SolChat is a decentralized, non-custodial software protocol. By connecting your wallet and using the tipping software, you agree that you are solely responsible for your own private credentials, keys, transactions, and local tax reporting compliance. Cryptocurrency transactions carry high price volatility, smart-contract risks, and blockchain validation delays. SolChat does not act as a custodian, fiduciary, financial advisor, bank, money service business (MSB), or licensed payment processor. Tipping services are provided "as-is" without explicit or implied guarantees of future yields or earnings. Smart contract audits are part of our developmental roadmap but do not eliminate decentralized software vulnerabilities.
+            {SITE_NAME} is a decentralized, non-custodial software protocol. By connecting your wallet and using the tipping software, you agree that you are solely responsible for your own private credentials, keys, transactions, and local tax reporting compliance. Cryptocurrency transactions carry high price volatility, smart-contract risks, and blockchain validation delays. {SITE_NAME} does not act as a custodian, fiduciary, financial advisor, bank, money service business (MSB), or licensed payment processor. Tipping services are provided "as-is" without explicit or implied guarantees of future yields or earnings. Smart contract audits are part of our developmental roadmap but do not eliminate decentralized software vulnerabilities.
+
           </Typography>
         </Box>
       </Container>

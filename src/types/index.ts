@@ -2,7 +2,7 @@
 // Shared Type Definitions — types/index.ts
 // ============================================================================
 //
-// Centralized TypeScript interfaces used across the SolChat frontend.
+// Centralized TypeScript interfaces used across the frontend.
 // All API response shapes, state models, and shared data structures live here
 // to ensure type consistency and eliminate `any` usage.
 // ============================================================================

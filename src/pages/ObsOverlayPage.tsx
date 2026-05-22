@@ -2,7 +2,7 @@
 // OBS Overlay Integration Page — ObsOverlayPage.tsx
 // ============================================================================
 //
-// A dedicated marketing and technical setup landing page for SolChat's OBS
+// A dedicated marketing and technical setup landing page for the OBS
 // browser source overlay. Optimized with target keywords to capture streamer search
 // traffic.
 // ============================================================================
@@ -40,6 +40,9 @@ import DiamondIcon from "@mui/icons-material/Diamond";
 import StarIcon from "@mui/icons-material/Star";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
 import SEO from "../components/common/SEO";
+import { SITE_NAME, SITE_URL } from "../shared/constants";
+
+
 
 // Define the alert styles for the previewer sandbox
 type AlertTheme = "standard" | "gold" | "neon" | "midnight";
@@ -162,26 +165,27 @@ export default function ObsOverlayPage() {
       {/* SEO Metadata Tags */}
       <SEO 
         title="OBS Overlay Integration — Setup Twitch & OBS Crypto Alerts" 
-        description="Configure your OBS superchat overlay with SolChat. Full guide for Twitch crypto donations OBS, transparency settings, Streamlabs support, and Solana stream alerts."
+        description={`Configure your OBS superchat overlay with ${SITE_NAME}. Full guide for Twitch crypto donations OBS, transparency settings, Streamlabs support, and Solana stream alerts.`}
         faqs={[
           {
             q: "What are OBS crypto alerts and how fast do they display?",
-            a: "OBS crypto alerts are live graphic and audio stream notifications triggered when a supporter sends cryptocurrency (like SOL) directly to your wallet. SolChat’s WebSocket gateway monitors the Solana blockchain in real-time, displaying alert updates on your Twitch stream in under 300 milliseconds."
+            a: `OBS crypto alerts are live graphic and audio stream notifications triggered when a supporter sends cryptocurrency (like SOL) directly to your wallet. ${SITE_NAME}’s WebSocket gateway monitors the Solana blockchain in real-time, displaying alert updates on your Twitch stream in under 300 milliseconds.`
           },
           {
             q: "Do I need to chroma key my OBS superchat overlay to make it transparent?",
             a: "No! Our OBS superchat overlay outputs clean HTML rendering with a 0% alpha background. OBS Studio and Streamlabs automatically read this transparent layer natively. You do not need to apply green-screen or chroma key filters to make it float perfectly above your gaming layout."
           },
           {
-            q: "How do I connect Twitch crypto donations in OBS with SolChat?",
-            a: "Accepting Twitch crypto donations OBS alerts is incredibly simple. Connect your Solana browser wallet (like Phantom or Solflare) to SolChat, copy your custom tip link, and add it to your Twitch panels or chat bots (like Nightbot or Streamlabs Cloudbot). Then, add the secret overlay URL as a browser source inside OBS Studio. When viewers click your link and send a tip, the overlay alerts automatically fire."
+            q: `How do I connect Twitch crypto donations in OBS with ${SITE_NAME}?`,
+            a: `Accepting Twitch crypto donations OBS alerts is incredibly simple. Connect your Solana browser wallet (like Phantom or Solflare) to ${SITE_NAME}, copy your custom tip link, and add it to your Twitch panels or chat bots (like Nightbot or Streamlabs Cloudbot). Then, add the secret overlay URL as a browser source inside OBS Studio. When viewers click your link and send a tip, the overlay alerts automatically fire.`
           },
           {
             q: "Can I configure custom audios for different Solana stream alerts?",
-            a: "Absolutely! Inside your creator dashboard, you can fully configure different alert sounds, customized alert GIF graphics, custom CSS, custom volumes, and sound settings that automatically update your Solana stream alerts overlay without needing to adjust the OBS browser source settings."
+            a: `Absolutely! Inside your creator dashboard, you can fully configure different alert sounds, customized alert GIF graphics, custom CSS, custom volumes, and sound settings that automatically update your Solana stream alerts overlay without needing to adjust the OBS browser source settings.`
           }
         ]}
       />
+
 
       {/* Background radial ambient lights */}
       <Box 
@@ -481,7 +485,8 @@ export default function ObsOverlayPage() {
                   Native Alpha Transparency
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.7, mb: 3 }}>
-                  Forget traditional chroma-keying green screens or tedious filters. SolChat’s <strong>OBS superchat overlay</strong> outputs clean alpha channel layers with 100% transparent backgrounds directly.
+                  Forget traditional chroma-keying green screens or tedious filters. {SITE_NAME}’s <strong>OBS superchat overlay</strong> outputs clean alpha channel layers with 100% transparent backgrounds directly.
+
                 </Typography>
                 <Typography variant="body2" color="primary.main" sx={{ fontWeight: 800, display: "flex", alignItems: "center", gap: 0.5 }}>
                   ✔ No green background removal required. Float alerts anywhere.
@@ -557,7 +562,8 @@ export default function ObsOverlayPage() {
                   Add OBS Browser Source
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                  Open OBS Studio. Under <strong>Sources</strong>, click the <strong>+</strong> icon, select <strong>Browser</strong>, name it "SolChat Alerts", and click OK.
+                  Open OBS Studio. Under <strong>Sources</strong>, click the <strong>+</strong> icon, select <strong>Browser</strong>, name it `{SITE_NAME} Alerts`, and click OK.
+
                 </Typography>
               </Paper>
             </Grid>
@@ -605,7 +611,7 @@ export default function ObsOverlayPage() {
                 mb: 4
               }}
             >
-              https://solchat.io/overlay/YOUR_WALLET_ADDRESS?key=YOUR_SECRET_TOKEN&sound=true&tts=true
+              {`${typeof window !== "undefined" ? window.location.origin : SITE_URL}/overlay/YOUR_WALLET_ADDRESS#key=YOUR_SECRET_TOKEN&sound=true&tts=true`}
             </Box>
 
             <Grid container spacing={3}>
@@ -657,7 +663,7 @@ export default function ObsOverlayPage() {
               </AccordionSummary>
               <AccordionDetails sx={{ px: 3, pb: 3 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                  <strong>OBS crypto alerts</strong> are live graphic and audio stream notifications triggered when a supporter sends cryptocurrency (like SOL) directly to your wallet. SolChat’s WebSocket gateway monitors the Solana blockchain in real-time, displaying alert updates on your Twitch stream in under 300 milliseconds.
+                  <strong>OBS crypto alerts</strong> are live graphic and audio stream notifications triggered when a supporter sends cryptocurrency (like SOL) directly to your wallet. {SITE_NAME}’s WebSocket gateway monitors the Solana blockchain in real-time, displaying alert updates on your Twitch stream in under 300 milliseconds.
                 </Typography>
               </AccordionDetails>
             </Accordion>
@@ -680,15 +686,16 @@ export default function ObsOverlayPage() {
             <Accordion sx={{ bgcolor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px !important", "&::before": { display: "none" } }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: "secondary.main" }} />} sx={{ py: 1 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                  How do I connect Twitch crypto donations in OBS with SolChat?
+                  How do I connect Twitch crypto donations in OBS with {SITE_NAME}?
                 </Typography>
               </AccordionSummary>
               <AccordionDetails sx={{ px: 3, pb: 3 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                  Accepting <strong>Twitch crypto donations OBS</strong> alerts is incredibly simple. Connect your Solana browser wallet (like Phantom or Solflare) to SolChat, copy your custom tip link, and add it to your Twitch panels or chat bots (like Nightbot or Streamlabs Cloudbot). Then, add the secret overlay URL as a browser source inside OBS Studio. When viewers click your link and send a tip, the overlay alerts automatically fire.
+                  Accepting <strong>Twitch crypto donations OBS</strong> alerts is incredibly simple. Connect your Solana browser wallet (like Phantom or Solflare) to {SITE_NAME}, copy your custom tip link, and add it to your Twitch panels or chat bots (like Nightbot or Streamlabs Cloudbot). Then, add the secret overlay URL as a browser source inside OBS Studio. When viewers click your link and send a tip, the overlay alerts automatically fire.
                 </Typography>
               </AccordionDetails>
             </Accordion>
+
 
             {/* FAQ 4 */}
             <Accordion sx={{ bgcolor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "16px !important", "&::before": { display: "none" } }}>
@@ -723,7 +730,8 @@ export default function ObsOverlayPage() {
           
           <CardContent sx={{ position: "relative", zIndex: 1 }}>
             <Typography variant="h4" sx={{ fontWeight: 900, mb: 2 }}>
-              Level Up Your Stream alerts with SolChat Overlay
+              Level Up Your Stream alerts with {SITE_NAME} Overlay
+
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ maxW: 600, mx: "auto", mb: 5, lineHeight: 1.6 }}>
               Set up live high-speed blockchain alerts in OBS in under 3 minutes. Accept instant non-custodial tips with absolute transparency support.

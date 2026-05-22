@@ -44,6 +44,8 @@ import FlashOnIcon from "@mui/icons-material/FlashOn";
 import LanguageIcon from "@mui/icons-material/Language";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import SEO from "../components/common/SEO";
+import { SITE_NAME, SITE_URL } from "../shared/constants";
+
 
 export type PlatformType = "youtube" | "kick" | "streamlabs" | "general";
 
@@ -81,14 +83,14 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
   // Platform dynamic settings
   const configs: Record<PlatformType, PlatformConfig> = {
     youtube: {
-      metaTitle: "YouTube Crypto Donations & Super Chat Alternative | SolChat",
-      metaDesc: "Tired of YouTube taking 30% of your Super Chats? Set up a SolChat donation page. Lower fees, instant peer-to-peer settlement, and OBS overlays.",
+      metaTitle: `YouTube Crypto Donations & Super Chat Alternative | ${SITE_NAME}`,
+      metaDesc: `Tired of YouTube taking 30% of your Super Chats? Set up a ${SITE_NAME} donation page. Lower fees, instant peer-to-peer settlement, and OBS overlays.`,
       brandColor: "#EF4444", // YouTube Red
       glowColor: "rgba(239, 68, 68, 0.4)",
       glowOpacity: "0c",
       accentText: "YOUTUBE BROADCASTER SPEC",
       heroTitle: "YouTube Super Chat Alternative",
-      heroSub: "YouTube takes up to 30% of your Super Chat support. SolChat enables direct peer-to-peer <strong>youtube crypto donations</strong> with a minimal 5% platform fee and instant payouts.",
+      heroSub: `YouTube takes up to 30% of your Super Chat support. ${SITE_NAME} enables direct peer-to-peer <strong>youtube crypto donations</strong> with a minimal 5% platform fee and instant payouts.`,
       comparisonLabel: "YouTube Super Chat",
       comparisonFee: "30% flat commission",
       comparisonSplitText: "70% to Creator (Holds funds)",
@@ -96,12 +98,12 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
       keywords: ["youtube crypto donations", "youtube super chat alternative", "solana superchat for youtube", "crypto tipping youtube"],
       faqs: [
         {
-          q: "Is it safe to put a SolChat crypto donation link in my YouTube description?",
-          a: "Absolutely. YouTube welcomes third-party donation links (like Patreon, Ko-fi, and PayPal) in video descriptions. A SolChat tipping link acts as a direct, secure alternative for receiving wallet based crypto support without violating community guidelines."
+          q: `Is it safe to put a ${SITE_NAME} crypto donation link in my YouTube description?`,
+          a: `Absolutely. YouTube welcomes third-party donation links (like Patreon, Ko-fi, and PayPal) in video descriptions. A ${SITE_NAME} tipping link acts as a direct, secure alternative for receiving wallet based crypto support without violating community guidelines.`
         },
         {
           q: "How does a Solana superchat compare to a YouTube Super Chat?",
-          a: "While YouTube Super Chats deduct a 30% fee and hold your funds for up to 45 days, a Solana superchat via SolChat is fully decentralized: we charge a flat 5% platform fee, and donations settle peer-to-peer directly into your wallet in under 2 seconds, immediately triggering real-time stream overlays."
+          a: `While YouTube Super Chats deduct a 30% fee and hold your funds for up to 45 days, a Solana superchat via ${SITE_NAME} is fully decentralized: we charge a flat 5% platform fee, and donations settle peer-to-peer directly into your wallet in under 2 seconds, immediately triggering real-time stream overlays.`
         },
         {
           q: "Do I need a special setup to show Solana tipping alerts on YouTube streams?",
@@ -109,19 +111,19 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
         },
         {
           q: "Can viewers donate crypto on mobile devices?",
-          a: "Yes! SolChat integrates seamlessly with the Solana Mobile Wallet Adapter (MWA). Viewers on YouTube Mobile can tap your tipping link, sign the transaction in their Phantom or Solflare app in one tap, and return immediately."
+          a: `Yes! ${SITE_NAME} integrates seamlessly with the Solana Mobile Wallet Adapter (MWA). Viewers on YouTube Mobile can tap your tipping link, sign the transaction in their Phantom or Solflare app in one tap, and return immediately.`
         }
       ]
     },
     kick: {
-      metaTitle: "Kick Crypto Tipping Link & Custom Alerts | SolChat",
+      metaTitle: `Kick Crypto Tipping Link & Custom Alerts | ${SITE_NAME}`,
       metaDesc: "Boost your Kick stream monetization. Secure Solana tipping link with direct 95/5 creator splits, instant peer-to-peer settlement, and OBS alerts.",
       brandColor: "#53FC18", // Kick Green
       glowColor: "rgba(83, 252, 24, 0.4)",
       glowOpacity: "08",
       accentText: "KICK CREATOR SPEC",
       heroTitle: "Kick Tipping Alternative & Alerts",
-      heroSub: "Kick is built on a creator-first ethos, but sub splits still take a cut. Expand your stream monetization with direct <strong>kick crypto tipping</strong>, offering 95/5 splits and instant settlement.",
+      heroSub: `Kick is built on a creator-first ethos, but sub splits still take a cut. Expand your stream monetization with direct <strong>kick crypto tipping</strong>, offering 95/5 splits and instant settlement.`,
       comparisonLabel: "Kick Subscriptions",
       comparisonFee: "5% platform split",
       comparisonSplitText: "95% Creator Split (Monthly cycle)",
@@ -129,16 +131,16 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
       keywords: ["kick crypto tipping", "kick stream alerts", "kick donation link", "solana tipping kick"],
       faqs: [
         {
-          q: "How does SolChat fit with Kick's creator-first splitting fees?",
-          a: "Kick is famous for its premium 95/5 splits, but sub splits still deduct fees and hold payouts. SolChat goes a step further by offering a premium 95/5 split: we take a tiny 5% commission to support platform development, and your viewers' tips transfer instantly from wallet to wallet in under two seconds."
+          q: `How does ${SITE_NAME} fit with Kick's creator-first splitting fees?`,
+          a: `Kick is famous for its premium 95/5 splits, but sub splits still deduct fees and hold payouts. ${SITE_NAME} goes a step further by offering a premium 95/5 split: we take a tiny 5% commission to support platform development, and your viewers' tips transfer instantly from wallet to wallet in under two seconds.`
         },
         {
           q: "How do I configure a custom Kick stream alerts overlay?",
-          a: "Simply open your SolChat dashboard, configure your custom alert sounds and styling, copy your unique secret Browser Source URL, and paste it into your OBS or Streamlabs overlay dashboard. The alerts fire in under 300 milliseconds on stream."
+          a: `Simply open your ${SITE_NAME} dashboard, configure your custom alert sounds and styling, copy your unique secret Browser Source URL, and paste it into your OBS or Streamlabs overlay dashboard. The alerts fire in under 300 milliseconds on stream.`
         },
         {
           q: "Can I accept Twitch or Kick crypto donations side-by-side?",
-          a: "Yes! Your custom SolChat tipping page is platform-agnostic. You can share your link simultaneously in your Kick panels, Twitch descriptions, or YouTube headers, and manage all alert presets from one central hub."
+          a: `Yes! Your custom ${SITE_NAME} tipping page is platform-agnostic. You can share your link simultaneously in your Kick panels, Twitch descriptions, or YouTube headers, and manage all alert presets from one central hub.`
         },
         {
           q: "What wallets do Kick viewers use to sign tipping transactions?",
@@ -147,7 +149,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
       ]
     },
     streamlabs: {
-      metaTitle: "Streamlabs Crypto Tip Page & OBS Integration | SolChat",
+      metaTitle: `Streamlabs Crypto Tip Page & OBS Integration | ${SITE_NAME}`,
       metaDesc: "Upgrade your Streamlabs setup with Solana stream alerts. Low platform fees, instant peer-to-peer settlement, and full Streamlabs compatibility.",
       brandColor: "#06B6D4", // Streamlabs Teal
       glowColor: "rgba(6, 182, 212, 0.4)",
@@ -162,8 +164,8 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
       keywords: ["streamlabs crypto tipping", "streamlabs donation overlay", "solana alerts streamlabs", "crypto tipping streamlabs OBS"],
       faqs: [
         {
-          q: "Does SolChat support Streamlabs Desktop and Streamlabs OBS?",
-          a: "Yes! SolChat’s custom alert overlay is fully compatible with Streamlabs Desktop (formerly Streamlabs OBS), Streamlabs Cloud, and StreamElements. Just add a new 'Browser Source' to your scene, paste your SolChat alert link, and you are ready."
+          q: `Does ${SITE_NAME} support Streamlabs Desktop and Streamlabs OBS?`,
+          a: `Yes! ${SITE_NAME}’s custom alert overlay is fully compatible with Streamlabs Desktop (formerly Streamlabs OBS), Streamlabs Cloud, and StreamElements. Just add a new 'Browser Source' to your scene, paste your ${SITE_NAME} alert link, and you are ready.`
         },
         {
           q: "Are credit card chargebacks a risk on crypto donations for streamers?",
@@ -171,23 +173,23 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
         },
         {
           q: "Do I need to configure chroma-key green screen filters in Streamlabs?",
-          a: "No. SolChat alerts render with native alpha channel transparency (0% opacity backgrounds). You can place the browser source anywhere on your Streamlabs layout and float clean alerts without chroma-keying."
+          a: `No. ${SITE_NAME} alerts render with native alpha channel transparency (0% opacity backgrounds). You can place the browser source anywhere on your Streamlabs layout and float clean alerts without chroma-keying.`
         },
         {
           q: "How do I test my Streamlabs stream overlay alerts before going live?",
-          a: "Simply navigate to your SolChat dashboard and click 'Send Test Alert'. This instantly triggers a live preview on your Streamlabs overlay, letting you verify graphics, custom fonts, and alert audios in real-time."
+          a: `Simply navigate to your ${SITE_NAME} dashboard and click 'Send Test Alert'. This instantly triggers a live preview on your Streamlabs overlay, letting you verify graphics, custom fonts, and alert audios in real-time.`
         }
       ]
     },
     general: {
-      metaTitle: "Crypto Monetization for Digital & Content Creators | SolChat",
+      metaTitle: `Crypto Monetization for Digital & Content Creators | ${SITE_NAME}`,
       metaDesc: "Set up a decentralized tipping link for your brand. Direct peer-to-peer global payments, flat 5% platform cuts, and instant Solana payouts.",
       brandColor: "#6366F1", // Indigo
       glowColor: "rgba(99, 102, 241, 0.4)",
       glowOpacity: "0c",
       accentText: "CREATOR ECONOMY SPEC",
       heroTitle: "Creator Crypto Monetization",
-      heroSub: "Bypass platform gatekeepers, high payment processing fees, and geo-restrictions. SolChat enables direct, global, peer-to-peer <strong>crypto monetization for creators</strong>.",
+      heroSub: `Bypass platform gatekeepers, high payment processing fees, and geo-restrictions. ${SITE_NAME} enables direct, global, peer-to-peer <strong>crypto monetization for creators</strong>.`,
       comparisonLabel: "Traditional Sub Portals",
       comparisonFee: "10% to 30% commission cuts",
       comparisonSplitText: "Weekly/monthly delay holds",
@@ -195,20 +197,20 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
       keywords: ["crypto monetization creators", "content creator tipping link", "solana superchat creator", "crypto donations for streamers"],
       faqs: [
         {
-          q: "What makes SolChat a superior Twitch donation alternative?",
-          a: "Traditional tipping portals take heavy fee cuts, hold funds, and require complex merchant integrations. SolChat provides a secure, non-custodial alternative where viewers send tips directly to your Solana wallet with absolute transparency, instant settlement, and a flat 5% platform fee."
+          q: `What makes ${SITE_NAME} a superior Twitch donation alternative?`,
+          a: `Traditional tipping portals take heavy fee cuts, hold funds, and require complex merchant integrations. ${SITE_NAME} provides a secure, non-custodial alternative where viewers send tips directly to your Solana wallet with absolute transparency, instant settlement, and a flat 5% platform fee.`
         },
         {
           q: "Is a web3 wallet tipping link appropriate for off-stream creators?",
-          a: "Absolutely! Podcasters, bloggers, developers, and writers use SolChat's customized tipping pages in social bios, post footers, and website widgets to receive direct cross-border support globally."
+          a: `Absolutely! Podcasters, bloggers, developers, and writers use ${SITE_NAME}'s customized tipping pages in social bios, post footers, and website widgets to receive direct cross-border support globally.`
         },
         {
           q: "How does the platform fee structure work?",
-          a: "SolChat operates on a fully peer-to-peer decentralized transaction model. The viewer signs a transaction that splits 95% straight to the creator and 5% to the platform to maintain hosting and WebSocket servers. The only other cost is Solana's network gas fee, which averages under $0.00025."
+          a: `${SITE_NAME} operates on a fully peer-to-peer decentralized transaction model. The viewer signs a transaction that splits 95% straight to the creator and 5% to the platform to maintain hosting and WebSocket servers. The only other cost is Solana's network gas fee, which averages under $0.00025.`
         },
         {
           q: "How secure is direct web3 peer-to-peer tipping?",
-          a: "It is exceptionally secure. No personal billing details are exposed, and funds transfer directly between wallets. SolChat never accesses your private keys or holds your donations, ensuring complete non-custodial safety."
+          a: `It is exceptionally secure. No personal billing details are exposed, and funds transfer directly between wallets. ${SITE_NAME} never accesses your private keys or holds your donations, ensuring complete non-custodial safety.`
         }
       ]
     }
@@ -357,7 +359,8 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
                       borderRight: `1px solid ${brandColor}15`
                     }}
                   >
-                    🚀 SolChat Protocol
+                    🚀 {SITE_NAME} Protocol
+
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -421,7 +424,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
                   Profit Calculator
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 4, lineHeight: 1.6 }}>
-                  Adjust the slider to simulate your monthly donation tipping volume and calculate exactly how much you lose to commissions vs. how much you save with SolChat.
+                  Adjust the slider to simulate your monthly donation tipping volume and calculate exactly how much you lose to commissions vs. how much you save with {SITE_NAME}.
                 </Typography>
 
                 <Box sx={{ mb: 4 }}>
@@ -483,12 +486,13 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
                     </Box>
                   </Box>
 
-                  {/* SolChat Split Bar */}
+                  {/* Dynamic Split Bar */}
                   <Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                       <Typography variant="caption" sx={{ color: brandColor, fontWeight: 800 }}>
-                        🚀 SolChat Net Support (5% platform fee + gas)
+                        🚀 {SITE_NAME} Net Support (5% platform fee + gas)
                       </Typography>
+
                       <Typography variant="caption" sx={{ color: "success.main", fontWeight: 900, fontFamily: "Space Mono" }}>
                         ${solchatKept.toLocaleString()} (loses only ${platformFee.toLocaleString()})
                       </Typography>

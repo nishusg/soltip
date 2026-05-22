@@ -7,6 +7,8 @@
 // Structured as blocks for rich rendering on the frontend.
 // ============================================================================
 
+import { SITE_NAME } from "../shared/constants";
+
 export interface ContentBlock {
   type: "paragraph" | "header" | "quote" | "list" | "cta" | "table";
   text?: string;
@@ -37,7 +39,7 @@ export const blogArticles: BlogArticle[] = [
     category: "Guides",
     readTime: "5 min read",
     date: "May 18, 2026",
-    metaTitle: "How to Accept Crypto Donations on Twitch | SolChat Guide",
+    metaTitle: `How to Accept Crypto Donations on Twitch | ${SITE_NAME} Guide`,
     metaDesc: "Step-by-step setup guide for Twitch streamers to accept decentralized cryptocurrency tips. Skip high commissions and prevent chargeback fraud entirely.",
     tags: ["Twitch Tipping", "Crypto Donations", "Stream Setup"],
     contentBlocks: [
@@ -60,7 +62,7 @@ export const blogArticles: BlogArticle[] = [
       },
       {
         type: "header",
-        title: "How to Set Up SolChat Tipping on Your Channel",
+        title: `How to Set Up ${SITE_NAME} Tipping on Your Channel`,
         text: "Setting up a decentralized donation link takes under 2 minutes. Follow these three simple steps:"
       },
       {
@@ -68,12 +70,12 @@ export const blogArticles: BlogArticle[] = [
         items: [
           "1. Connect Your Wallet: Plug in your Phantom or Solflare wallet. The setup is fully client-side and non-custodial.",
           "2. Configure Your Creator Profile: Set your profile bio, select your premium page theme colors, and download your unique public tipping page link.",
-          "3. Link in Twitch About Panels: Copy your SolChat link, head over to your Twitch Channel settings, click 'Edit Panels', and add a new graphic pointing directly to your tipping hub."
+          `3. Link in Twitch About Panels: Copy your ${SITE_NAME} link, head over to your Twitch Channel settings, click 'Edit Panels', and add a new graphic pointing directly to your tipping hub.`
         ]
       },
       {
         type: "quote",
-        text: "Switching from standard PayPal tipping to decentralized peer-to-peer SolChat tips saved me over $340 in platform fees and dispute costs in my first month of streaming."
+        text: `Switching from standard PayPal tipping to decentralized peer-to-peer ${SITE_NAME} tips saved me over $340 in platform fees and dispute costs in my first month of streaming.`
       },
       {
         type: "cta",
@@ -84,22 +86,22 @@ export const blogArticles: BlogArticle[] = [
   {
     slug: "best-obs-overlay-for-solana-donations",
     title: "Best OBS Overlay for Solana Donations: Custom Alerts Sandbox",
-    excerpt: "Want your live streams to react instantly when a viewer sends you a tip? Discover how SolChat’s WebSocket-backed OBS overlay gives you stunning real-time crypto alerts.",
+    excerpt: `Want your live streams to react instantly when a viewer sends you a tip? Discover how ${SITE_NAME}’s WebSocket-backed OBS overlay gives you stunning real-time crypto alerts.`,
     category: "Alerts",
     readTime: "4 min read",
     date: "May 17, 2026",
-    metaTitle: "Best OBS Overlay for Solana Donations & Alerts | SolChat",
+    metaTitle: `Best OBS Overlay for Solana Donations & Alerts | ${SITE_NAME}`,
     metaDesc: "Configure real-time, transparent Solana crypto alerts on your OBS overlays. Low-latency alert sandboxes with premium soundwaves and custom alerts.",
     tags: ["OBS Alerts", "Solana Overlay", "Streamlabs Setup"],
     contentBlocks: [
       {
         type: "paragraph",
-        text: "Live stream engagement thrives on instant feedback. When a viewer sends you a Superchat tip, a dynamic on-screen alert celebrates their contribution. Standard stream notification gateways are slow, clunky, and lack support for direct on-chain wallet signatures. SolChat introduces a high-speed websocket alert system built for OBS Studio, Streamlabs, and XSplit."
+        text: `Live stream engagement thrives on instant feedback. When a viewer sends you a Superchat tip, a dynamic on-screen alert celebrates their contribution. Standard stream notification gateways are slow, clunky, and lack support for direct on-chain wallet signatures. ${SITE_NAME} introduces a high-speed websocket alert system built for OBS Studio, Streamlabs, and XSplit.`
       },
       {
         type: "header",
         title: "The Tech Behind low-latency Web3 Stream Alerts",
-        text: "Traditional stream alerts suffer from API lag, sometimes firing up to 30 seconds after a transaction completes. SolChat solves this latency barrier:"
+        text: `Traditional stream alerts suffer from API lag, sometimes firing up to 30 seconds after a transaction completes. ${SITE_NAME} solves this latency barrier:`
       },
       {
         type: "list",
@@ -136,17 +138,17 @@ export const blogArticles: BlogArticle[] = [
     category: "Monetization",
     readTime: "6 min read",
     date: "May 16, 2026",
-    metaTitle: "How Streamers Avoid High Platform Fees | SolChat Tipping",
+    metaTitle: `How Streamers Avoid High Platform Fees | ${SITE_NAME} Tipping`,
     metaDesc: "Discover the fee structures of major platforms. Learn why streamers are shifting to non-custodial crypto tipping to save up to 45% in platform commissions.",
     tags: ["Platform Fees", "Streamer Earnings", "Crypto Superchat"],
     contentBlocks: [
       {
         type: "paragraph",
-        text: "Monetizing your audience should not mean sacrificing your margins. Creators are beginning to realize that centralized media giants take massive commissions. Twitch takes up to 50% of subscriber tiers. YouTube cuts away 30% of standard Super Chat tips. SolChat rewrites the rules with a flat 5% platform protocol fee."
+        text: `Monetizing your audience should not mean sacrificing your margins. Creators are beginning to realize that centralized media giants take massive commissions. Twitch takes up to 50% of subscriber tiers. YouTube cuts away 30% of standard Super Chat tips. ${SITE_NAME} rewrites the rules with a flat 5% platform protocol fee.`
       },
       {
         type: "header",
-        title: "Comparing the Cuts: Twitch vs. YouTube vs. SolChat",
+        title: `Comparing the Cuts: Twitch vs. YouTube vs. ${SITE_NAME}`,
         text: "Let's break down exactly how much you lose to platform commissions when fans tip you:"
       },
       {
@@ -156,13 +158,13 @@ export const blogArticles: BlogArticle[] = [
           ["Twitch Subs / Bits", "30% - 50%", "15 days minimum", "Highly Restricted"],
           ["YouTube Super Chat", "30%", "Monthly cycles", "Restricted"],
           ["Patreon Premium", "8% - 12% + card fees", "Monthly withdraws", "Moderate"],
-          ["🚀 SolChat Protocol", "Flat 5%", "Instant (< 2 seconds)", "100% Non-Custodial"]
+          [`🚀 ${SITE_NAME} Protocol`, "Flat 5%", "Instant (< 2 seconds)", "100% Non-Custodial"]
         ]
       },
       {
         type: "header",
         title: "How Decentralized Tipping Restores Creator Profit",
-        text: "When you use SolChat, splits are handled completely transparently on the Solana blockchain. A secure smart contract receives the tip, automatically routes 5% to the protocol wallet to keep the network servers running, and forwards 95% straight to your personal non-custodial address in the very same block transaction. There are no monthly subscriptions, setup tiers, or exit hold thresholds."
+        text: `When you use ${SITE_NAME}, splits are handled completely transparently on the Solana blockchain. A secure smart contract receives the tip, automatically routes 5% to the protocol wallet to keep the network servers running, and forwards 95% straight to your personal non-custodial address in the very same block transaction. There are no monthly subscriptions, setup tiers, or exit hold thresholds.`
       },
       {
         type: "cta",
@@ -177,13 +179,13 @@ export const blogArticles: BlogArticle[] = [
     category: "Monetization",
     readTime: "5 min read",
     date: "May 15, 2026",
-    metaTitle: "Crypto Superchat vs YouTube Superchat | SolChat Tipping",
-    metaDesc: "A complete feature comparison between YouTube's native Super Chat and SolChat's crypto-based alternative. Save 25% on fees and settle tips instantly.",
+    metaTitle: `Crypto Superchat vs YouTube Superchat | ${SITE_NAME} Tipping`,
+    metaDesc: `A complete feature comparison between YouTube's native Super Chat and ${SITE_NAME}'s crypto-based alternative. Save 25% on fees and settle tips instantly.`,
     tags: ["YouTube Super Chat", "Tipping Alternatives", "DeFi Monetization"],
     contentBlocks: [
       {
         type: "paragraph",
-        text: "YouTube Super Chat has revolutionized live streams, giving viewers a gamified way to pin messages at the top of the chat during live broadcasts. However, behind that visual engagement lies a costly reality: YouTube takes an absolute 30% cut of every single Super Chat sent. SolChat is built to solve this commission issue."
+        text: `YouTube Super Chat has revolutionized live streams, giving viewers a gamified way to pin messages at the top of the chat during live broadcasts. However, behind that visual engagement lies a costly reality: YouTube takes an absolute 30% cut of every single Super Chat sent. ${SITE_NAME} is built to solve this commission issue.`
       },
       {
         type: "header",
@@ -192,7 +194,7 @@ export const blogArticles: BlogArticle[] = [
       },
       {
         type: "table",
-        headers: ["Feature Matrix", "YouTube Super Chat", "🚀 SolChat Protocol"],
+        headers: ["Feature Matrix", "YouTube Super Chat", `🚀 ${SITE_NAME} Protocol`],
         rows: [
           ["Commission Cut", "30%", "Flat 5%"],
           ["Payout Settlement", "Up to 30 days delay", "Instant (under 2 seconds)"],
@@ -204,7 +206,7 @@ export const blogArticles: BlogArticle[] = [
       {
         type: "header",
         title: "Bypassing the App Store & Credit Card Cuts",
-        text: "Why is YouTube's fee so high? In addition to platform operations, Google has to pay Apple's 30% App Store cuts and high credit card processor merchant fees. By leveraging the Solana network, SolChat bypasses these centralized middlemen entirely, ensuring your supporters' funds go straight from their wallet into yours with zero gatekeepers."
+        text: `Why is YouTube's fee so high? In addition to platform operations, Google has to pay Apple's 30% App Store cuts and high credit card processor merchant fees. By leveraging the Solana network, ${SITE_NAME} bypasses these centralized middlemen entirely, ensuring your supporters' funds go straight from their wallet into yours with zero gatekeepers.`
       },
       {
         type: "cta",
@@ -230,7 +232,7 @@ export const blogArticles: BlogArticle[] = [
       {
         type: "header",
         title: "Step 1: The Cryptographic Handshake",
-        text: "When a viewer decides to send you SOL or USDC support on SolChat, they never input credit cards or card credentials. Instead, our platform connects with their browser wallet extension (such as Phantom or Solflare) via a client-side Wallet Adapter. This adapter acts as a secure firewall, allowing the wallet to review and sign the transaction locally on their device."
+        text: `When a viewer decides to send you SOL or USDC support on ${SITE_NAME}, they never input credit cards or card credentials. Instead, our platform connects with their browser wallet extension (such as Phantom or Solflare) via a client-side Wallet Adapter. This adapter acts as a secure firewall, allowing the wallet to review and sign the transaction locally on their device.`
       },
       {
         type: "header",
@@ -255,7 +257,7 @@ export const blogArticles: BlogArticle[] = [
     category: "Web3 Tutorials",
     readTime: "5 min read",
     date: "May 13, 2026",
-    metaTitle: "Best Solana Tools for Creators & Streamers | SolChat Hub",
+    metaTitle: `Best Solana Tools for Creators & Streamers | ${SITE_NAME} Hub`,
     metaDesc: "Our review of the best Solana tools, dApps, and non-custodial platforms for streamers, YouTubers, and content creators looking to monetize in Web3.",
     tags: ["Solana Tools", "Creator Economy", "Staking for Streamers"],
     contentBlocks: [
@@ -265,8 +267,8 @@ export const blogArticles: BlogArticle[] = [
       },
       {
         type: "header",
-        title: "1. Tipping & Live Overlays: SolChat Protocol",
-        text: "SolChat is the premier tipping protocol on Solana. It bridges the gap between decentralized finance and live entertainment, providing streamers with custom OBS webhooks, zero chargebacks, low fees, and real-time customizable sound sandboxes."
+        title: `1. Tipping & Live Overlays: ${SITE_NAME} Protocol`,
+        text: `${SITE_NAME} is the premier tipping protocol on Solana. It bridges the gap between decentralized finance and live entertainment, providing streamers with custom OBS webhooks, zero chargebacks, low fees, and real-time customizable sound sandboxes.`
       },
       {
         type: "header",

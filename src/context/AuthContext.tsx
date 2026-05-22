@@ -15,7 +15,7 @@
 // ============================================================================
 
 import type { ReactNode } from "react";
-import { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { authenticate, getToken, removeToken, getStoredAddress } from "../services/auth";
 import toast from "react-hot-toast";
@@ -92,14 +92,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token, refreshUser]);
 
   // -------------------------------------------------------------------
-  // Login: run the full nonce → sign → verify flow
+  // Login: run the full nonce → sign → verify flow (with rate limiting)
   // -------------------------------------------------------------------
+  const lastLoginAttempt = useRef<number>(0);
+  const LOGIN_COOLDOWN_MS = 3000; // 3-second cooldown between attempts
+
   const login = useCallback(async () => {
     if (isLoading) return;
     if (!publicKey || !signMessage) {
       setError("Please connect your wallet first");
       return;
     }
+
+    // Rate limiting: prevent rapid repeated login attempts
+    const now = Date.now();
+    if (now - lastLoginAttempt.current < LOGIN_COOLDOWN_MS) {
+      return;
+    }
+    lastLoginAttempt.current = now;
 
     setIsLoading(true);
     setError(null);

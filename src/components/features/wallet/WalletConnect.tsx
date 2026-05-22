@@ -5,6 +5,7 @@ import { useWalletAuth } from "../../../hooks/useWalletAuth";
 import BoringAvatar from "boring-avatars";
 import toast from "react-hot-toast";
 import SEO from "../../common/SEO";
+import { SITE_NAME, SITE_URL } from "../../../shared/constants";
 
 // Material Icons
 import FlashOnIcon from "@mui/icons-material/FlashOn";
@@ -52,11 +53,11 @@ export default function WalletConnect() {
   const faqs = [
     {
       q: "How do I get paid?",
-      a: "Instantly and directly! SolChat uses fully non-custodial smart contracts and direct on-chain transactions. When a fan tips you, the SOL or USDC lands inside your Phantom or Solflare wallet within sub-seconds—no weekly holding periods, no processing delay."
+      a: `Instantly and directly! ${SITE_NAME} uses fully non-custodial smart contracts and direct on-chain transactions. When a fan tips you, the SOL or USDC lands inside your Phantom or Solflare wallet within sub-seconds—no weekly holding periods, no processing delay.`
     },
     {
       q: "What are the platform fees?",
-      a: "SolChat operates with a clean, transparent flat 5% platform fee on all standard tips to support development and overlay hosting. We do not charge subscription fees for receiving tips. Instead, creators can purchase our Premium subscription to unlock aesthetic themes (Gold, Diamond, Neon, Midnight), advanced custom stream alert overlays, personalized sound widgets, and unique creator page enhancements."
+      a: `${SITE_NAME} operates with a clean, transparent flat 5% platform fee on all standard tips to support development and overlay hosting. We do not charge subscription fees for receiving tips. Instead, creators can purchase our Premium subscription to unlock aesthetic themes (Gold, Diamond, Neon, Midnight), advanced custom stream alert overlays, personalized sound widgets, and unique creator page enhancements.`
     },
     {
       q: "Does this protect against Stripe chargebacks?",
@@ -64,13 +65,14 @@ export default function WalletConnect() {
     },
     {
       q: "Can fans tip without a cryptocurrency wallet?",
-      a: "Yes! SolChat integrates standard Solana Web3 connectors, allowing viewers to tip instantly with browser-connected wallets or mobile dApps. We are also preparing fiat-to-crypto checkout gateways for traditional viewers."
+      a: `Yes! ${SITE_NAME} integrates standard Solana Web3 connectors, allowing viewers to tip instantly with browser-connected wallets or mobile dApps. We are also preparing fiat-to-crypto checkout gateways for traditional viewers.`
     },
     {
       q: "How do I add the live alert overlay to OBS?",
       a: "Once authenticated, go to your Control Dashboard to grab your unique OBS Alert Box URL. Add it as a standard 'Browser Source' inside OBS or Streamlabs. Any tip received on your dynamic SEO profile page will play a premium animation instantly."
     }
   ];
+
 
   return (
     <Box sx={{ position: "relative", overflow: "hidden", pb: 12 }}>
@@ -319,13 +321,13 @@ export default function WalletConnect() {
             {
               step: "01",
               title: "Link Web3 Identity",
-              desc: "Securely link your Phantom or Solflare wallet. SolChat runs 100% passwordless and non-custodial for maximal safety.",
+              desc: `Securely link your Phantom or Solflare wallet. ${SITE_NAME} runs 100% passwordless and non-custodial for maximal safety.`,
               icon: <AccountBalanceWalletIcon sx={{ fontSize: 30, color: "primary.light" }} />
             },
             {
               step: "02",
               title: "Claim Public Profile URL",
-              desc: "Set a unique slug like solchat.io/aerodegen, hook up your socials, and grab your custom alert overlay URL for OBS Studio.",
+              desc: `Set a unique slug like ${SITE_URL.replace(/^https?:\/\//i, "")}/aerodegen, hook up your socials, and grab your custom alert overlay URL for OBS Studio.`,
               icon: <LanguageIcon sx={{ fontSize: 30, color: "secondary.main" }} />
             },
             {
@@ -334,6 +336,7 @@ export default function WalletConnect() {
               desc: "Fans tip SOL or USDC direct to your wallet. OBS stream alerts activate instantly with ultra-low Solana sub-second delays.",
               icon: <FlashOnIcon sx={{ fontSize: 30, color: "primary.main" }} />
             }
+
           ].map((item, idx) => (
             <Grid size={{ xs: 12, md: 4 }} key={idx}>
               <Card sx={{ height: "100%", position: "relative", overflow: "visible" }}>
@@ -533,7 +536,7 @@ export default function WalletConnect() {
         <Box sx={{ textAlign: "center", mb: 8 }}>
           <Typography variant="h3" component="h2" sx={{ fontWeight: 900, mb: 2 }}>Protocol Capabilities</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: "auto", fontSize: "1.05rem" }}>
-            Explore the deep technical core features that make SolChat the premier tipping solution.
+            Explore the deep technical core features that make {SITE_NAME} the premier tipping solution.
           </Typography>
         </Box>
 
@@ -759,14 +762,15 @@ export default function WalletConnect() {
         <Box sx={{ textAlign: "center", mb: 8 }}>
           <Typography variant="h3" component="h2" sx={{ fontWeight: 900, mb: 2 }}>Broadcaster Stories</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: "auto", fontSize: "1.05rem" }}>
-            Hear from streamers who migrated to SolChat's direct on-chain tipping channels.
+            Hear from streamers who migrated to {SITE_NAME}'s direct on-chain tipping channels.
           </Typography>
+
         </Box>
 
         <Grid container spacing={4}>
           {[
             {
-              quote: "Since adopting SolChat, my stream tipping has been incredibly smooth with near-zero network fees! The sub-second alert updates have blown my Twitch viewer community away.",
+              quote: `Since adopting ${SITE_NAME}, my stream tipping has been incredibly smooth with near-zero network fees! The sub-second alert updates have blown my Twitch viewer community away.`,
               author: "TectonicDegen",
               role: "Broadcaster, Twitch Esports"
             },

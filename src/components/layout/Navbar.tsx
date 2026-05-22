@@ -56,6 +56,8 @@ import MonitorIcon from "@mui/icons-material/Monitor";
 import BoringAvatar from "boring-avatars";
 import TipForm from "../features/tips/TipForm";
 import SubscriptionModal from "../features/subscription/SubscriptionModal";
+import { SITE_NAME } from "../../shared/constants";
+
 
 export default function Navbar() {
   const { connected, isAuthenticated, login, logout, isLoading, walletAddress, shortAddress, user } = useWalletAuth();
@@ -241,7 +243,8 @@ export default function Navbar() {
               transition: "letter-spacing 0.3s ease"
             }}
           >
-            SolChat
+            {SITE_NAME}
+
           </Typography>
         </Box>
 
@@ -779,7 +782,8 @@ export default function Navbar() {
               >
                 <BoltIcon sx={{ color: "#000", fontSize: 20 }} />
               </Box>
-              <Typography variant="h6" sx={{ fontWeight: 950, fontFamily: "Space Grotesk" }}>SolChat Menu</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 950, fontFamily: "Space Grotesk" }}>{SITE_NAME} Menu</Typography>
+
             </Box>
             <IconButton onClick={() => setMobileOpen(false)} sx={{ color: "text.secondary" }}>
               <CloseIcon />

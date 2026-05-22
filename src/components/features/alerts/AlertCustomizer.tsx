@@ -40,6 +40,8 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import toast from "react-hot-toast";
 import { logger } from "../../../utils/logger";
 import type { OverlaySettings } from "../../../types";
+import { SITE_NAME } from "../../../shared/constants";
+
 
 interface AlertCustomizerProps {
   initialSettings: Partial<OverlaySettings>;
@@ -275,7 +277,7 @@ export default function AlertCustomizer({
   };
 
   const getOverlayUrl = () => {
-    return `${window.location.origin}/overlay/${walletAddress}?key=${overlayToken}`;
+    return `${window.location.origin}/overlay/${walletAddress}#key=${overlayToken}`;
   };
 
   return (
@@ -303,7 +305,7 @@ export default function AlertCustomizer({
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4, flexWrap: "wrap", gap: 2 }}>
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 950, display: "flex", alignItems: "center", gap: 1.5, color: userThemeColor, letterSpacing: "-0.02em" }}>
-            <SettingsIcon /> SolChat Stream Overlay Studio
+            <SettingsIcon /> {SITE_NAME} Stream Overlay Studio
           </Typography>
           <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
             Personalize your stream overlays in real time. Configure theme colors, preset sounds, transitions, custom uploads, and sequential queues.

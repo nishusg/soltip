@@ -277,7 +277,7 @@ export default function Dashboard() {
 
   const getOverlayUrl = () => {
     if (!data?.user?.wallet_address || !overlayToken) return null;
-    return `${window.location.origin}/overlay/${data.user.wallet_address}?key=${overlayToken}`;
+    return `${window.location.origin}/overlay/${data.user.wallet_address}#key=${overlayToken}`;
   };
 
   const copyOverlayUrl = () => {
