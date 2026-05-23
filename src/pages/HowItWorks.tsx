@@ -37,7 +37,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import StarIcon from "@mui/icons-material/Star";
 import SEO from "../components/common/SEO";
-import { SITE_NAME, SITE_URL } from "../shared/constants";
+import { SITE_NAME, SITE_URL, PLATFORM_FEE_PCT } from "../shared/constants";
 
 
 
@@ -55,6 +55,10 @@ export default function HowItWorks() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [activeStep, setActiveStep] = useState<number>(0);
+
+  // Dynamic platform fee percentage whole number
+  const platformFeePct = PLATFORM_FEE_PCT.toString();
+  const creatorSplitPct = 100 - PLATFORM_FEE_PCT;
 
   const steps: FlowStep[] = [
     {
@@ -86,7 +90,7 @@ export default function HowItWorks() {
       shortDesc: "Peer-to-peer payout",
       icon: <FlashOnIcon />,
       title: "4. Peer-to-Peer Instant Settlement",
-      detailedDesc: `Donation splits are processed on-chain straight from the viewer's wallet to your wallet. ${SITE_NAME} is fully non-custodial: we charge a minimal flat 5% platform cut to support maintenance while 95% is transferred directly, settling in under 2 seconds.`,
+      detailedDesc: `Donation splits are processed on-chain straight from the viewer's wallet to your wallet. ${SITE_NAME} is fully non-custodial: we charge a minimal flat ${platformFeePct}% platform cut to support maintenance while ${creatorSplitPct}% is transferred directly, settling in under 2 seconds.`,
       tipText: "Your SOL donations are directly yours immediately. No weekly cycles, no platform holds, and no payout delay.",
     },
     {
@@ -113,7 +117,7 @@ export default function HowItWorks() {
           },
           {
             q: "How does the platform fee compare to traditional portals?",
-            a: `We charge a minimal flat 5% platform fee to fund hostings, stream overlays, and high-speed websocket gateways. In comparison, traditional streaming portals take 30% to 50% commission cuts and hold your funds for weeks. On ${SITE_NAME}, 95% of the tip splits directly to your personal wallet in under 2 seconds, offering high-speed payouts with maximum creator margins.`
+            a: `We charge a minimal flat ${platformFeePct}% platform fee to fund hostings, stream overlays, and high-speed websocket gateways. In comparison, traditional streaming portals take 30% to 50% commission cuts and hold your funds for weeks. On ${SITE_NAME}, ${creatorSplitPct}% of the tip splits directly to your personal wallet in under 2 seconds, offering high-speed payouts with maximum creator margins.`
           },
           {
             q: "What wallets are supported for wallet based tipping?",
@@ -671,7 +675,7 @@ export default function HowItWorks() {
               </AccordionSummary>
               <AccordionDetails sx={{ px: 3, pb: 3 }}>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
-                  We charge a minimal flat 5% platform fee to fund hostings, stream overlays, and high-speed websocket gateways. In comparison, traditional streaming portals take 30% to 50% commission cuts and hold your funds for weeks. On {SITE_NAME}, 95% of the tip splits directly to your personal wallet in under 2 seconds, offering high-speed payouts with maximum creator margins.
+                  We charge a minimal flat {platformFeePct}% platform fee to fund hostings, stream overlays, and high-speed websocket gateways. In comparison, traditional streaming portals take 30% to 50% commission cuts and hold your funds for weeks. On {SITE_NAME}, {creatorSplitPct}% of the tip splits directly to your personal wallet in under 2 seconds, offering high-speed payouts with maximum creator margins.
                 </Typography>
               </AccordionDetails>
             </Accordion>

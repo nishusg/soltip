@@ -5,6 +5,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { sendTip, getExplorerUrl, calculateFeeBreakdown } from "../../../services/solana";
 import { verifyAndStoreTransaction, getTransactionStatus } from "../../../services/api";
 import { PublicKey } from "@solana/web3.js";
+import { PLATFORM_FEE_PCT } from "../../../shared/constants";
 import toast from "react-hot-toast";
 import { logger } from "../../../utils/logger";
 import { Card, CardContent, Typography, TextField, Button, Box, CircularProgress, Link, Alert, Stack, Chip } from "@mui/material";
@@ -278,7 +279,7 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
                 }}>
                   <Stack spacing={1.5}>
                     <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                      <Typography variant="body2" color="text.secondary">Platform fee (5%)</Typography>
+                      <Typography variant="body2" color="text.secondary">Platform fee ({PLATFORM_FEE_PCT}%)</Typography>
                       <Typography variant="body2" sx={{ fontWeight: 600, color: "error.light" }}>-{feeBreakdown.fee} SOL</Typography>
                     </Box>
                     <Box sx={{

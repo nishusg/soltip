@@ -44,7 +44,7 @@ import FlashOnIcon from "@mui/icons-material/FlashOn";
 import LanguageIcon from "@mui/icons-material/Language";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import SEO from "../components/common/SEO";
-import { SITE_NAME, SITE_URL } from "../shared/constants";
+import { SITE_NAME, SITE_URL, FEE_PERCENTAGE, PLATFORM_FEE_PCT } from "../shared/constants";
 
 
 export type PlatformType = "youtube" | "kick" | "streamlabs" | "general";
@@ -80,6 +80,10 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [tipVolume, setTipVolume] = useState<number>(1500);
 
+  // Dynamic platform fee percentage whole number
+  const platformFeePct = PLATFORM_FEE_PCT.toString();
+  const creatorSplitPct = 100 - PLATFORM_FEE_PCT;
+
   // Platform dynamic settings
   const configs: Record<PlatformType, PlatformConfig> = {
     youtube: {
@@ -90,7 +94,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
       glowOpacity: "0c",
       accentText: "YOUTUBE BROADCASTER SPEC",
       heroTitle: "YouTube Super Chat Alternative",
-      heroSub: `YouTube takes up to 30% of your Super Chat support. ${SITE_NAME} enables direct peer-to-peer <strong>youtube crypto donations</strong> with a minimal 5% platform fee and instant payouts.`,
+      heroSub: `YouTube takes up to 30% of your Super Chat support. ${SITE_NAME} enables direct peer-to-peer <strong>youtube crypto donations</strong> with a minimal ${platformFeePct}% platform fee and instant payouts.`,
       comparisonLabel: "YouTube Super Chat",
       comparisonFee: "30% flat commission",
       comparisonSplitText: "70% to Creator (Holds funds)",
@@ -103,7 +107,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
         },
         {
           q: "How does a Solana superchat compare to a YouTube Super Chat?",
-          a: `While YouTube Super Chats deduct a 30% fee and hold your funds for up to 45 days, a Solana superchat via ${SITE_NAME} is fully decentralized: we charge a flat 5% platform fee, and donations settle peer-to-peer directly into your wallet in under 2 seconds, immediately triggering real-time stream overlays.`
+          a: `While YouTube Super Chats deduct a 30% fee and hold your funds for up to 45 days, a Solana superchat via ${SITE_NAME} is fully decentralized: we charge a flat ${platformFeePct}% platform fee, and donations settle peer-to-peer directly into your wallet in under 2 seconds, immediately triggering real-time stream overlays.`
         },
         {
           q: "Do I need a special setup to show Solana tipping alerts on YouTube streams?",
@@ -117,22 +121,22 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
     },
     kick: {
       metaTitle: `Kick Crypto Tipping Link & Custom Alerts | ${SITE_NAME}`,
-      metaDesc: "Boost your Kick stream monetization. Secure Solana tipping link with direct 95/5 creator splits, instant peer-to-peer settlement, and OBS alerts.",
+      metaDesc: `Boost your Kick stream monetization. Secure Solana tipping link with direct ${creatorSplitPct}/${platformFeePct} creator splits, instant peer-to-peer settlement, and OBS alerts.`,
       brandColor: "#53FC18", // Kick Green
       glowColor: "rgba(83, 252, 24, 0.4)",
       glowOpacity: "08",
       accentText: "KICK CREATOR SPEC",
       heroTitle: "Kick Tipping Alternative & Alerts",
-      heroSub: `Kick is built on a creator-first ethos, but sub splits still take a cut. Expand your stream monetization with direct <strong>kick crypto tipping</strong>, offering 95/5 splits and instant settlement.`,
+      heroSub: `Kick is built on a creator-first ethos, but sub splits still take a cut. Expand your stream monetization with direct <strong>kick crypto tipping</strong>, offering ${creatorSplitPct}/${platformFeePct} splits and instant settlement.`,
       comparisonLabel: "Kick Subscriptions",
       comparisonFee: "5% platform split",
-      comparisonSplitText: "95% Creator Split (Monthly cycle)",
+      comparisonSplitText: `${creatorSplitPct}% Creator Split (Monthly cycle)`,
       calculatorFeeRate: 0.05,
       keywords: ["kick crypto tipping", "kick stream alerts", "kick donation link", "solana tipping kick"],
       faqs: [
         {
           q: `How does ${SITE_NAME} fit with Kick's creator-first splitting fees?`,
-          a: `Kick is famous for its premium 95/5 splits, but sub splits still deduct fees and hold payouts. ${SITE_NAME} goes a step further by offering a premium 95/5 split: we take a tiny 5% commission to support platform development, and your viewers' tips transfer instantly from wallet to wallet in under two seconds.`
+          a: `Kick is famous for its premium 95/5 splits, but sub splits still deduct fees and hold payouts. ${SITE_NAME} goes a step further by offering a premium ${creatorSplitPct}/${platformFeePct} split: we take a tiny ${platformFeePct}% commission to support platform development, and your viewers' tips transfer instantly from wallet to wallet in under two seconds.`
         },
         {
           q: "How do I configure a custom Kick stream alerts overlay?",
@@ -156,7 +160,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
       glowOpacity: "0c",
       accentText: "STREAMLABS OVERLAY SPEC",
       heroTitle: "Streamlabs Crypto Tips & Overlay",
-      heroSub: "Avoid high merchant fees and credit card chargebacks. Integrate direct <strong>streamlabs crypto tipping</strong> into your broadcast with a flat 5% cut, zero payout delay, and full Streamlabs compatibility.",
+      heroSub: `Avoid high merchant fees and credit card chargebacks. Integrate direct <strong>streamlabs crypto tipping</strong> into your broadcast with a flat ${platformFeePct}% cut, zero payout delay, and full Streamlabs compatibility.`,
       comparisonLabel: "Traditional Tip Portals",
       comparisonFee: "Up to 5% + merchant fees",
       comparisonSplitText: "Chargebacks & holds apply",
@@ -183,7 +187,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
     },
     general: {
       metaTitle: `Crypto Monetization for Digital & Content Creators | ${SITE_NAME}`,
-      metaDesc: "Set up a decentralized tipping link for your brand. Direct peer-to-peer global payments, flat 5% platform cuts, and instant Solana payouts.",
+      metaDesc: `Set up a decentralized tipping link for your brand. Direct peer-to-peer global payments, flat ${platformFeePct}% platform cuts, and instant Solana payouts.`,
       brandColor: "#6366F1", // Indigo
       glowColor: "rgba(99, 102, 241, 0.4)",
       glowOpacity: "0c",
@@ -198,7 +202,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
       faqs: [
         {
           q: `What makes ${SITE_NAME} a superior Twitch donation alternative?`,
-          a: `Traditional tipping portals take heavy fee cuts, hold funds, and require complex merchant integrations. ${SITE_NAME} provides a secure, non-custodial alternative where viewers send tips directly to your Solana wallet with absolute transparency, instant settlement, and a flat 5% platform fee.`
+          a: `Traditional tipping portals take heavy fee cuts, hold funds, and require complex merchant integrations. ${SITE_NAME} provides a secure, non-custodial alternative where viewers send tips directly to your Solana wallet with absolute transparency, instant settlement, and a flat ${platformFeePct}% platform fee.`
         },
         {
           q: "Is a web3 wallet tipping link appropriate for off-stream creators?",
@@ -206,7 +210,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
         },
         {
           q: "How does the platform fee structure work?",
-          a: `${SITE_NAME} operates on a fully peer-to-peer decentralized transaction model. The viewer signs a transaction that splits 95% straight to the creator and 5% to the platform to maintain hosting and WebSocket servers. The only other cost is Solana's network gas fee, which averages under $0.00025.`
+          a: `${SITE_NAME} operates on a fully peer-to-peer decentralized transaction model. The viewer signs a transaction that splits ${creatorSplitPct}% straight to the creator and ${platformFeePct}% to the platform to maintain hosting and WebSocket servers. The only other cost is Solana's network gas fee, which averages under $0.00025.`
         },
         {
           q: "How secure is direct web3 peer-to-peer tipping?",
@@ -224,7 +228,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
 
   // Calculations for Tipping Fee Calculator
   const traditionalFees = Math.round(tipVolume * activeConfig.calculatorFeeRate);
-  const platformFee = Math.round(tipVolume * 0.05); // Standard 5% platform cut
+  const platformFee = Math.round(tipVolume * FEE_PERCENTAGE); // Standard platform cut
   const networkFees = Math.round(tipVolume * 0.0005); // Simulated network/gas fee
   const solchatKept = Math.round(tipVolume - platformFee - networkFees);
   const traditionalKept = Math.round(tipVolume - traditionalFees);
@@ -370,7 +374,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
                   <TableCell sx={{ fontWeight: 800, color: "#fff" }}>Platform Commission</TableCell>
                   <TableCell sx={{ color: "error.main", fontWeight: 700 }}>{activeConfig.comparisonFee}</TableCell>
                   <TableCell sx={{ color: "success.main", fontWeight: 900, bgcolor: `${brandColor}03`, borderLeft: `1px solid ${brandColor}10`, borderRight: `1px solid ${brandColor}10` }}>
-                    Flat 5.00%
+                    Flat {parseFloat(platformFeePct).toFixed(2)}%
                   </TableCell>
                 </TableRow>
 
@@ -379,7 +383,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
                   <TableCell sx={{ fontWeight: 800, color: "#fff" }}>Net Creator Share</TableCell>
                   <TableCell sx={{ color: "text.secondary" }}>{activeConfig.comparisonSplitText}</TableCell>
                   <TableCell sx={{ color: "#fff", fontWeight: 900, bgcolor: `${brandColor}03`, borderLeft: `1px solid ${brandColor}10`, borderRight: `1px solid ${brandColor}10` }}>
-                    95% to your Wallet
+                    {creatorSplitPct}% to your Wallet
                   </TableCell>
                 </TableRow>
 
@@ -490,7 +494,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
                   <Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                       <Typography variant="caption" sx={{ color: brandColor, fontWeight: 800 }}>
-                        🚀 {SITE_NAME} Net Support (5% platform fee + gas)
+                        🚀 {SITE_NAME} Net Support ({platformFeePct}% platform fee + gas)
                       </Typography>
 
                       <Typography variant="caption" sx={{ color: "success.main", fontWeight: 900, fontFamily: "Space Mono" }}>
@@ -564,10 +568,10 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
                   <BoltIcon fontSize="small" />
                 </Box>
                 <Typography variant="h6" sx={{ fontWeight: 800, mb: 1.5, fontSize: "1.1rem" }}>
-                  Minimal 5% Fee
+                  Minimal {platformFeePct}% Fee
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                  We charge a minimal flat 5% platform fee. Net tip volumes settle 95% peer-to-peer directly into your wallet.
+                  We charge a minimal flat {platformFeePct}% platform fee. Net tip volumes settle {creatorSplitPct}% peer-to-peer directly into your wallet.
                 </Typography>
               </Card>
             </Grid>
@@ -666,7 +670,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
               Maximize Your Creator Revenue Today
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ maxW: 600, mx: "auto", mb: 5, lineHeight: 1.6 }}>
-              Set up your high-converting decentralized donation link in under 2 minutes. Receive peer-to-peer tip splits instantly with a minimal flat 5% platform fee.
+              Set up your high-converting decentralized donation link in under 2 minutes. Receive peer-to-peer tip splits instantly with a minimal flat {platformFeePct}% platform fee.
             </Typography>
             
             <Stack 

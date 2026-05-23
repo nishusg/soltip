@@ -7,7 +7,10 @@
 // Structured as blocks for rich rendering on the frontend.
 // ============================================================================
 
-import { SITE_NAME } from "../shared/constants";
+import { SITE_NAME, PLATFORM_FEE_PCT } from "../shared/constants";
+
+const platformFeePct = PLATFORM_FEE_PCT.toString();
+const creatorSplitPct = 100 - PLATFORM_FEE_PCT;
 
 export interface ContentBlock {
   type: "paragraph" | "header" | "quote" | "list" | "cta" | "table";
@@ -133,18 +136,18 @@ export const blogArticles: BlogArticle[] = [
   },
   {
     slug: "how-streamers-avoid-high-platform-fees",
-    title: "How Streamers Avoid High Platform Fees and Keep 95% of Tips",
+    title: `How Streamers Avoid High Platform Fees and Keep ${creatorSplitPct}% of Tips`,
     excerpt: "Struggling under Twitch's huge 50% subscription splits and Patreon's monthly fees? Discover the web3 strategy streamers are using to secure higher profits.",
     category: "Monetization",
     readTime: "6 min read",
     date: "May 16, 2026",
     metaTitle: `How Streamers Avoid High Platform Fees | ${SITE_NAME} Tipping`,
-    metaDesc: "Discover the fee structures of major platforms. Learn why streamers are shifting to non-custodial crypto tipping to save up to 45% in platform commissions.",
+    metaDesc: `Discover the fee structures of major platforms. Learn why streamers are shifting to non-custodial crypto tipping to save up to 45% in platform commissions.`,
     tags: ["Platform Fees", "Streamer Earnings", "Crypto Superchat"],
     contentBlocks: [
       {
         type: "paragraph",
-        text: `Monetizing your audience should not mean sacrificing your margins. Creators are beginning to realize that centralized media giants take massive commissions. Twitch takes up to 50% of subscriber tiers. YouTube cuts away 30% of standard Super Chat tips. ${SITE_NAME} rewrites the rules with a flat 5% platform protocol fee.`
+        text: `Monetizing your audience should not mean sacrificing your margins. Creators are beginning to realize that centralized media giants take massive commissions. Twitch takes up to 50% of subscriber tiers. YouTube cuts away 30% of standard Super Chat tips. ${SITE_NAME} rewrites the rules with a flat ${platformFeePct}% platform protocol fee.`
       },
       {
         type: "header",
@@ -158,13 +161,13 @@ export const blogArticles: BlogArticle[] = [
           ["Twitch Subs / Bits", "30% - 50%", "15 days minimum", "Highly Restricted"],
           ["YouTube Super Chat", "30%", "Monthly cycles", "Restricted"],
           ["Patreon Premium", "8% - 12% + card fees", "Monthly withdraws", "Moderate"],
-          [`🚀 ${SITE_NAME} Protocol`, "Flat 5%", "Instant (< 2 seconds)", "100% Non-Custodial"]
+          [`🚀 ${SITE_NAME} Protocol`, `Flat ${platformFeePct}%`, "Instant (< 2 seconds)", "100% Non-Custodial"]
         ]
       },
       {
         type: "header",
         title: "How Decentralized Tipping Restores Creator Profit",
-        text: `When you use ${SITE_NAME}, splits are handled completely transparently on the Solana blockchain. A secure smart contract receives the tip, automatically routes 5% to the protocol wallet to keep the network servers running, and forwards 95% straight to your personal non-custodial address in the very same block transaction. There are no monthly subscriptions, setup tiers, or exit hold thresholds.`
+        text: `When you use ${SITE_NAME}, splits are handled completely transparently on the Solana blockchain. A secure smart contract receives the tip, automatically routes ${platformFeePct}% to the protocol wallet to keep the network servers running, and forwards ${creatorSplitPct}% straight to your personal non-custodial address in the very same block transaction. There are no monthly subscriptions, setup tiers, or exit hold thresholds.`
       },
       {
         type: "cta",
@@ -196,7 +199,7 @@ export const blogArticles: BlogArticle[] = [
         type: "table",
         headers: ["Feature Matrix", "YouTube Super Chat", `🚀 ${SITE_NAME} Protocol`],
         rows: [
-          ["Commission Cut", "30%", "Flat 5%"],
+          ["Commission Cut", "30%", `Flat ${platformFeePct}%`],
           ["Payout Settlement", "Up to 30 days delay", "Instant (under 2 seconds)"],
           ["Viewer Access", "Credit card / Geo-locked", "Global (Borderless Web3 wallet)"],
           ["Spam Shielding", "Strict automated filtering", "Dynamic rate limiting & spam guards"],
@@ -237,7 +240,7 @@ export const blogArticles: BlogArticle[] = [
       {
         type: "header",
         title: "Step 2: Smart Contract Routing & Splitting",
-        text: "Once the signature is verified, the transaction is submitted directly to the Solana blockchain. A secure, audited smart contract processes the block in under 2 seconds: it automatically routes 95% of the transaction volume straight to the creator's wallet and 5% to the protocol development wallet concurrently. Because this happens on-chain, nobody can intercept or hold the funds."
+        text: `Once the signature is verified, the transaction is submitted directly to the Solana blockchain. A secure, audited smart contract processes the block in under 2 seconds: it automatically routes ${creatorSplitPct}% of the transaction volume straight to the creator's wallet and ${platformFeePct}% to the protocol development wallet concurrently. Because this happens on-chain, nobody can intercept or hold the funds.`
       },
       {
         type: "header",

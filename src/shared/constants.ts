@@ -20,7 +20,9 @@ export const PLATFORM_WALLET = new PublicKey(
 export const SOLANA_RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL;
 
 // Fees
-export const FEE_PERCENTAGE = 0.05;
+const platformFeeEnv = import.meta.env.VITE_PLATFORM_FEE;
+export const PLATFORM_FEE_PCT = platformFeeEnv ? parseInt(platformFeeEnv) : 5;
+export const FEE_PERCENTAGE = PLATFORM_FEE_PCT / 100;
 
 // Site Metadata
 export const SITE_NAME = import.meta.env.VITE_SITE_NAME;

@@ -5,7 +5,7 @@ import { useWalletAuth } from "../../../hooks/useWalletAuth";
 import BoringAvatar from "boring-avatars";
 import toast from "react-hot-toast";
 import SEO from "../../common/SEO";
-import { SITE_NAME, SITE_URL } from "../../../shared/constants";
+import { SITE_NAME, SITE_URL, PLATFORM_FEE_PCT } from "../../../shared/constants";
 
 // Material Icons
 import FlashOnIcon from "@mui/icons-material/FlashOn";
@@ -57,7 +57,7 @@ export default function WalletConnect() {
     },
     {
       q: "What are the platform fees?",
-      a: `${SITE_NAME} operates with a clean, transparent flat 5% platform fee on all standard tips to support development and overlay hosting. We do not charge subscription fees for receiving tips. Instead, creators can purchase our Premium subscription to unlock aesthetic themes (Gold, Diamond, Neon, Midnight), advanced custom stream alert overlays, personalized sound widgets, and unique creator page enhancements.`
+      a: `${SITE_NAME} operates with a clean, transparent flat ${PLATFORM_FEE_PCT}% platform fee on all standard tips to support development and overlay hosting. We do not charge subscription fees for receiving tips. Instead, creators can purchase our Premium subscription to unlock aesthetic themes (Gold, Diamond, Neon, Midnight), advanced custom stream alert overlays, personalized sound widgets, and unique creator page enhancements.`
     },
     {
       q: "Does this protect against Stripe chargebacks?",

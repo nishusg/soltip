@@ -54,7 +54,7 @@ import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import toast from "react-hot-toast";
 import { logger } from "../utils/logger";
-import { SITE_NAME } from "../shared/constants";
+import { SITE_NAME, PLATFORM_FEE_PCT } from "../shared/constants";
 
 
 interface CreatorProfile {
@@ -1316,7 +1316,7 @@ export default function PublicProfilePage() {
                   </Stack>
                   <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", my: 2 }} />
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Verified on-chain tip direct to creator's wallet — 0% middlemen.
+                    Verified on-chain tip direct to creator's wallet — {PLATFORM_FEE_PCT}% platform fee.
                   </Typography>
 
                   {!isAuthenticated ? (
@@ -1417,7 +1417,7 @@ export default function PublicProfilePage() {
                             <Box sx={{ mt: 2, p: 2.5, bgcolor: "rgba(255,255,255,0.015)", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.04)" }}>
                               <Stack spacing={1.5}>
                                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                  <Typography variant="caption" color="text.secondary">Platform fee (5%)</Typography>
+                                  <Typography variant="caption" color="text.secondary">Platform fee ({PLATFORM_FEE_PCT}%)</Typography>
                                   <Typography variant="caption" sx={{ fontWeight: 700, color: "error.light" }}>
                                     -{feeBreakdown.fee} SOL
                                   </Typography>

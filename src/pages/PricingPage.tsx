@@ -47,7 +47,7 @@ import TvIcon from "@mui/icons-material/Tv";
 import GroupIcon from "@mui/icons-material/Group";
 import ShieldIcon from "@mui/icons-material/Shield";
 import SEO from "../components/common/SEO";
-import { SITE_NAME } from "../shared/constants";
+import { SITE_NAME, FEE_PERCENTAGE, PLATFORM_FEE_PCT } from "../shared/constants";
 
 
 export default function PricingPage() {
@@ -55,12 +55,16 @@ export default function PricingPage() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [tipVolume, setTipVolume] = useState<number>(1500);
 
+  // Dynamic platform fee percentage whole number
+  const platformFeePct = PLATFORM_FEE_PCT.toString();
+  const creatorSplitPct = 100 - PLATFORM_FEE_PCT;
+
   // Dynamic context colors from current theme
   const brandColor = theme.palette.primary.main;
   const secondaryColor = theme.palette.secondary?.main || brandColor;
 
   // Pricing calculations
-  const platformFee = Math.round(tipVolume * 0.05); // dynamic platform fee
+  const platformFee = Math.round(tipVolume * FEE_PERCENTAGE); // dynamic platform fee
   const networkFees = Math.round(tipVolume * 0.0005); // Solana devnet/mainnet average gas
 
   const creatorRetained = Math.round(tipVolume - platformFee - networkFees);
@@ -81,7 +85,7 @@ export default function PricingPage() {
     },
     {
       title: "Protocol Platform Fee",
-      value: "Flat 5%",
+      value: `Flat ${platformFeePct}%`,
       subtitle: "On incoming creator support",
       desc: "Supports platform development, OBS stream overlays, hosting, and smart contract maintenance. Only paid when you earn.",
       tag: "CREATOR FIRST"
@@ -99,8 +103,7 @@ export default function PricingPage() {
     { name: `Twitch Bits / Subs`, fee: "30% - 50% commission split", payout: "15-day hold period", chargebacks: "Creator holds liability" },
     { name: "Patreon Premium", fee: "8% - 12% cut + merchant splits", payout: "Monthly cycle payouts", chargebacks: "Subject to fraud claims" },
     { name: "PayPal / Credit Cards", fee: "3.4% + $0.30 standard cuts", payout: "7-day rolling holds", chargebacks: "High chargeback penalty fees" },
-    { name: `🚀 ${SITE_NAME} Protocol`, fee: "Flat 5% + Solana network gas", payout: "Instant (under 2 seconds)", chargebacks: "Ledger Irreversible (No Chargebacks)", highlight: true }
-
+    { name: `🚀 ${SITE_NAME} Protocol`, fee: `Flat ${platformFeePct}% + Solana network gas`, payout: "Instant (under 2 seconds)", chargebacks: "Ledger Irreversible (No Chargebacks)", highlight: true }
   ];
 
   const payoutSteps = [
@@ -112,7 +115,7 @@ export default function PricingPage() {
     {
       step: "02",
       title: "On-Chain Splitting",
-      desc: "Solana smart contract automatically distributes 95% straight to the creator and 5% to the protocol."
+      desc: `Solana smart contract automatically distributes ${creatorSplitPct}% straight to the creator and ${platformFeePct}% to the protocol.`
     },
     {
       step: "03",
@@ -128,8 +131,8 @@ export default function PricingPage() {
 
   const faqs = [
     {
-      q: `Why does ${SITE_NAME} charge a flat 5% platform fee?`,
-      a: `Our flat 5% platform fee helps fund the development of our high-speed websocket servers, customizable OBS alert engines, non-custodial wallet integrations, and monorepo hosting. Unlike traditional portals that take 30-50% cuts or charge high monthly subscription fees, you only pay a tiny fraction when you actually receive support.`
+      q: `Why does ${SITE_NAME} charge a flat ${platformFeePct}% platform fee?`,
+      a: `Our flat ${platformFeePct}% platform fee helps fund the development of our high-speed websocket servers, customizable OBS alert engines, non-custodial wallet integrations, and monorepo hosting. Unlike traditional portals that take 30-50% cuts or charge high monthly subscription fees, you only pay a tiny fraction when you actually receive support.`
     },
     {
       q: "What is a Solana gas fee and who receives it?",
@@ -486,7 +489,7 @@ export default function PricingPage() {
                   <Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
                       <Typography variant="caption" sx={{ color: brandColor, fontWeight: 800 }}>
-                        🚀 {SITE_NAME} Net Support (5% platform + gas)
+                        🚀 {SITE_NAME} Net Support ({platformFeePct}% platform + gas)
                       </Typography>
 
                       <Typography variant="caption" sx={{ color: "success.main", fontWeight: 900, fontFamily: "Space Mono" }}>
@@ -583,7 +586,7 @@ export default function PricingPage() {
               Stop Overpaying Gatekeepers
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ maxW: 600, mx: "auto", mb: 5, lineHeight: 1.6 }}>
-              Set up your high-speed decentralized tipping page in under 2 minutes. Retain 95% of your direct incoming creator support.
+              Set up your high-speed decentralized tipping page in under 2 minutes. Retain {creatorSplitPct}% of your direct incoming creator support.
             </Typography>
             
             <Stack 
