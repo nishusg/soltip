@@ -115,6 +115,7 @@ export default function Navbar() {
   const navItems = [
     { label: "Home", path: "/" },
     ...(isAuthenticated ? [
+      { label: "Search", path: "/search" },
       { label: "Dashboard", path: "/dashboard" },
       { label: "Activity", path: "/activity" },
       { label: "Leaderboard", path: "/leaderboard" }

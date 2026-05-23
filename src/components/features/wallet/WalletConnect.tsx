@@ -76,12 +76,12 @@ export default function WalletConnect() {
 
   return (
     <Box sx={{ position: "relative", overflow: "hidden", pb: 12 }}>
-      <SEO 
+      <SEO
         title="Solana-Powered Creator Superchats & OBS stream alerts"
         description="The premier superchat, alerts, and tipping layer for Solana creators. Connect Phantom or Solflare, claim your public username, and set up dynamic OBS overlay triggers."
         faqs={faqs}
       />
-      
+
       {/* Spinning Conic Orbs Backdrop */}
       <Box
         sx={{
@@ -147,18 +147,18 @@ export default function WalletConnect() {
           label="🚀 Solana Tipping Protocol v2.5"
           color="primary"
           variant="outlined"
-          sx={{ 
-            fontWeight: 800, 
-            px: 2, 
-            py: 2.2, 
-            mb: 4, 
-            borderRadius: "50px", 
+          sx={{
+            fontWeight: 800,
+            px: 2,
+            py: 2.2,
+            mb: 4,
+            borderRadius: "50px",
             fontSize: "0.85rem",
             bgcolor: "rgba(153, 69, 242, 0.08)",
             borderColor: "rgba(153, 69, 242, 0.3)"
           }}
         />
-        
+
         <Typography
           variant="h1"
           sx={{
@@ -340,13 +340,13 @@ export default function WalletConnect() {
           ].map((item, idx) => (
             <Grid size={{ xs: 12, md: 4 }} key={idx}>
               <Card sx={{ height: "100%", position: "relative", overflow: "visible" }}>
-                <Box 
-                  sx={{ 
-                    position: "absolute", 
-                    top: -15, 
-                    right: 25, 
-                    fontSize: "3.5rem", 
-                    fontWeight: 950, 
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: -15,
+                    right: 25,
+                    fontSize: "3.5rem",
+                    fontWeight: 950,
                     color: "rgba(255,255,255,0.03)",
                     fontFamily: "'Space Grotesk', sans-serif"
                   }}
@@ -373,7 +373,7 @@ export default function WalletConnect() {
       {/* ================= INTERACTIVE LIVE DEMO SECTION ================= */}
       <Container maxWidth="lg" sx={{ mb: 14 }}>
         <Grid container spacing={6} sx={{ alignItems: "center" }}>
-          
+
           {/* Left Panel: Inputs */}
           <Grid size={{ xs: 12, lg: 6 }}>
             <Box sx={{ pr: { lg: 4 } }}>
@@ -439,11 +439,11 @@ export default function WalletConnect() {
 
           {/* Right Panel: Virtual Screen Monitor */}
           <Grid size={{ xs: 12, lg: 6 }}>
-            <Box 
-              sx={{ 
+            <Box
+              sx={{
                 position: "relative",
-                borderRadius: "20px", 
-                overflow: "hidden", 
+                borderRadius: "20px",
+                overflow: "hidden",
                 border: "6px solid #1e293b",
                 boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
                 background: "#090d16",
@@ -457,10 +457,10 @@ export default function WalletConnect() {
             >
               {/* Virtual Camera View (Background placeholder) */}
               <Box sx={{ position: "absolute", inset: 0, opacity: 0.15, background: "radial-gradient(circle, rgba(153,69,242,0.1) 0%, rgba(0,0,0,0) 80%)" }} />
-              
+
               {/* Camera Indicator */}
               <Box sx={{ position: "absolute", top: 12, left: "50%", transform: "translateX(-50%)", width: 8, height: 8, borderRadius: "50%", bgcolor: "#ef4444" }} />
-              
+
               {/* OBS Overlay Alert Box Container */}
               <Box sx={{ zIndex: 2, width: "100%", display: "flex", justifyContent: "center" }}>
                 {demoAlerts.length === 0 ? (
@@ -594,10 +594,10 @@ export default function WalletConnect() {
 
       {/* ================= OBS OVERLAY PREVIEW SECTION ================= */}
       <Container maxWidth="lg" sx={{ mb: 14 }}>
-        <Paper 
-          sx={{ 
-            p: { xs: 4, md: 6 }, 
-            borderRadius: "24px", 
+        <Paper
+          sx={{
+            p: { xs: 4, md: 6 },
+            borderRadius: "24px",
             border: "1px solid rgba(153, 69, 242, 0.2)",
             background: "linear-gradient(135deg, rgba(20,241,149,0.02) 0%, rgba(153,69,242,0.04) 100%)",
             position: "relative",
@@ -626,8 +626,8 @@ export default function WalletConnect() {
             </Grid>
 
             <Grid size={{ xs: 12, md: 5 }}>
-              <Box 
-                sx={{ 
+              <Box
+                sx={{
                   bgcolor: "#00FF00", // Classic Green Screen OBS chroma key
                   borderRadius: "16px",
                   p: 3,
@@ -639,11 +639,11 @@ export default function WalletConnect() {
                   position: "relative"
                 }}
               >
-                <Box 
-                  sx={{ 
-                    bgcolor: "rgba(10, 10, 15, 0.95)", 
-                    borderRadius: "12px", 
-                    p: 2.5, 
+                <Box
+                  sx={{
+                    bgcolor: "rgba(10, 10, 15, 0.95)",
+                    borderRadius: "12px",
+                    p: 2.5,
                     border: "2px solid #9945FF",
                     boxShadow: "0 4px 20px rgba(153,69,242,0.4)",
                     width: "90%",
@@ -686,12 +686,12 @@ export default function WalletConnect() {
             { name: "Discord Servers", color: "#5865F2", desc: "Host direct invitation links to steer your community directly.", icon: <LanguageIcon sx={{ fontSize: 32 }} /> }
           ].map((p, idx) => (
             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={idx}>
-              <Paper 
+              <Paper
                 elevation={0}
-                sx={{ 
-                  p: 4, 
-                  textAlign: "center", 
-                  bgcolor: "rgba(255,255,255,0.01)", 
+                sx={{
+                  p: 4,
+                  textAlign: "center",
+                  bgcolor: "rgba(255,255,255,0.01)",
                   border: "1px solid rgba(255,255,255,0.05)",
                   borderRadius: "16px",
                   height: "100%",
@@ -739,12 +739,12 @@ export default function WalletConnect() {
             { spec: "Custody Control", solana: "100% Non-Custodial", legacy: "Centralized Vaults" },
             { spec: "Chargeback Security", solana: "On-Chain Ledger Finality", legacy: "Heavy processor risks" }
           ].map((item, idx) => (
-            <Box 
-              key={idx} 
-              sx={{ 
-                display: "grid", 
-                gridTemplateColumns: { xs: "1.5fr 1fr 1fr", md: "2fr 1fr 1fr" }, 
-                p: 2.5, 
+            <Box
+              key={idx}
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1.5fr 1fr 1fr", md: "2fr 1fr 1fr" },
+                p: 2.5,
                 borderBottom: idx !== 3 ? "1px solid rgba(255,255,255,0.04)" : "none",
                 bgcolor: idx % 2 === 1 ? "rgba(255,255,255,0.01)" : "transparent"
               }}
@@ -870,14 +870,14 @@ export default function WalletConnect() {
         >
           {/* Subtle background overlay */}
           <Box sx={{ position: "absolute", inset: 0, opacity: 0.04, background: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54 48c-2 0-3 1-4 2v4c0 1-1 2-2 2h-4c-1 0-2 1-2 2s1 2 2 2h4c3 0 6-3 6-6v-4c1-1 2-2 2-2s-1-2-2-2zm-36-36c2 0 3-1 4-2V6c0-1 1-2 2-2h4c1 0 2-1 2-2S29 0 28 0h-4C21 0 18 3 18 6v4c-1 1-2 2-2 2s1 2 2 2zm18 36c1 1 2 2 2 2s-1 2-2 2v4c0 3-3 6-6 6h-4c-1 0-2-1-2-2s1-2 2-2h4c1 0 2-1 2-2v-4c0-1 1-2 2-2zM18 12c-1-1-2-2-2-2s1-2 2-2V4c0-3 3-6 6-6h4c1 0 2 1 2 2s-1 2-2 2h-4c-1 0-2 1-2 2v4c0 1-1 2-2 2z' fill='%23ffffff'/%3E%3C/svg%3E\")" }} />
-          
+
           <Typography variant="h3" component="h2" sx={{ fontWeight: 950, mb: 3 }}>
             Build Your Public Creator SEO Profile Today
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 6, maxWidth: 650, mx: "auto", fontSize: "1.08rem", lineHeight: 1.8 }}>
             Claim your custom tipping slug, link your social media streams, and deploy dynamic Web3 overlays in less than five minutes.
           </Typography>
-          
+
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Button
               variant="contained"

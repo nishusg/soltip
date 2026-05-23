@@ -244,3 +244,8 @@ export async function saveOverlaySettings(settings: {
   });
 }
 
+/** Search creators in the database by query string */
+export async function searchCreators(query: string) {
+  return api(`/stats/search?q=${encodeURIComponent(query)}`);
+}
+

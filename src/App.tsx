@@ -44,6 +44,7 @@ const SecurityPage = React.lazy(() => import("./pages/SecurityPage"));
 const BlogPage = React.lazy(() => import("./pages/BlogPage"));
 const BlogPostPage = React.lazy(() => import("./pages/BlogPostPage"));
 const PublicProfilePage = React.lazy(() => import("./pages/PublicProfilePage"));
+const SearchPage = React.lazy(() => import("./pages/SearchPage"));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -98,6 +99,7 @@ function AppLayout() {
       <Suspense fallback={<div className="page-wrapper container"><div className="spinner"></div></div>}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/obs-overlay" element={<ObsOverlayPage />} />
           <Route path="/for-youtube" element={<VerticalCreatorPage platform="youtube" />} />
