@@ -338,7 +338,7 @@ export default function BlogPostPage() {
                       </TableHead>
                       <TableBody>
                         {block.rows?.map((row, rIdx) => {
-                          const isSolChat = row[0].includes("SolChat") || row[0].includes(SITE_NAME);
+                          const isSolChat = row[0].includes(SITE_NAME);
                           return (
                             <TableRow key={rIdx} sx={{ borderBottom: rIdx === block.rows!.length - 1 ? "none" : "1px solid rgba(255,255,255,0.04)", bgcolor: isSolChat ? `${brandColor}03` : "transparent" }}>
                               {row.map((cell, cIdx) => (
