@@ -27,7 +27,8 @@ import {
   ThemeProvider,
   CssBaseline,
   IconButton,
-  Pagination
+  Pagination,
+  InputAdornment
 } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
 import SendIcon from "@mui/icons-material/Send";
@@ -42,6 +43,14 @@ import ChatIcon from "@mui/icons-material/Chat";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ShareIcon from "@mui/icons-material/Share";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import SearchIcon from "@mui/icons-material/Search";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import toast from "react-hot-toast";
 import { logger } from "../utils/logger";
@@ -82,6 +91,18 @@ interface EnrichedTip {
   status: string;
 }
 
+interface ConfettiParticle {
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  speedX: number;
+  speedY: number;
+  rotation: number;
+  rotationSpeed: number;
+  opacity: number;
+}
+
 export default function PublicProfilePage() {
   const { username } = useParams<{ username: string }>();
   const { connection } = useConnection();
@@ -93,6 +114,13 @@ export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+
+  // Enhanced visual and tracking states
+  const [streamVisible, setStreamVisible] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "large" | "message">("all");
+  const [showConfetti, setShowConfetti] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     setPage(1);
@@ -127,6 +155,84 @@ export default function PublicProfilePage() {
 
     fetchCreator();
   }, [username]);
+
+
+
+  // Confetti Particle Animation Loop
+  useEffect(() => {
+    if (!showConfetti || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    let animationFrameId: number;
+    const particles: ConfettiParticle[] = [];
+    const colors = ["#9945FF", "#14F195", "#38BDF8", "#FFD700", "#FF2D55", "#FF9500"];
+    
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", handleResize);
+    
+    for (let i = 0; i < 180; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height - 50,
+        size: Math.random() * 8 + 6,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        speedX: Math.random() * 6 - 3,
+        speedY: Math.random() * 8 + 4,
+        rotation: Math.random() * 360,
+        rotationSpeed: Math.random() * 4 - 2,
+        opacity: 1
+      });
+    }
+    
+    let frames = 0;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let active = false;
+      
+      particles.forEach(p => {
+        p.y += p.speedY;
+        p.x += p.speedX;
+        p.rotation += p.rotationSpeed;
+        
+        if (p.y < canvas.height) {
+          active = true;
+        } else {
+          p.opacity -= 0.015;
+          if (p.opacity > 0) active = true;
+        }
+        
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.opacity);
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        ctx.restore();
+      });
+      
+      frames++;
+      if (active && frames < 300) {
+        animationFrameId = requestAnimationFrame(animate);
+      } else {
+        setShowConfetti(false);
+      }
+    };
+    
+    animate();
+    
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [showConfetti]);
 
   // Handle Preset Tip Click
   const handlePresetTip = (val: number) => {
@@ -187,6 +293,7 @@ export default function PublicProfilePage() {
       setTxStatus("success");
       setAmount("");
       setMessage("");
+      setShowConfetti(true); // Trigger Confetti upon signature confirmation
       
       // Reload recent superchats
       const updatedData = await getPublicProfileByUsername(username!);
@@ -207,6 +314,10 @@ export default function PublicProfilePage() {
     try {
       const res = await getTransactionStatus(txHash);
       setVerificationStatus(res.status);
+      if (res.status === "verified") {
+        setShowConfetti(true); // Celebrate again on verified state confirmation
+        toast.success("Tip verified successfully!", { icon: "🎉" });
+      }
     } catch (err: any) {
       logger.error("Status check failed:", err);
     } finally {
@@ -244,14 +355,69 @@ export default function PublicProfilePage() {
     return date.toLocaleDateString();
   }
 
+  // Dynamic stats calculated from the recent tips feed
+  const creatorStats = useMemo(() => {
+    if (!tips || tips.length === 0) {
+      return { totalCount: 0, volumeSol: 0, avgSol: 0 };
+    }
+    const totalCount = tips.length;
+    const totalLamports = tips.reduce((sum, tip) => sum + tip.amount, 0);
+    const volumeSol = totalLamports / 1e9;
+    const avgSol = volumeSol / totalCount;
+    return { totalCount, volumeSol, avgSol };
+  }, [tips]);
+
+  // Dynamic Tipping Tier Configuration
+  const tipTier = useMemo(() => {
+    const parsed = parseFloat(amount);
+    if (isNaN(parsed) || parsed <= 0) return { name: "Starter", color: "rgba(255, 255, 255, 0.08)", glow: "none", text: "text.secondary", badge: "🌱 Starter Support" };
+    if (parsed >= 5.0) return { name: "Legendary", color: "#ff2d55", glow: "0 0 30px rgba(255, 45, 85, 0.5)", text: "#ff2d55", badge: "🏆 Legendary Support" };
+    if (parsed >= 1.0) return { name: "Epic", color: "#ff9500", glow: "0 0 24px rgba(255, 149, 0, 0.4)", text: "#ff9500", badge: "💎 Epic Support" };
+    if (parsed >= 0.5) return { name: "Premium", color: "#ffcc00", glow: "0 0 18px rgba(255, 204, 0, 0.35)", text: "#ffcc00", badge: "⭐ Premium Support" };
+    if (parsed >= 0.1) return { name: "Standard", color: "#14F195", glow: "0 0 14px rgba(20, 241, 149, 0.25)", text: "#14F195", badge: "⚡ Standard Support" };
+    return { name: "Starter", color: "rgba(255, 255, 255, 0.15)", glow: "none", text: "text.secondary", badge: "🌱 Starter Support" };
+  }, [amount]);
+
+  // Filtered and Searched Tips list
+  const filteredTips = useMemo(() => {
+    return tips.filter(tip => {
+      const nameMatch = (tip.sender_name || "").toLowerCase().includes(searchQuery.toLowerCase());
+      const messageMatch = (tip.message || "").toLowerCase().includes(searchQuery.toLowerCase());
+      const walletMatch = (tip.sender_wallet || "").toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = nameMatch || messageMatch || walletMatch;
+      
+      if (!matchesSearch) return false;
+      
+      if (filterType === "large") {
+        return tip.amount >= 0.5 * 1e9; // 0.5 SOL
+      }
+      if (filterType === "message") {
+        return !!tip.message;
+      }
+      
+      return true;
+    });
+  }, [tips, searchQuery, filterType]);
+
   const itemsPerPage = 5;
-  const totalPages = Math.ceil(tips.length / itemsPerPage);
-  const paginatedTips = tips.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+  const totalPages = Math.ceil(filteredTips.length / itemsPerPage);
+  const paginatedTips = filteredTips.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     document.getElementById("public-superchats-header")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  const getTipTierColor = (lamports: number) => {
+    const sol = lamports / 1e9;
+    if (sol >= 5.0) return "#ff2d55";
+    if (sol >= 1.0) return "#ff9500";
+    if (sol >= 0.5) return "#ffcc00";
+    if (sol >= 0.1) return "#14F195";
+    return "rgba(255, 255, 255, 0.08)";
+  };
+
+
 
   // Load Custom Theme Dynamically
   const currentTheme = useMemo(() => {
@@ -263,13 +429,37 @@ export default function PublicProfilePage() {
   }, [creator]);
 
   const premiumStyles = useMemo(() => {
+    let styles = "";
     if (creator?.is_premium) {
       const primaryColor = currentTheme.palette.primary.main;
       const secondaryColor = currentTheme.palette.secondary?.main || primaryColor;
       const bgColor = currentTheme.palette.background.default || "#050508";
-      return getPremiumOverrides(primaryColor, secondaryColor, bgColor, "");
+      styles = getPremiumOverrides(primaryColor, secondaryColor, bgColor, "");
     }
-    return "";
+    styles += `
+      @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      @keyframes floatShape1 {
+        0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        50% { transform: translate(30px, -20px) scale(1.15) rotate(180deg); }
+      }
+      @keyframes floatShape2 {
+        0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        50% { transform: translate(-30px, 30px) scale(1.1) rotate(-180deg); }
+      }
+      @keyframes techGridScroll {
+        0% { background-position: 0 0; }
+        100% { background-position: 60px 60px; }
+      }
+      @keyframes pulseBorder {
+        0%, 100% { box-shadow: 0 0 0 4px ${currentTheme.palette.background.default}, 0 8px 32px ${currentTheme.palette.primary.main}40; }
+        50% { box-shadow: 0 0 0 6px ${currentTheme.palette.primary.main}50, 0 12px 48px ${currentTheme.palette.primary.main}60; }
+      }
+    `;
+    return styles;
   }, [creator, currentTheme]);
 
   if (loading) {
@@ -307,6 +497,21 @@ export default function PublicProfilePage() {
     <ThemeProvider theme={currentTheme}>
       <CssBaseline />
       {premiumStyles && <style dangerouslySetInnerHTML={{ __html: premiumStyles }} />}
+
+      {showConfetti && (
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 9999,
+            pointerEvents: "none"
+          }}
+        />
+      )}
 
       <Box sx={{ position: "relative", minHeight: "calc(100vh - 64px)", pb: 12 }}>
         {/* Dynamic Theme Blur Orbs */}
@@ -357,54 +562,199 @@ export default function PublicProfilePage() {
             {/* Top decorative gradient banner */}
             <Box
               sx={{
-                height: "150px",
+                height: { xs: "100px", sm: "130px", md: "150px" },
                 borderRadius: "16px 16px 0 0",
-                background: `linear-gradient(135deg, ${currentTheme.palette.primary.main}cc 0%, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}99 50%, ${currentTheme.palette.primary.main}55 100%)`,
+                background: creator.is_premium 
+                  ? `linear-gradient(-45deg, ${currentTheme.palette.primary.dark}dd 0%, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}cc 35%, ${currentTheme.palette.primary.main}bb 70%, ${currentTheme.palette.secondary?.dark || currentTheme.palette.primary.dark}dd 100%)`
+                  : `linear-gradient(135deg, ${currentTheme.palette.primary.dark}bb 0%, ${currentTheme.palette.background.default} 70%, ${currentTheme.palette.secondary?.dark || currentTheme.palette.primary.dark}66 100%)`,
+                backgroundSize: "400% 400%",
+                animation: creator.is_premium ? "gradientShift 15s ease infinite" : "none",
                 position: "relative",
                 overflow: "hidden",
+                borderBottom: `2px solid ${currentTheme.palette.primary.main}44`,
                 "&::after": {
                   content: '""',
                   position: "absolute",
                   inset: 0,
-                  background: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+                  background: "url(\"data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 30 0 L 0 0 0 30' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'/%3E%3C/svg%3E\")",
+                  animation: creator.is_premium ? "techGridScroll 25s linear infinite" : "none",
                 }
               }}
-            />
+            >
+              {/* Rotating futuristic crystal cards */}
+              <Box sx={{
+                position: "absolute",
+                width: 60,
+                height: 60,
+                borderRadius: "12px",
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.03)",
+                backdropFilter: "blur(6px)",
+                top: "20%",
+                right: "15%",
+                transform: "rotate(45deg)",
+                animation: "floatShape1 14s ease-in-out infinite",
+                pointerEvents: "none",
+              }} />
+              <Box sx={{
+                position: "absolute",
+                width: 90,
+                height: 90,
+                borderRadius: "16px",
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.01)",
+                backdropFilter: "blur(3px)",
+                bottom: "10%",
+                left: "20%",
+                transform: "rotate(15deg)",
+                animation: "floatShape2 18s ease-in-out infinite",
+                pointerEvents: "none",
+              }} />
+
+              {/* Glowing decorative floating shapes inside banner */}
+              <Box sx={{
+                position: "absolute",
+                width: "200px",
+                height: "200px",
+                borderRadius: "50%",
+                background: `radial-gradient(circle, ${currentTheme.palette.primary.main}3b 0%, rgba(0,0,0,0) 75%)`,
+                top: "-50px",
+                left: "30%",
+                filter: "blur(30px)",
+                animation: "floatShape1 12s ease-in-out infinite",
+                pointerEvents: "none",
+              }} />
+
+              {/* Bottom vignette overlay to blend with card */}
+              <Box sx={{
+                position: "absolute",
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: "60px",
+                background: "linear-gradient(to top, rgba(11, 15, 23, 0.95) 0%, rgba(11, 15, 23, 0) 100%)",
+                pointerEvents: "none",
+              }} />
+
+              {/* Floating Glassmorphic Creator Rank / Premium Status Badge */}
+              <Chip
+                icon={<VerifiedIcon sx={{ color: "inherit !important", fontSize: "14px !important" }} />}
+                label={creator.is_premium ? "PREMIUM PARTNER" : "VERIFIED CREATOR"}
+                sx={{
+                  position: "absolute",
+                  top: 15,
+                  right: 15,
+                  background: "rgba(11, 15, 23, 0.75)",
+                  backdropFilter: "blur(10px)",
+                  border: `1px solid ${currentTheme.palette.primary.main}44`,
+                  color: `${currentTheme.palette.primary.main} !important`,
+                  fontWeight: 900,
+                  letterSpacing: "0.08em",
+                  fontSize: "0.65rem",
+                  boxShadow: `0 4px 20px rgba(0,0,0,0.4), 0 0 12px ${currentTheme.palette.primary.main}22`,
+                  zIndex: 2,
+                  "& .MuiChip-label": { px: 1.2 }
+                }}
+              />
+
+              {/* Neon border line at the bottom */}
+              <Box sx={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: "3px",
+                background: `linear-gradient(90deg, transparent, ${currentTheme.palette.primary.main}, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}, transparent)`,
+                zIndex: 2,
+              }} />
+            </Box>
 
             <CardContent sx={{ pt: 0, px: { xs: 3, md: 6 }, pb: 5 }}>
-              <Grid container spacing={3} sx={{ alignItems: "flex-end", mt: -7, mb: 3 }}>
-                <Grid>
-                  <Box
-                    sx={{
-                      width: 120,
-                      height: 120,
-                      borderRadius: "50%",
-                      p: 0.5,
-                      background: `linear-gradient(135deg, ${currentTheme.palette.primary.main}, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main})`,
-                      boxShadow: `0 0 0 4px ${currentTheme.palette.background.default}, 0 8px 32px ${currentTheme.palette.primary.main}40`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center"
+              <Box sx={{ 
+                display: "flex", 
+                flexDirection: { xs: "column", sm: "row" }, 
+                alignItems: { xs: "center", sm: "flex-end" }, 
+                gap: { xs: 2.5, sm: 3.5 },
+                mb: 4,
+                flexWrap: { xs: "wrap", sm: "nowrap" },
+                width: "100%"
+              }}>
+                {/* Avatar container pulled up individually */}
+                <Box
+                  sx={{
+                    width: { xs: 100, sm: 120 },
+                    height: { xs: 100, sm: 120 },
+                    borderRadius: "50%",
+                    p: 0.5,
+                    background: `linear-gradient(135deg, ${currentTheme.palette.primary.main}, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main})`,
+                    boxShadow: `0 0 0 4px ${currentTheme.palette.background.default}, 0 8px 32px ${currentTheme.palette.primary.main}40`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    animation: creator.is_premium ? "pulseBorder 4s ease-in-out infinite" : "none",
+                    transition: "transform 0.3s ease-in-out",
+                    position: "relative",
+                    zIndex: 5,
+                    mt: { xs: "-50px", sm: "-60px" },
+                    mx: { xs: "auto", sm: 0 },
+                    flexShrink: 0,
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                    }
+                  }}
+                >
+                  <Box sx={{ 
+                    borderRadius: "50%", 
+                    overflow: "hidden", 
+                    width: { xs: 88, sm: 108 }, 
+                    height: { xs: 88, sm: 108 },
+                    "& svg": {
+                      width: "100% !important",
+                      height: "100% !important"
+                    }
+                  }}>
+                    <BoringAvatar
+                      name={creator.name || creator.wallet_address}
+                      variant="beam"
+                      size={108}
+                      colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                    />
+                  </Box>
+                </Box>
+
+                {/* Creator info details: Name, Username, Badges */}
+                <Box sx={{ 
+                  flexGrow: 1, 
+                  minWidth: 0,
+                  textAlign: { xs: "center", sm: "left" },
+                  width: "100%",
+                  mt: { xs: 1, sm: 0 }
+                }}>
+                  <Stack 
+                    direction={{ xs: "column", sm: "row" }} 
+                    spacing={1.5} 
+                    sx={{ 
+                      alignItems: "center", 
+                      justifyContent: "space-between",
+                      mb: 2,
+                      width: "100%"
                     }}
                   >
-                    <Box sx={{ borderRadius: "50%", overflow: "hidden", width: 108, height: 108 }}>
-                      <BoringAvatar
-                        name={creator.name || creator.wallet_address}
-                        variant="beam"
-                        size={108}
-                        colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
-                      />
-                    </Box>
-                  </Box>
-                </Grid>
-
-                <Grid size="grow" sx={{ mt: { xs: 2, sm: 0 } }}>
-                  <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ alignItems: { sm: "center" }, justifyContent: "space-between", mb: 2 }}>
-                    <Box>
-                      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-                        <Typography variant="h4" sx={{ fontWeight: 900 }}>
+                    <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
+                      <Stack 
+                        direction="row" 
+                        spacing={1.5} 
+                        sx={{ 
+                          alignItems: "center",
+                          justifyContent: { xs: "center", sm: "flex-start" } 
+                        }}
+                      >
+                        <Typography variant="h4" sx={{ fontWeight: 900, fontSize: { xs: "1.65rem", sm: "2.125rem" } }}>
                           {creator.name}
                         </Typography>
+                        {creator.is_premium && (
+                          <VerifiedIcon sx={{ color: "#14F195", fontSize: { xs: 22, sm: 26 }, filter: "drop-shadow(0 0 5px rgba(20,241,149,0.3))" }} />
+                        )}
                         {creator.is_premium && (
                           <Chip 
                             label="PREMIUM" 
@@ -413,26 +763,34 @@ export default function PublicProfilePage() {
                               background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)", 
                               color: "#000", 
                               fontWeight: 900,
-                              fontSize: "0.68rem"
+                              fontSize: "0.6rem"
                             }} 
                           />
                         )}
                       </Stack>
-                      <Typography variant="h6" color="primary" sx={{ fontWeight: 700, mt: 0.5 }}>
+                      <Typography variant="h6" color="primary" sx={{ fontWeight: 700, mt: 0.2, fontSize: { xs: "0.95rem", sm: "1.25rem" }, textAlign: { xs: "center", sm: "left" } }}>
                         @{creator.username}
                       </Typography>
                     </Box>
 
                     {/* Live Badge + Share Button */}
-                    <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                    <Stack 
+                      direction="row" 
+                      spacing={1.5} 
+                      sx={{ 
+                        alignItems: "center",
+                        justifyContent: { xs: "center", sm: "flex-end" },
+                        mt: { xs: 1.5, sm: 0 }
+                      }}
+                    >
                       <Chip
                         label={isLive ? "🔴 LIVE" : "● ONLINE"}
                         size="small"
                         sx={{ 
                           fontWeight: 900,
-                          px: 1.5,
+                          px: 1.2,
                           borderRadius: "50px", 
-                          fontSize: "0.78rem",
+                          fontSize: "0.7rem",
                           border: isLive ? "1px solid #ff17444d" : "1px solid #00e6764d",
                           bgcolor: isLive ? "rgba(255,23,68,0.1)" : "rgba(0,230,118,0.08)",
                           color: isLive ? "#ff4444" : "#00e676",
@@ -443,13 +801,13 @@ export default function PublicProfilePage() {
                         variant="outlined"
                         size="small"
                         onClick={copyShareableLink}
-                        startIcon={<ShareIcon sx={{ fontSize: 15 }} />}
+                        startIcon={<ShareIcon sx={{ fontSize: 13 }} />}
                         sx={{
-                          borderRadius: "10px",
+                          borderRadius: "8px",
                           fontWeight: 700,
-                          fontSize: "0.78rem",
-                          px: 2,
-                          py: 0.8,
+                          fontSize: "0.7rem",
+                          px: 1.5,
+                          py: 0.6,
                           borderColor: `${currentTheme.palette.primary.main}55`,
                           color: "text.secondary",
                           bgcolor: `${currentTheme.palette.primary.main}08`,
@@ -466,16 +824,26 @@ export default function PublicProfilePage() {
                   </Stack>
 
                   {/* Creator Wallet Address + Share row */}
-                  <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 2, flexWrap: "wrap", gap: 1 }}>
+                  <Stack 
+                    direction="row" 
+                    spacing={1.5} 
+                    sx={{ 
+                      alignItems: "center", 
+                      mb: 2, 
+                      flexWrap: "wrap", 
+                      gap: 1.5,
+                      justifyContent: { xs: "center", sm: "flex-start" }
+                    }}
+                  >
                     <Box 
                       onClick={copyWallet}
                       sx={{ 
                         display: "inline-flex", 
                         alignItems: "center", 
                         gap: 1, 
-                        px: 2, 
-                        py: 0.8, 
-                        borderRadius: "8px", 
+                        px: 1.5, 
+                        py: 0.6, 
+                        borderRadius: "6px", 
                         bgcolor: "rgba(255,255,255,0.03)", 
                         border: "1px solid rgba(255,255,255,0.06)",
                         cursor: "pointer",
@@ -483,25 +851,25 @@ export default function PublicProfilePage() {
                         "&:hover": { bgcolor: "rgba(255,255,255,0.07)", borderColor: "rgba(255,255,255,0.12)" }
                       }}
                     >
-                      <Typography sx={{ fontFamily: "'Space Mono', monospace", fontSize: "0.8rem", color: "text.secondary" }}>
+                      <Typography sx={{ fontFamily: "'Space Mono', monospace", fontSize: "0.75rem", color: "text.secondary" }}>
                         {shorten(creator.wallet_address)}
                       </Typography>
-                      <ContentCopyIcon sx={{ fontSize: 13, color: "text.secondary" }} />
+                      <ContentCopyIcon sx={{ fontSize: 11, color: "text.secondary" }} />
                     </Box>
                     <Button
                       variant="contained"
                       size="small"
                       onClick={copyShareableLink}
-                      startIcon={<ShareIcon sx={{ fontSize: 15 }} />}
+                      startIcon={<ShareIcon sx={{ fontSize: 13 }} />}
                       sx={{
-                        borderRadius: "8px",
+                        borderRadius: "6px",
                         fontWeight: 800,
-                        fontSize: "0.78rem",
-                        px: 2,
-                        py: 0.8,
+                        fontSize: "0.75rem",
+                        px: 1.5,
+                        py: 0.6,
                         background: `linear-gradient(135deg, ${currentTheme.palette.primary.main} 0%, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main} 100%)`,
-                        boxShadow: `0 4px 14px ${currentTheme.palette.primary.main}30`,
-                        "&:hover": { transform: "translateY(-1px)", boxShadow: `0 6px 18px ${currentTheme.palette.primary.main}50` }
+                        boxShadow: `0 4px 12px ${currentTheme.palette.primary.main}20`,
+                        "&:hover": { transform: "translateY(-1px)", boxShadow: `0 6px 14px ${currentTheme.palette.primary.main}40` }
                       }}
                     >
                       Copy Shareable Link
@@ -509,12 +877,22 @@ export default function PublicProfilePage() {
                   </Stack>
 
                   {creator.bio && (
-                    <Typography variant="body1" sx={{ color: "text.secondary", maxWidth: 700, lineHeight: 1.8, fontSize: "1.05rem" }}>
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        color: "text.secondary", 
+                        maxWidth: 700, 
+                        lineHeight: 1.6, 
+                        fontSize: { xs: "0.9rem", sm: "1rem" },
+                        textAlign: { xs: "center", sm: "left" },
+                        mx: { xs: "auto", sm: 0 }
+                      }}
+                    >
                       {creator.bio}
                     </Typography>
                   )}
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
 
               {/* Social Channels Row */}
               {creator.socials && Object.values(creator.socials).some(v => !!v) && (
@@ -589,6 +967,81 @@ export default function PublicProfilePage() {
             </CardContent>
           </Card>
 
+          {/* ---- Glassmorphic Stats Section ---- */}
+          <Grid container spacing={2.5} sx={{ mb: 4 }}>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <Card sx={{ 
+                bgcolor: "rgba(255, 255, 255, 0.015)", 
+                border: "1px solid rgba(255,255,255,0.04)",
+                boxShadow: "none",
+                "&:hover": { bgcolor: "rgba(255, 255, 255, 0.03)", transform: "translateY(-2px)" },
+                transition: "all 0.2s"
+              }}>
+                <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, py: "16px !important" }}>
+                  <Box sx={{ p: 1.2, borderRadius: "10px", bgcolor: `${currentTheme.palette.primary.main}15`, color: "primary.main", display: "flex" }}>
+                    <MonetizationOnIcon />
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
+                      Total Supported
+                    </Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 900 }}>
+                      {creatorStats.volumeSol.toFixed(2)} SOL
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <Card sx={{ 
+                bgcolor: "rgba(255, 255, 255, 0.015)", 
+                border: "1px solid rgba(255,255,255,0.04)",
+                boxShadow: "none",
+                "&:hover": { bgcolor: "rgba(255, 255, 255, 0.03)", transform: "translateY(-2px)" },
+                transition: "all 0.2s"
+              }}>
+                <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, py: "16px !important" }}>
+                  <Box sx={{ p: 1.2, borderRadius: "10px", bgcolor: `${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}15`, color: "secondary.main", display: "flex" }}>
+                    <EmojiEventsIcon />
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
+                      Superchats Count
+                    </Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 900 }}>
+                      {creatorStats.totalCount}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <Card sx={{ 
+                bgcolor: "rgba(255, 255, 255, 0.015)", 
+                border: "1px solid rgba(255,255,255,0.04)",
+                boxShadow: "none",
+                "&:hover": { bgcolor: "rgba(255, 255, 255, 0.03)", transform: "translateY(-2px)" },
+                transition: "all 0.2s"
+              }}>
+                <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, py: "16px !important" }}>
+                  <Box sx={{ p: 1.2, borderRadius: "10px", bgcolor: "success.main15", color: "success.main", display: "flex" }}>
+                    <TrendingUpIcon />
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
+                      Avg. Tip Size
+                    </Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 900 }}>
+                      {creatorStats.avgSol.toFixed(3)} SOL
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
           {/* ---- Body Container Grid ---- */}
           <Grid container spacing={4}>
             
@@ -600,44 +1053,57 @@ export default function PublicProfilePage() {
                 {isLive && (
                   <Card>
                     <CardContent sx={{ p: 2 }}>
-                      <Typography variant="h6" sx={{ fontWeight: 900, mb: 2, px: 1, display: "flex", alignItems: "center", gap: 1 }}>
-                        📺 Creator Live Broadcast
-                      </Typography>
-                      <Box sx={{ width: "100%", overflow: "hidden", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.06)", position: "relative" }}>
-                        {creator.stream_embed.platform === "twitch" && isValidChannel("twitch", creator.stream_embed.channel || "") && (
-                          <iframe
-                            src={`https://player.twitch.tv/?channel=${encodeURIComponent(creator.stream_embed.channel!)}&parent=${encodeURIComponent(window.location.hostname)}&muted=false`}
-                            height="400"
-                            width="100%"
-                            allowFullScreen
-                            sandbox="allow-scripts allow-same-origin allow-popups"
-                            referrerPolicy="no-referrer"
-                            style={{ border: "none" }}
-                          />
-                        )}
-                        {creator.stream_embed.platform === "youtube" && isValidChannel("youtube", creator.stream_embed.channel || "") && (
-                          <iframe
-                            src={`https://www.youtube.com/embed/${encodeURIComponent(creator.stream_embed.channel!)}?autoplay=0`}
-                            height="400"
-                            width="100%"
-                            allowFullScreen
-                            sandbox="allow-scripts allow-same-origin allow-popups"
-                            referrerPolicy="no-referrer"
-                            style={{ border: "none" }}
-                          />
-                        )}
-                        {creator.stream_embed.platform === "kick" && isValidChannel("kick", creator.stream_embed.channel || "") && (
-                          <iframe
-                            src={`https://player.kick.com/${encodeURIComponent(creator.stream_embed.channel!)}`}
-                            height="400"
-                            width="100%"
-                            allowFullScreen
-                            sandbox="allow-scripts allow-same-origin allow-popups"
-                            referrerPolicy="no-referrer"
-                            style={{ border: "none" }}
-                          />
-                        )}
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2, px: 1 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 900, display: "flex", alignItems: "center", gap: 1 }}>
+                          📺 Creator Live Broadcast
+                        </Typography>
+                        <Button 
+                          size="small" 
+                          variant="text"
+                          onClick={() => setStreamVisible(!streamVisible)}
+                          startIcon={streamVisible ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                          sx={{ textTransform: "none", fontWeight: 700 }}
+                        >
+                          {streamVisible ? "Collapse Stream" : "Expand Stream"}
+                        </Button>
                       </Box>
+                      {streamVisible && (
+                        <Box sx={{ width: "100%", overflow: "hidden", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.06)", position: "relative" }}>
+                          {creator.stream_embed.platform === "twitch" && isValidChannel("twitch", creator.stream_embed.channel || "") && (
+                            <iframe
+                              src={`https://player.twitch.tv/?channel=${encodeURIComponent(creator.stream_embed.channel!)}&parent=${encodeURIComponent(window.location.hostname)}&muted=false`}
+                              height="400"
+                              width="100%"
+                              allowFullScreen
+                              sandbox="allow-scripts allow-same-origin allow-popups"
+                              referrerPolicy="no-referrer"
+                              style={{ border: "none" }}
+                            />
+                          )}
+                          {creator.stream_embed.platform === "youtube" && isValidChannel("youtube", creator.stream_embed.channel || "") && (
+                            <iframe
+                              src={`https://www.youtube.com/embed/${encodeURIComponent(creator.stream_embed.channel!)}?autoplay=0`}
+                              height="400"
+                              width="100%"
+                              allowFullScreen
+                              sandbox="allow-scripts allow-same-origin allow-popups"
+                              referrerPolicy="no-referrer"
+                              style={{ border: "none" }}
+                            />
+                          )}
+                          {creator.stream_embed.platform === "kick" && isValidChannel("kick", creator.stream_embed.channel || "") && (
+                            <iframe
+                              src={`https://player.kick.com/${encodeURIComponent(creator.stream_embed.channel!)}`}
+                              height="400"
+                              width="100%"
+                              allowFullScreen
+                              sandbox="allow-scripts allow-same-origin allow-popups"
+                              referrerPolicy="no-referrer"
+                              style={{ border: "none" }}
+                            />
+                          )}
+                        </Box>
+                      )}
                     </CardContent>
                   </Card>
                 )}
@@ -647,15 +1113,63 @@ export default function PublicProfilePage() {
                   <CardContent sx={{ p: 4 }}>
                     <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mb: 3 }}>
                       <Typography variant="h6" sx={{ fontWeight: 900 }}>🎙️ Recent Superchats</Typography>
-                      <Chip label={`${tips.length} tip${tips.length !== 1 ? "s" : ""}`} size="small" variant="outlined" sx={{ fontWeight: 700, borderRadius: "8px", fontSize: "0.72rem" }} />
+                      <Chip label={`${filteredTips.length} tip${filteredTips.length !== 1 ? "s" : ""}`} size="small" variant="outlined" sx={{ fontWeight: 700, borderRadius: "8px", fontSize: "0.72rem" }} />
                     </Stack>
 
-                    {tips.length === 0 ? (
+                    {/* Filter and Search controls */}
+                    <Stack spacing={2} sx={{ mb: 4 }}>
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        placeholder="Search superchats by name, message, or wallet..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        slotProps={{
+                          input: {
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <SearchIcon sx={{ color: "text.secondary", fontSize: 20 }} />
+                              </InputAdornment>
+                            ),
+                            sx: { borderRadius: "10px" }
+                          }
+                        }}
+                      />
+                      
+                      <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
+                        <Chip
+                          label="All Tips"
+                          onClick={() => setFilterType("all")}
+                          color={filterType === "all" ? "primary" : "default"}
+                          variant={filterType === "all" ? "filled" : "outlined"}
+                          size="small"
+                          sx={{ fontWeight: 700, borderRadius: "8px" }}
+                        />
+                        <Chip
+                          label="Large Tips (≥0.5 SOL)"
+                          onClick={() => setFilterType("large")}
+                          color={filterType === "large" ? "primary" : "default"}
+                          variant={filterType === "large" ? "filled" : "outlined"}
+                          size="small"
+                          sx={{ fontWeight: 700, borderRadius: "8px" }}
+                        />
+                        <Chip
+                          label="With Messages"
+                          onClick={() => setFilterType("message")}
+                          color={filterType === "message" ? "primary" : "default"}
+                          variant={filterType === "message" ? "filled" : "outlined"}
+                          size="small"
+                          sx={{ fontWeight: 700, borderRadius: "8px" }}
+                        />
+                      </Stack>
+                    </Stack>
+
+                    {filteredTips.length === 0 ? (
                       <Box sx={{ textAlign: "center", py: 6 }}>
                         <Typography sx={{ fontSize: "2.5rem", mb: 1 }}>⚡</Typography>
-                        <Typography sx={{ fontWeight: 700, mb: 0.5 }}>No Superchats Yet</Typography>
+                        <Typography sx={{ fontWeight: 700, mb: 0.5 }}>No Superchats Found</Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Be the first to support {creator.name}!
+                          Try searching for another term or tip to be the first!
                         </Typography>
                       </Box>
                     ) : (
@@ -686,7 +1200,13 @@ export default function PublicProfilePage() {
                                 </Stack>
 
                                 {tip.message && (
-                                  <Box sx={{ mt: 1.5, p: 1.5, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "8px", borderLeft: `3px solid ${currentTheme.palette.primary.main}` }}>
+                                  <Box sx={{ 
+                                    mt: 1.5, 
+                                    p: 1.5, 
+                                    bgcolor: "rgba(255,255,255,0.02)", 
+                                    borderRadius: "8px", 
+                                    borderLeft: `3.5px solid ${getTipTierColor(tip.amount)}` 
+                                  }}>
                                     <Typography variant="body2" sx={{ fontStyle: "italic", opacity: 0.95, lineHeight: 1.5 }}>
                                       "{tip.message}"
                                     </Typography>
@@ -747,27 +1267,52 @@ export default function PublicProfilePage() {
             <Grid size={{ xs: 12, md: isLive ? 5 : 6 }}>
               
               {/* Tipping Panel Widget */}
-              <Card sx={{ position: "relative", overflow: "visible" }}>
+              <Card sx={{ 
+                position: "relative", 
+                overflow: "visible",
+                border: `2px solid ${tipTier.color}`,
+                boxShadow: tipTier.glow,
+                transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
+              }}>
                 <Box
                   sx={{
                     position: "absolute",
-                    top: -1,
+                    top: -2,
                     left: "10%",
                     right: "10%",
-                    height: "2px",
-                    background: `linear-gradient(90deg, transparent, ${currentTheme.palette.primary.main}, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}, transparent)`
+                    height: "3px",
+                    background: `linear-gradient(90deg, transparent, ${tipTier.color}, transparent)`,
+                    transition: "all 0.4s ease"
                   }}
                 />
 
                 <CardContent sx={{ p: { xs: 3, md: 5 } }}>
-                  <Stack direction="row" spacing={2} sx={{ alignItems: "center", mb: 1 }}>
-                    <Box sx={{ width: 40, height: 40, borderRadius: "10px", overflow: "hidden", flexShrink: 0 }}>
-                      <BoringAvatar name={creator.name || creator.wallet_address} variant="beam" size={40} colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
-                    </Box>
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 900, lineHeight: 1.2 }}>⚡ Tip {creator.name}</Typography>
-                      <Typography variant="caption" color="text.secondary">@{creator.username}</Typography>
-                    </Box>
+                  <Stack direction="row" spacing={2} sx={{ alignItems: "center", mb: 1, justifyContent: "space-between" }}>
+                    <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+                      <Box sx={{ width: 40, height: 40, borderRadius: "10px", overflow: "hidden", flexShrink: 0 }}>
+                        <BoringAvatar name={creator.name || creator.wallet_address} variant="beam" size={40} colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
+                      </Box>
+                      <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 900, lineHeight: 1.2 }}>⚡ Tip {creator.name}</Typography>
+                        <Typography variant="caption" color="text.secondary">@{creator.username}</Typography>
+                      </Box>
+                    </Stack>
+                    
+                    {amount && parseFloat(amount) > 0 && (
+                      <Chip
+                        label={tipTier.badge}
+                        size="small"
+                        sx={{
+                          bgcolor: `${tipTier.color}15`,
+                          color: tipTier.color,
+                          border: `1px solid ${tipTier.color}35`,
+                          fontWeight: 900,
+                          fontSize: "0.72rem",
+                          borderRadius: "6px",
+                          px: 0.5
+                        }}
+                      />
+                    )}
                   </Stack>
                   <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", my: 2 }} />
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
@@ -815,20 +1360,33 @@ export default function PublicProfilePage() {
                           </Typography>
                           <Grid container spacing={1.5}>
                             {[0.1, 0.5, 1.0, 2.5].map((preset) => (
-                              <Grid size={{ xs: 3 }} key={preset}>
+                              <Grid size={{ xs: 6, sm: 3 }} key={preset}>
                                 <Button
                                   variant="outlined"
                                   fullWidth
                                   onClick={() => handlePresetTip(preset)}
                                   sx={{ 
-                                    py: 1.2, 
-                                    borderRadius: "10px", 
+                                    py: 1.5, 
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    borderRadius: "12px", 
                                     fontWeight: 800, 
-                                    border: amount === preset.toString() ? `2px solid ${currentTheme.palette.primary.main}` : "1px solid rgba(255,255,255,0.06)",
-                                    bgcolor: amount === preset.toString() ? `${currentTheme.palette.primary.main}0d` : "transparent"
+                                    transition: "all 0.2s ease",
+                                    border: amount === preset.toString() 
+                                      ? `2px solid ${tipTier.color}` 
+                                      : "1px solid rgba(255,255,255,0.06)",
+                                    bgcolor: amount === preset.toString() 
+                                      ? `${tipTier.color}14` 
+                                      : "rgba(255,255,255,0.02)",
+                                    "&:hover": {
+                                      bgcolor: "rgba(255,255,255,0.05)",
+                                      borderColor: "rgba(255,255,255,0.15)"
+                                    }
                                   }}
                                 >
-                                  {preset}
+                                  <Typography variant="body1" sx={{ fontWeight: 900 }}>
+                                    {preset} SOL
+                                  </Typography>
                                 </Button>
                               </Grid>
                             ))}
@@ -849,20 +1407,26 @@ export default function PublicProfilePage() {
                             disabled={txStatus === "sending" || txStatus === "verifying"}
                             slotProps={{
                               htmlInput: { min: 0.01, step: 0.01 },
-                              input: { sx: { fontSize: "1.02rem" } }
+                              input: { 
+                                sx: { fontSize: "1.02rem" }
+                              }
                             }}
                           />
 
                           {feeBreakdown && (
-                            <Box sx={{ mt: 2, p: 2, bgcolor: "rgba(255,255,255,0.015)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.04)" }}>
-                              <Stack spacing={1}>
+                            <Box sx={{ mt: 2, p: 2.5, bgcolor: "rgba(255,255,255,0.015)", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.04)" }}>
+                              <Stack spacing={1.5}>
                                 <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                                   <Typography variant="caption" color="text.secondary">Platform fee (5%)</Typography>
-                                  <Typography variant="caption" sx={{ fontWeight: 600, color: "error.light" }}>-{feeBreakdown.fee} SOL</Typography>
+                                  <Typography variant="caption" sx={{ fontWeight: 700, color: "error.light" }}>
+                                    -{feeBreakdown.fee} SOL
+                                  </Typography>
                                 </Box>
-                                <Box sx={{ display: "flex", justifyContent: "space-between", pt: 1, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Creator receives</Typography>
-                                  <Typography variant="body2" sx={{ fontWeight: 800, color: "primary.main" }}>{feeBreakdown.creatorAmount} SOL</Typography>
+                                <Box sx={{ display: "flex", justifyContent: "space-between", pt: 1.5, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 700 }}>Creator receives</Typography>
+                                  <Typography variant="body2" sx={{ fontWeight: 900, color: tipTier.color }}>
+                                    {feeBreakdown.creatorAmount} SOL
+                                  </Typography>
                                 </Box>
                               </Stack>
                             </Box>
