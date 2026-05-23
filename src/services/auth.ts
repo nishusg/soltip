@@ -9,29 +9,35 @@
 //     2. Constructs the message: "Sign this message to login: <nonce>"
 //     3. Asks the wallet to sign it (via signMessage callback)
 //     4. Sends the signature to POST /api/auth/verify
-//     5. Stores the returned JWT in localStorage
-//     6. Returns the token
+//     5. Stores the returned access token in localStorage
+//     6. The refresh token is automatically stored as an HttpOnly cookie
+//     7. Returns the access token
 //
-//   getToken(): retrieves stored JWT
-//   removeToken(): clears the JWT (logout)
+//   refreshAccessToken(): silently refreshes the access token using the
+//     HttpOnly refresh cookie. Called automatically by the API wrapper.
+//
+//   getToken(): retrieves stored access token (returns null if expired)
+//   removeToken(): clears the access token and calls server logout to
+//     clear the refresh cookie
 //   isAuthenticated(): checks if a valid token exists
 // ============================================================================
 
 import bs58 from "bs58";
-import { getNonce, verifySignature } from "./api";
+import { getNonce, verifySignature, logoutFromServer, refreshToken } from "./api";
 import { isTokenValid } from "../utils/security";
 
-/** localStorage key for the JWT token */
+/** localStorage key for the JWT access token */
 const TOKEN_KEY = "superchat_token";
 /** localStorage key for the wallet address associated with the token */
 const ADDRESS_KEY = "superchat_wallet";
 
 /**
- * Full authentication flow: nonce → sign → verify → store JWT.
+ * Full authentication flow: nonce → sign → verify → store access token.
+ * The refresh token is automatically set as an HttpOnly cookie by the server.
  *
  * @param walletAddress — the connected wallet's public key (base58)
  * @param signMessage — function from the wallet adapter to sign a message
- * @returns the JWT token string
+ * @returns the JWT access token string
  */
 export async function authenticate(
   walletAddress: string,
@@ -56,12 +62,12 @@ export async function authenticate(
   const signatureBase58 = bs58.encode(signatureBytes);
 
   // -------------------------------------------------------------------
-  // 4. Verify with backend and get JWT
+  // 4. Verify with backend and get access token (+ refresh cookie)
   // -------------------------------------------------------------------
   const { token } = await verifySignature(walletAddress, signatureBase58);
 
   // -------------------------------------------------------------------
-  // 5. Store token and wallet in localStorage
+  // 5. Store access token and wallet in localStorage
   // -------------------------------------------------------------------
   localStorage.setItem(TOKEN_KEY, token);
   localStorage.setItem(ADDRESS_KEY, walletAddress);
@@ -69,21 +75,31 @@ export async function authenticate(
   return token;
 }
 
-/** Get the stored JWT token (returns null if missing or expired) */
+/** Get the stored JWT access token (returns null if missing or expired) */
 export function getToken(): string | null {
   const token = localStorage.getItem(TOKEN_KEY);
   if (token && !isTokenValid(token)) {
-    // Token is expired — proactively clear it
-    removeToken();
+    // Token is expired — don't clear it yet, let the silent refresh handle it
     return null;
   }
   return token;
 }
 
-/** Remove the stored JWT token and wallet (logout) */
+/**
+ * Silently refresh the access token using the HttpOnly refresh cookie.
+ * Returns the new access token or null if the refresh fails.
+ */
+export async function refreshAccessToken(): Promise<string | null> {
+  const newToken = await refreshToken();
+  return newToken;
+}
+
+/** Remove the stored JWT access token, wallet, and clear server-side refresh cookie */
 export function removeToken(): void {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(ADDRESS_KEY);
+  // Clear the HttpOnly refresh cookie on the server (best-effort, fire-and-forget)
+  logoutFromServer();
 }
 
 /** Get the stored wallet address */
@@ -91,7 +107,7 @@ export function getStoredAddress(): string | null {
   return localStorage.getItem(ADDRESS_KEY);
 }
 
-/** Check if the user has a stored, non-expired token */
+/** Check if the user has a stored, non-expired access token */
 export function isAuthenticated(): boolean {
   return !!getToken();
 }

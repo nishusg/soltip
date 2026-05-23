@@ -6,14 +6,61 @@
 //
 // All requests go through the `api` helper which:
 //   - Prefixes the base URL
-//   - Attaches the JWT token from localStorage (if present)
+//   - Attaches the JWT access token from localStorage (if present)
+//   - Sends credentials (cookies) for refresh token flow
 //   - Parses JSON responses
+//   - On 401, silently refreshes the access token and retries once
 //   - Handles errors consistently
 //
 // Each function maps to a specific backend endpoint.
 // ============================================================================
 
 import { API_BASE } from "../shared/constants";
+
+// ---------------------------------------------------------------------------
+// Silent Refresh — get a new access token using the HttpOnly refresh cookie
+// ---------------------------------------------------------------------------
+
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
+
+/**
+ * Attempt to silently refresh the access token using the HttpOnly
+ * refresh cookie. Returns the new token or null if refresh fails.
+ */
+async function silentRefresh(): Promise<string | null> {
+  // Deduplicate concurrent refresh attempts
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        credentials: "include", // Send the HttpOnly refresh cookie
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) return null;
+
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem("superchat_token", data.token);
+        return data.token;
+      }
+      return null;
+    } catch {
+      return null;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
 
 // ---------------------------------------------------------------------------
 // Generic fetch wrapper
@@ -24,10 +71,11 @@ import { API_BASE } from "../shared/constants";
  *
  * @param endpoint — API path (e.g. "/auth/nonce")
  * @param options — fetch options (method, body, etc.)
+ * @param isRetry — internal flag to prevent infinite retry loops
  * @returns parsed JSON response
  * @throws Error with message from backend
  */
-async function api(endpoint: string, options: RequestInit = {}) {
+async function api(endpoint: string, options: RequestInit = {}, isRetry = false) {
   const token = localStorage.getItem("superchat_token");
 
   const headers: Record<string, string> = {
@@ -43,6 +91,7 @@ async function api(endpoint: string, options: RequestInit = {}) {
   const res = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers,
+    credentials: "include", // Always send cookies for refresh token
   });
 
   const contentType = res.headers.get("content-type");
@@ -60,9 +109,17 @@ async function api(endpoint: string, options: RequestInit = {}) {
   }
 
   if (!res.ok) {
-    if (res.status === 401) {
+    // On 401, try silent refresh before giving up (but only once)
+    if (res.status === 401 && !isRetry) {
+      const newToken = await silentRefresh();
+      if (newToken) {
+        // Retry the original request with the new access token
+        return api(endpoint, options, true);
+      }
+      // Refresh failed — session is truly expired
       window.dispatchEvent(new CustomEvent("auth:expired"));
     }
+
     const errorMessage = parseError 
       ? `HTTP error ${res.status}: ${res.statusText}`
       : (data.error || "API request failed");
@@ -91,6 +148,24 @@ export async function verifySignature(wallet: string, signature: string) {
     method: "POST",
     body: JSON.stringify({ wallet, signature }),
   });
+}
+
+/** Refresh the access token using the HttpOnly refresh cookie */
+export async function refreshToken() {
+  return silentRefresh();
+}
+
+/** Logout — clear the refresh cookie on the server */
+export async function logoutFromServer() {
+  try {
+    await fetch(`${API_BASE}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch {
+    // Best-effort — even if the call fails, we clear local state
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -248,4 +323,3 @@ export async function saveOverlaySettings(settings: {
 export async function searchCreators(query: string) {
   return api(`/stats/search?q=${encodeURIComponent(query)}`);
 }
-

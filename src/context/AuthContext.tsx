@@ -17,7 +17,7 @@
 import type { ReactNode } from "react";
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { authenticate, getToken, removeToken, getStoredAddress } from "../services/auth";
+import { authenticate, getToken, removeToken, getStoredAddress, refreshAccessToken } from "../services/auth";
 import toast from "react-hot-toast";
 import { logger } from "../utils/logger";
 import type { User } from "../types";
@@ -92,6 +92,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token, refreshUser]);
 
   // -------------------------------------------------------------------
+  // Silent Token Refresh — refresh access token every 12 minutes
+  // (3-minute buffer before the 15-minute expiry)
+  // -------------------------------------------------------------------
+  useEffect(() => {
+    if (!token) return;
+
+    const REFRESH_INTERVAL_MS = 12 * 60 * 1000; // 12 minutes
+
+    const intervalId = setInterval(async () => {
+      try {
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+          setToken(newToken);
+        }
+      } catch {
+        // Refresh failed — will be caught by auth:expired on next API call
+      }
+    }, REFRESH_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [token]);
+
+  // -------------------------------------------------------------------
   // Login: run the full nonce → sign → verify flow (with rate limiting)
   // -------------------------------------------------------------------
   const lastLoginAttempt = useRef<number>(0);
@@ -135,14 +158,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
   }, []);
 
+  // Keep track of whether the wallet has ever connected during this tab session
+  const [wasConnected, setWasConnected] = useState(false);
+
+  useEffect(() => {
+    if (connected) {
+      setWasConnected(true);
+    }
+  }, [connected]);
+
   // -------------------------------------------------------------------
   // Auto-logout only when wallet is definitely disconnected
   // -------------------------------------------------------------------
   const { connecting } = useWallet();
 
   useEffect(() => {
-    // 1. If wallet is definitely disconnected, clear session
-    if (!connected && !connecting && token) {
+    // 1. If wallet is definitely disconnected (after being connected), clear session
+    if (wasConnected && !connected && !connecting && token) {
       logout();
       return;
     }
@@ -157,7 +189,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout();
       }
     }
-  }, [connected, connecting, publicKey, logout, token]);
+  }, [connected, connecting, publicKey, logout, token, wasConnected]);
 
   useEffect(() => {
     const handleAuthExpired = () => {
