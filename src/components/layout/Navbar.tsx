@@ -171,12 +171,14 @@ export default function Navbar() {
       position="sticky"
       elevation={0}
       sx={{
-        backgroundColor: scrolled ? `${theme.palette.background.default}cc` : "transparent",
-        backdropFilter: scrolled ? "blur(24px)" : "none",
+        backgroundColor: scrolled
+          ? (isMobile ? theme.palette.background.default : `${theme.palette.background.default}cc`)
+          : "transparent",
+        backdropFilter: scrolled && !isMobile ? "blur(24px)" : "none",
         borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "1px solid transparent",
         zIndex: 1100,
-        boxShadow: scrolled ? "0 10px 40px rgba(0, 0, 0, 0.25)" : "none",
-        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+        boxShadow: scrolled && !isMobile ? "0 10px 40px rgba(0, 0, 0, 0.25)" : "none",
+        transition: isMobile ? "background-color 0.2s ease" : "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
       }}
     >
       {/* Dynamic bottom neon border that fades in when scrolled */}
@@ -185,7 +187,7 @@ export default function Navbar() {
           height: "1.5px",
           width: "100%",
           background: `linear-gradient(90deg, transparent 0%, ${brandColor} 50%, transparent 100%)`,
-          opacity: scrolled ? 0.7 : 0,
+          opacity: scrolled && !isMobile ? 0.7 : 0,
           transition: "opacity 0.3s ease",
           position: "absolute",
           bottom: 0,
@@ -766,7 +768,13 @@ export default function Navbar() {
         anchor="right"
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
+        keepMounted
+        transitionDuration={{
+          enter: 200,
+          exit: 150,
+        }}
         ModalProps={{ 
+          keepMounted: true,
           disableScrollLock: true // Prevents layout/header shifting when drawer opens
         }}
         sx={{
@@ -776,7 +784,7 @@ export default function Navbar() {
             width: 310,
             background: "rgba(10, 10, 15, 0.98)", // slightly more opaque to compensate for blur removal
             borderLeft: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "-10px 0 45px rgba(0,0,0,0.6)",
+            boxShadow: "-2px 0 12px rgba(0,0,0,0.4)",
             // Force GPU layer creation for smooth sliding animations on mobile browsers
             transform: "translate3d(0, 0, 0)",
             willChange: "transform",
