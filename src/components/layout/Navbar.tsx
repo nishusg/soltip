@@ -86,11 +86,12 @@ export default function Navbar() {
   const secondaryColor = theme.palette.secondary?.main || brandColor;
 
   useEffect(() => {
+    let currentScrolled = false;
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
+      const isScrolled = window.scrollY > 20;
+      if (isScrolled !== currentScrolled) {
+        currentScrolled = isScrolled;
+        setScrolled(isScrolled);
       }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -740,7 +741,14 @@ export default function Navbar() {
                 bgcolor: "rgba(255,255,255,0.03)",
                 borderRadius: "10px",
                 border: "1px solid rgba(255,255,255,0.06)",
-                p: 1
+                p: 1,
+                transition: "background-color 0.2s ease",
+                "&:hover": {
+                  bgcolor: "rgba(255,255,255,0.06)"
+                },
+                "&:active": {
+                  bgcolor: "rgba(255,255,255,0.1)"
+                }
               }}
             >
               <MenuIcon />
@@ -762,8 +770,7 @@ export default function Navbar() {
           "& .MuiDrawer-paper": {
             boxSizing: "border-box",
             width: 310,
-            background: "rgba(10, 10, 15, 0.96)",
-            backdropFilter: "blur(30px)",
+            background: "rgba(10, 10, 15, 0.98)", // slightly more opaque to compensate for blur removal
             borderLeft: "1px solid rgba(255,255,255,0.08)",
             boxShadow: "-10px 0 45px rgba(0,0,0,0.6)"
           },
