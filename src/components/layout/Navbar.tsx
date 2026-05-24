@@ -737,11 +737,13 @@ export default function Navbar() {
               color="inherit"
               aria-label="open drawer"
               onClick={() => setMobileOpen(true)}
+              disableRipple
               sx={{
                 bgcolor: "rgba(255,255,255,0.03)",
                 borderRadius: "10px",
                 border: "1px solid rgba(255,255,255,0.06)",
                 p: 1,
+                touchAction: "manipulation", // Eliminates 300ms click delay on mobile touchscreens
                 transition: "background-color 0.2s ease",
                 "&:hover": {
                   bgcolor: "rgba(255,255,255,0.06)"
@@ -774,7 +776,12 @@ export default function Navbar() {
             width: 310,
             background: "rgba(10, 10, 15, 0.98)", // slightly more opaque to compensate for blur removal
             borderLeft: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "-10px 0 45px rgba(0,0,0,0.6)"
+            boxShadow: "-10px 0 45px rgba(0,0,0,0.6)",
+            // Force GPU layer creation for smooth sliding animations on mobile browsers
+            transform: "translate3d(0, 0, 0)",
+            willChange: "transform",
+            WebkitBackfaceVisibility: "hidden",
+            backfaceVisibility: "hidden"
           },
         }}
       >
