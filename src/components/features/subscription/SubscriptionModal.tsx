@@ -83,6 +83,7 @@ export default function SubscriptionModal({ open, onClose }: SubscriptionModalPr
     <Dialog 
       open={open} 
       onClose={onClose}
+      disableScrollLock={true}
       maxWidth="xs"
       fullWidth
       sx={{

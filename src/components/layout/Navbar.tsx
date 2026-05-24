@@ -13,7 +13,7 @@
 //   6. Beautifully structured and polished Mobile drawer
 // ============================================================================
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWalletAuth } from "../../hooks/useWalletAuth";
@@ -58,6 +58,39 @@ import TipForm from "../features/tips/TipForm";
 import SubscriptionModal from "../features/subscription/SubscriptionModal";
 import { SITE_NAME } from "../../shared/constants";
 
+
+const resources = [
+  {
+    label: "How It Works",
+    desc: "Complete step-by-step setup guides",
+    path: "/how-it-works",
+    icon: <BoltIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
+  },
+  {
+    label: "Pricing & Fees",
+    desc: "Flat 5% cut with zero monthly gas holds",
+    path: "/pricing",
+    icon: <PaymentsIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
+  },
+  {
+    label: "Security & Trust",
+    desc: "100% Non-custodial cryptographic safety",
+    path: "/security",
+    icon: <ShieldIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
+  },
+  {
+    label: "Blog Hub",
+    desc: "Streamer insights & crypto tipping manuals",
+    path: "/blog",
+    icon: <MenuBookIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
+  },
+  {
+    label: "OBS Setup",
+    desc: "Low-latency alert browser overlay integrations",
+    path: "/obs-overlay",
+    icon: <MonitorIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
+  }
+];
 
 export default function Navbar() {
   const { connected, isAuthenticated, login, logout, isLoading, walletAddress, shortAddress, user } = useWalletAuth();
@@ -112,8 +145,8 @@ export default function Navbar() {
     setProfileAnchorEl(null);
   };
 
-  // Swapping nav links (landing vs creator workflow)
-  const navItems = [
+  // Swapping nav links (landing vs creator workflow) - Memoized
+  const navItems = useMemo(() => [
     { label: "Home", path: "/" },
     ...(isAuthenticated ? [
       { label: "Search", path: "/search" },
@@ -121,50 +154,17 @@ export default function Navbar() {
       { label: "Activity", path: "/activity" },
       { label: "Leaderboard", path: "/leaderboard" }
     ] : [])
-  ];
+  ], [isAuthenticated]);
 
-  const isActive = (path: string) => {
+  const isActive = useCallback((path: string) => {
     if (path === "/" && location.pathname !== "/") return false;
     return location.pathname.startsWith(path);
-  };
+  }, [location.pathname]);
 
-  const isDropdownActive = () => {
+  const isDropdownActive = useCallback(() => {
     const dropdownPaths = ["/pricing", "/security", "/blog", "/obs-overlay", "/how-it-works"];
     return dropdownPaths.some(path => location.pathname.startsWith(path));
-  };
-
-  const resources = [
-    {
-      label: "How It Works",
-      desc: "Complete step-by-step setup guides",
-      path: "/how-it-works",
-      icon: <BoltIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
-    },
-    {
-      label: "Pricing & Fees",
-      desc: "Flat 5% cut with zero monthly gas holds",
-      path: "/pricing",
-      icon: <PaymentsIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
-    },
-    {
-      label: "Security & Trust",
-      desc: "100% Non-custodial cryptographic safety",
-      path: "/security",
-      icon: <ShieldIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
-    },
-    {
-      label: "Blog Hub",
-      desc: "Streamer insights & crypto tipping manuals",
-      path: "/blog",
-      icon: <MenuBookIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
-    },
-    {
-      label: "OBS Setup",
-      desc: "Low-latency alert browser overlay integrations",
-      path: "/obs-overlay",
-      icon: <MonitorIcon className="menu-icon" sx={{ color: "rgba(255,255,255,0.4)", transition: "color 0.2s" }} />
-    }
-  ];
+  }, [location.pathname]);
 
   return (
     <AppBar
@@ -764,7 +764,9 @@ export default function Navbar() {
         anchor="right"
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
-        ModalProps={{ keepMounted: true }}
+        ModalProps={{ 
+          disableScrollLock: true // Prevents layout/header shifting when drawer opens
+        }}
         sx={{
           display: { xs: "block", md: "none" },
           "& .MuiDrawer-paper": {
@@ -1082,6 +1084,7 @@ export default function Navbar() {
       <Dialog
         open={tipModalOpen}
         onClose={() => setTipModalOpen(false)}
+        disableScrollLock={true}
         maxWidth="md"
         fullWidth
         sx={{
