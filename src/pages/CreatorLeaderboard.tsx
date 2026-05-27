@@ -28,7 +28,9 @@ import {
   Zoom,
   Fade,
   Grow,
-  IconButton
+  IconButton,
+  useTheme,
+  useMediaQuery
 } from "@mui/material";
 import BoringAvatar from "boring-avatars";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -63,6 +65,8 @@ interface CreatorDetailsState {
 }
 
 export default function CreatorLeaderboard() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [creators, setCreators] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -205,7 +209,7 @@ export default function CreatorLeaderboard() {
   // Podium Logic (Top 3)
   // ---------------------------------------------------------------------------
   // We only show the separate visual podium on larger screens when there's no active search
-  const showPodium = creators.length >= 3 && !searchQuery;
+  const showPodium = creators.length >= 3 && !searchQuery && !isMobile;
 
   const firstPlace = showPodium ? creators[0] : null;
   const secondPlace = showPodium ? creators[1] : null;
@@ -628,8 +632,8 @@ export default function CreatorLeaderboard() {
 
           <List sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {paginatedCreators.map((creator, index) => {
-              // Rank index relative to the main collection
-              const globalIndex = showPodium ? index + 3 + (page - 1) * itemsPerPage : index + (page - 1) * itemsPerPage;
+              // Rank index relative to the main collection (actual leaderboard position)
+              const globalIndex = creators.findIndex((c) => c.wallet_address === creator.wallet_address);
               const isTop3 = globalIndex < 3;
               const isCurrentUser = user && user.wallet_address === creator.wallet_address;
               const isUpdating = !!recentUpdates[creator.wallet_address];
