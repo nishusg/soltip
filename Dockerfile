@@ -31,7 +31,7 @@ RUN npm run build
 
 
 # Production Stage
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:alpine
 
 # Copy custom nginx config that includes security headers & gzip
 COPY nginx.conf /etc/nginx/conf.d/default.conf
@@ -39,6 +39,9 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy built assets
 COPY --from=build /app/dist /usr/share/nginx/html
 
-EXPOSE 80
+EXPOSE 8080
+
+# Run as the unprivileged nginx user
+USER nginx
 
 CMD ["nginx", "-g", "daemon off;"]

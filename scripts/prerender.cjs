@@ -251,8 +251,12 @@ function prerender() {
       console.log(`   ✅ Pre-rendered homepage (/) directly inside 'dist/index.html'`);
     } else {
       // Subpage folder structure (e.g. dist/pricing/index.html)
+      // Safe: route.path is from a hardcoded configuration array, not user input.
+      // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
       const folderPath = path.join(DIST_DIR, route.path);
       fs.mkdirSync(folderPath, { recursive: true });
+      // Safe: folderPath is safe and index.html is a static filename.
+      // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
       fs.writeFileSync(path.join(folderPath, "index.html"), hydratedHtml, "utf8");
       console.log(`   ✅ Pre-rendered route (/${route.path}) inside 'dist/${route.path}/index.html'`);
     }

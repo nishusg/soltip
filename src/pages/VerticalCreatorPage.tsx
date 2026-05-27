@@ -299,7 +299,11 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
             variant="h6" 
             color="text.secondary" 
             sx={{ maxWidth: "800px", mx: "auto", fontWeight: 400, lineHeight: 1.7 }}
-            dangerouslySetInnerHTML={{ __html: activeConfig.heroSub }}
+            dangerouslySetInnerHTML={
+              // Safe: activeConfig.heroSub is static and not user input.
+              // nosemgrep: typescript.react.security.audit.react-dangerouslysetinnerhtml.react-dangerouslysetinnerhtml
+              { __html: activeConfig.heroSub }
+            }
           />
 
           {/* Keywords visual badges */}
