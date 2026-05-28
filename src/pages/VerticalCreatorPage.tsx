@@ -230,7 +230,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
   const traditionalFees = Math.round(tipVolume * activeConfig.calculatorFeeRate);
   const platformFee = Math.round(tipVolume * FEE_PERCENTAGE); // Standard platform cut
   const networkFees = Math.round(tipVolume * 0.0005); // Simulated network/gas fee
-  const solchatKept = Math.round(tipVolume - platformFee - networkFees);
+  const soltipKept = Math.round(tipVolume - platformFee - networkFees);
   const traditionalKept = Math.round(tipVolume - traditionalFees);
   const monthlySavings = Math.round(traditionalFees - platformFee - networkFees);
   const yearlySavings = Math.round(monthlySavings * 12);
@@ -502,7 +502,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
                       </Typography>
 
                       <Typography variant="caption" sx={{ color: "success.main", fontWeight: 900, fontFamily: "Space Mono" }}>
-                        ${solchatKept.toLocaleString()} (loses only ${platformFee.toLocaleString()})
+                        ${soltipKept.toLocaleString()} (loses only ${platformFee.toLocaleString()})
                       </Typography>
                     </Box>
                     <Box 
@@ -518,7 +518,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
                     >
                       <Box 
                         sx={{ 
-                          width: `${(solchatKept/tipVolume)*100}%`, 
+                          width: `${(soltipKept/tipVolume)*100}%`, 
                           height: "100%", 
                           background: `linear-gradient(90deg, ${brandColor} 0%, ${secondaryColor} 100%)`, 
                           borderRadius: "4px",

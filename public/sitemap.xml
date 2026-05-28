@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Core Landing Page -->
   <url>
-    <loc>https://solchat.io/</loc>
+    <loc>https://soltip.in/</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -10,7 +10,7 @@
 
   <!-- High-converting Pricing Hub -->
   <url>
-    <loc>https://solchat.io/pricing</loc>
+    <loc>https://soltip.in/pricing</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -18,7 +18,7 @@
 
   <!-- How It Works Tipping Guide -->
   <url>
-    <loc>https://solchat.io/how-it-works</loc>
+    <loc>https://soltip.in/how-it-works</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -26,7 +26,7 @@
 
   <!-- OBS Overlay Setup Guide -->
   <url>
-    <loc>https://solchat.io/obs-overlay</loc>
+    <loc>https://soltip.in/obs-overlay</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -34,25 +34,25 @@
 
   <!-- Platform Verticals -->
   <url>
-    <loc>https://solchat.io/for-youtube</loc>
+    <loc>https://soltip.in/for-youtube</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://solchat.io/for-kick</loc>
+    <loc>https://soltip.in/for-kick</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://solchat.io/for-streamlabs</loc>
+    <loc>https://soltip.in/for-streamlabs</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://solchat.io/for-content-creators</loc>
+    <loc>https://soltip.in/for-content-creators</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -60,7 +60,7 @@
 
   <!-- Transparency & Audits -->
   <url>
-    <loc>https://solchat.io/security</loc>
+    <loc>https://soltip.in/security</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -68,7 +68,7 @@
 
   <!-- Blog Hub -->
   <url>
-    <loc>https://solchat.io/blog</loc>
+    <loc>https://soltip.in/blog</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
@@ -76,37 +76,37 @@
 
   <!-- Individual SEO Blog Posts -->
   <url>
-    <loc>https://solchat.io/blog/how-to-accept-crypto-donations-on-twitch</loc>
+    <loc>https://soltip.in/blog/how-to-accept-crypto-donations-on-twitch</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://solchat.io/blog/best-obs-overlay-for-solana-donations</loc>
+    <loc>https://soltip.in/blog/best-obs-overlay-for-solana-donations</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://solchat.io/blog/how-streamers-avoid-high-platform-fees</loc>
+    <loc>https://soltip.in/blog/how-streamers-avoid-high-platform-fees</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://solchat.io/blog/crypto-superchat-vs-youtube-superchat</loc>
+    <loc>https://soltip.in/blog/crypto-superchat-vs-youtube-superchat</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://solchat.io/blog/how-wallet-based-donations-work</loc>
+    <loc>https://soltip.in/blog/how-wallet-based-donations-work</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://solchat.io/blog/best-solana-tools-for-creators</loc>
+    <loc>https://soltip.in/blog/best-solana-tools-for-creators</loc>
     <lastmod>2026-05-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

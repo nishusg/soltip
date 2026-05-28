@@ -10,12 +10,12 @@ RUN npm install
 COPY . .
 
 # Define build arguments for Vite environment variables with safe defaults
-ARG VITE_API_URL="https://solchat-api.kloudprompt.com/api"
+ARG VITE_API_URL="https://soltip-api.kloudprompt.com/api"
 ARG VITE_PROGRAM_ID="CzF4PuVgqAy19MzeGGgQwWM2qeeT1bJGehByTD5Hcqh8"
 ARG VITE_PLATFORM_WALLET="A37oSqJxnWforsFzkE9ok7dEQ3YKj7MDnc8fvbGWuJWP"
 ARG VITE_SOLANA_RPC_URL="https://api.devnet.solana.com"
-ARG VITE_SITE_NAME="SolChat"
-ARG VITE_SITE_URL="https://solchat.kloudprompt.com"
+ARG VITE_SITE_NAME="SolTip"
+ARG VITE_SITE_URL="https://soltip.kloudprompt.com"
 ARG VITE_PLATFORM_FEE="5"
 
 # Expose them as environment variables during build

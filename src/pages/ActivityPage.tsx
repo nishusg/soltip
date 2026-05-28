@@ -91,7 +91,7 @@ export default function ActivityPage() {
   
   // Explorer preference (Persisted in LocalStorage)
   const [explorerPref, setExplorerPref] = useState<string>(() => {
-    const pref = localStorage.getItem("solchat_explorer_pref") || "solscan";
+    const pref = localStorage.getItem("soltip_explorer_pref") || "solscan";
     return pref === "solanafm" ? "solscan" : pref;
   });
 
@@ -122,7 +122,7 @@ export default function ActivityPage() {
   // Save explorer preference
   const handleExplorerChange = (pref: string) => {
     setExplorerPref(pref);
-    localStorage.setItem("solchat_explorer_pref", pref);
+    localStorage.setItem("soltip_explorer_pref", pref);
     toast.success(`Explorer preference set to ${pref === "solscan" ? "Solscan" : "Solana Explorer"}`);
   };
 

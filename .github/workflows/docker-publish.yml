@@ -37,5 +37,5 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/solchat:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/solchat:${{ env.VERSION }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/soltip:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/soltip:${{ env.VERSION }}

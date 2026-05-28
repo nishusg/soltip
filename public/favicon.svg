@@ -19,6 +19,6 @@
   <!-- Premium Outer Squircle Chat Capsule (Transparent Background) -->
   <rect x="48" y="48" width="416" height="416" rx="96" fill="none" stroke="url(#solGradient)" stroke-width="20" filter="url(#glow)" />
   
-  <!-- Central High-Speed Lightning Bolt representing SolChat -->
+  <!-- Central High-Speed Lightning Bolt representing SolTip -->
   <path d="M288 80 L160 280 H264 L248 432 L352 232 H248 L288 80 Z" fill="url(#solGradient)" filter="url(#glow)" />
 </svg>
