@@ -40,6 +40,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import LaunchIcon from "@mui/icons-material/Launch";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import StarIcon from "@mui/icons-material/Star";
+import { CreatorLeaderboardSkeleton } from "../components/common/LoadingSkeletons";
 
 interface Creator {
   wallet_address: string;
@@ -379,14 +380,7 @@ export default function CreatorLeaderboard() {
       </Card>
 
       {/* Loading State */}
-      {loading && (
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", py: 12 }}>
-          <CircularProgress size={52} thickness={4.5} sx={{ mb: 3 }} />
-          <Typography color="text.secondary" sx={{ letterSpacing: "0.15em", textTransform: "uppercase", fontSize: "0.75rem", fontWeight: 900 }}>
-            Loading Leaderboard...
-          </Typography>
-        </Box>
-      )}
+      {loading && <CreatorLeaderboardSkeleton />}
 
       {/* Empty State */}
       {!loading && filteredCreators.length === 0 && (

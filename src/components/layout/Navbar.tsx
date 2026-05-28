@@ -145,6 +145,14 @@ export default function Navbar() {
     setProfileAnchorEl(null);
   };
 
+  const handleNavClick = (path: string) => {
+    if (location.pathname === path) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  };
+
   // Swapping nav links (landing vs creator workflow) - Memoized
   const navItems = useMemo(() => [
     { label: "Home", path: "/" },
@@ -201,6 +209,7 @@ export default function Navbar() {
         <Box
           component={RouterLink}
           to="/"
+          onClick={() => handleNavClick("/")}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -273,6 +282,7 @@ export default function Navbar() {
                   key={item.label}
                   component={RouterLink}
                   to={item.path}
+                  onClick={() => handleNavClick(item.path)}
                   sx={{
                     px: 2.2,
                     py: 0.8,
@@ -368,7 +378,10 @@ export default function Navbar() {
                   key={idx}
                   component={RouterLink}
                   to={res.path}
-                  onClick={handleCloseMenu}
+                  onClick={() => {
+                    handleCloseMenu();
+                    handleNavClick(res.path);
+                  }}
                   sx={{
                     py: 1.8,
                     px: 2.5,
@@ -653,7 +666,10 @@ export default function Navbar() {
                 <MenuItem
                   component={RouterLink}
                   to={`/profile/${walletAddress}`}
-                  onClick={handleCloseProfileMenu}
+                  onClick={() => {
+                    handleCloseProfileMenu();
+                    handleNavClick(`/profile/${walletAddress}`);
+                  }}
                   sx={{
                     py: 1.2,
                     px: 2.5,
@@ -678,7 +694,10 @@ export default function Navbar() {
                 <MenuItem
                   component={RouterLink}
                   to="/settings"
-                  onClick={handleCloseProfileMenu}
+                  onClick={() => {
+                    handleCloseProfileMenu();
+                    handleNavClick("/settings");
+                  }}
                   sx={{
                     py: 1.2,
                     px: 2.5,
@@ -824,7 +843,10 @@ export default function Navbar() {
                   <ListItemButton
                     component={RouterLink}
                     to={item.path}
-                    onClick={() => setMobileOpen(false)}
+                    onClick={() => {
+                      setMobileOpen(false);
+                      handleNavClick(item.path);
+                    }}
                     sx={{
                       borderRadius: "12px",
                       bgcolor: active ? "rgba(255,255,255,0.04)" : "transparent",
@@ -856,7 +878,10 @@ export default function Navbar() {
                   <ListItemButton
                     component={RouterLink}
                     to={res.path}
-                    onClick={() => setMobileOpen(false)}
+                    onClick={() => {
+                      setMobileOpen(false);
+                      handleNavClick(res.path);
+                    }}
                     sx={{
                       borderRadius: "12px",
                       bgcolor: active ? "rgba(255,255,255,0.04)" : "transparent",
@@ -986,7 +1011,10 @@ export default function Navbar() {
                   variant="outlined"
                   color="primary"
                   fullWidth
-                  onClick={() => setMobileOpen(false)}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    handleNavClick(`/profile/${walletAddress}`);
+                  }}
                   sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800 }}
                   startIcon={<PersonIcon />}
                 >
@@ -999,7 +1027,10 @@ export default function Navbar() {
                   variant="outlined"
                   color="inherit"
                   fullWidth
-                  onClick={() => setMobileOpen(false)}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    handleNavClick("/settings");
+                  }}
                   sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800, color: "text.secondary" }}
                   startIcon={<SettingsIcon />}
                 >

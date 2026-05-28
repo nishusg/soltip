@@ -17,6 +17,7 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 import { searchCreators } from "../../../services/api";
+import { CreatorSearchSkeleton } from "../../common/LoadingSkeletons";
 
 export default function CreatorSearch() {
   // Creator Search State
@@ -127,7 +128,7 @@ export default function CreatorSearch() {
       />
 
       {/* Results Grid */}
-      {searchResults.length > 0 ? (
+      {searchResults.length > 0 && !searchLoading ? (
         <Box>
           <Typography
             variant="caption"
@@ -236,6 +237,8 @@ export default function CreatorSearch() {
             ))}
           </Grid>
         </Box>
+      ) : searchLoading ? (
+        <CreatorSearchSkeleton />
       ) : (
         searchQuery.trim() && !searchLoading && (
           <Box sx={{ py: 4 }}>

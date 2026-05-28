@@ -28,8 +28,10 @@ import {
   CssBaseline,
   IconButton,
   Pagination,
-  InputAdornment
+  InputAdornment,
+  Paper
 } from "@mui/material";
+import { PublicProfileSkeleton } from "../components/common/LoadingSkeletons";
 import LockIcon from "@mui/icons-material/Lock";
 import SendIcon from "@mui/icons-material/Send";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -463,12 +465,7 @@ export default function PublicProfilePage() {
   }, [creator, currentTheme]);
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "80vh" }}>
-        <CircularProgress size={48} sx={{ mb: 2, color: "primary.main" }} />
-        <Typography color="text.secondary" variant="h6">Loading public profile...</Typography>
-      </Box>
-    );
+    return <PublicProfileSkeleton />;
   }
 
   if (error || !creator) {

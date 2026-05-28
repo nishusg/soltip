@@ -5,13 +5,14 @@ import { useRealtimeTips } from "../../../hooks/useRealtimeTips";
 import { listTransactions } from "../../../services/api";
 import { getExplorerUrl } from "../../../services/solana";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { Card, CardContent, Typography, List, ListItem, Box, CircularProgress, Link, Chip, Tooltip } from "@mui/material";
+import { Card, CardContent, Typography, List, ListItem, Box, CircularProgress, Link, Chip, Tooltip, Divider } from "@mui/material";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import BoringAvatar from "boring-avatars";
 import { logger } from "../../../utils/logger";
 import type { Tip } from "../../../types";
+import { RecentTipsSkeleton } from "../../common/LoadingSkeletons";
 
 export default function RecentTips() {
   const { walletAddress, isAuthenticated } = useWalletAuth();
@@ -96,14 +97,7 @@ export default function RecentTips() {
           </Typography>
         </Box>
 
-        {loading && (
-          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", py: 8 }}>
-            <CircularProgress size={40} thickness={4} sx={{ mb: 3, color: "primary.main" }} />
-            <Typography variant="body2" color="text.secondary" sx={{ letterSpacing: "0.1em", fontWeight: 700, textTransform: "uppercase" }}>
-              Syncing ledger...
-            </Typography>
-          </Box>
-        )}
+        {loading && <RecentTipsSkeleton />}
 
         {!loading && transactions.length === 0 && (
           <Box sx={{ textAlign: "center", py: 8, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "16px", border: "1px dashed rgba(255,255,255,0.1)" }}>

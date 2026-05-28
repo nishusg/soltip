@@ -23,6 +23,7 @@ import {
   InputLabel,
   Divider
 } from "@mui/material";
+import { ProfileSettingsSkeleton } from "../components/common/LoadingSkeletons";
 import SaveIcon from "@mui/icons-material/Save";
 import LockIcon from "@mui/icons-material/Lock";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -234,11 +235,7 @@ export default function ProfileSettings() {
   }
 
   if (fetching) {
-    return (
-      <Box sx={{ position: "relative", minHeight: "calc(100vh - 64px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <CircularProgress size={48} thickness={4} sx={{ color: "primary.main" }} />
-      </Box>
-    );
+    return <ProfileSettingsSkeleton />;
   }
 
   return (

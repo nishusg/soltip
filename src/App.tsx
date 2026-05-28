@@ -16,7 +16,7 @@
 // wrapping this component.
 // ============================================================================
 
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "./components/layout/Navbar";
@@ -142,9 +142,20 @@ function AppLayout() {
   );
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AppLayout />
     </BrowserRouter>
   );

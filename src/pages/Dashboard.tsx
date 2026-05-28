@@ -37,6 +37,7 @@ import {
   FormControlLabel,
   Pagination
 } from "@mui/material";
+import { DashboardSkeleton } from "../components/common/LoadingSkeletons";
 import BoltIcon from "@mui/icons-material/Bolt";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
@@ -291,11 +292,7 @@ export default function Dashboard() {
   };
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh" }}>
-        <CircularProgress size={48} thickness={4} sx={{ color: "primary.main" }} />
-      </Box>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (error) {

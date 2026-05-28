@@ -5,6 +5,7 @@ import { getExplorerUrl } from "../services/solana";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import { Container, Card, CardContent, Typography, Box, CircularProgress, Button, Avatar, List, ListItem, Divider, Link, Chip, Tabs, Tab, Pagination } from "@mui/material";
+import { ProfilePageSkeleton } from "../components/common/LoadingSkeletons";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -106,12 +107,7 @@ export default function ProfilePage() {
 
   return (
     <Container maxWidth="md" sx={{ py: 10, minHeight: "calc(100vh - 64px)" }}>
-      {loading && (
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", py: 10 }}>
-          <CircularProgress size={40} sx={{ mb: 2 }} />
-          <Typography color="text.secondary">Loading profile...</Typography>
-        </Box>
-      )}
+      {loading && <ProfilePageSkeleton />}
 
       {error && (
         <Card sx={{ textAlign: "center", py: 6, animation: "fadeInUp 0.6s ease-out" }}>

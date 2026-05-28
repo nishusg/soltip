@@ -28,6 +28,7 @@ import {
   Tooltip, 
   CircularProgress, 
   Link, 
+  Divider, 
   Stack, 
   Dialog, 
   DialogTitle, 
@@ -41,6 +42,7 @@ import {
   Grid,
   Pagination
 } from "@mui/material";
+import { ActivityPageSkeleton } from "../components/common/LoadingSkeletons";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -439,14 +441,7 @@ export default function ActivityPage() {
               </Box>
 
               <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
-                {loading && (
-                  <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", py: 12 }}>
-                    <CircularProgress size={45} thickness={4} sx={{ mb: 3, color: "primary.main" }} />
-                    <Typography variant="body2" color="text.secondary" sx={{ letterSpacing: "0.1em", fontWeight: 700, textTransform: "uppercase" }}>
-                      Synchronizing ledger proofs...
-                    </Typography>
-                  </Box>
-                )}
+                {loading && <ActivityPageSkeleton />}
 
                 {!loading && filteredTransactions.length === 0 && (
                   <Box sx={{ textAlign: "center", py: 10, bgcolor: "rgba(255,255,255,0.01)", borderRadius: "20px", border: "1px dashed rgba(255,255,255,0.08)" }}>
