@@ -21,20 +21,11 @@ import {
   ListItemAvatar,
   ListItemText,
   Chip,
-  CircularProgress,
   Button,
   TextField,
   Link,
   useTheme,
   useMediaQuery,
-  Switch,
-  Slider,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  InputAdornment,
-  FormControlLabel,
   Pagination
 } from "@mui/material";
 import { DashboardSkeleton } from "../components/common/LoadingSkeletons";
@@ -44,15 +35,12 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import TvIcon from "@mui/icons-material/Tv";
-import StarIcon from "@mui/icons-material/Star";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import AlertCustomizer from "../components/features/alerts/AlertCustomizer";
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -1167,8 +1155,6 @@ export default function Dashboard() {
               onSave={handleSaveOverlaySettings}
               testLoading={testLoading}
               onSendTestAlert={handleSendTestAlert}
-              tokenLoading={tokenLoading}
-              onGenerateToken={handleGenerateToken}
               overlayToken={overlayToken}
               connected={connected}
               walletAddress={publicKey?.toString() || data?.user?.wallet_address || ""}

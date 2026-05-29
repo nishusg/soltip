@@ -30,11 +30,9 @@ import {
   Chip
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import BoltIcon from "@mui/icons-material/Bolt";
 import ShieldIcon from "@mui/icons-material/Shield";
 import KeyIcon from "@mui/icons-material/Key";
 import SecurityIcon from "@mui/icons-material/Security";
-import RateReviewIcon from "@mui/icons-material/RateReview";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import WarningIcon from "@mui/icons-material/Warning";
 import GppGoodIcon from "@mui/icons-material/GppGood";
@@ -49,7 +47,6 @@ export default function SecurityPage() {
 
   // Dynamic context colors from current theme
   const brandColor = theme.palette.primary.main;
-  const secondaryColor = theme.palette.secondary?.main || brandColor;
 
   const securityPillars = [
     {

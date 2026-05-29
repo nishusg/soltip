@@ -7,7 +7,7 @@
 // ============================================================================
 
 import { Link as RouterLink } from "react-router-dom";
-import { Box, Container, Grid, Typography, Link, IconButton, useTheme, Tooltip, Divider } from "@mui/material";
+import { Box, Container, Grid, Typography, Link, IconButton, useTheme, Divider } from "@mui/material";
 import { SITE_NAME } from "../../shared/constants";
 
 import BoltIcon from "@mui/icons-material/Bolt";

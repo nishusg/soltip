@@ -28,7 +28,6 @@ import {
   useMediaQuery, 
   Stack, 
   Paper, 
-  Divider, 
   Chip, 
   Slider,
   Table,
@@ -39,13 +38,6 @@ import {
   TableRow
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import BoltIcon from "@mui/icons-material/Bolt";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import TvIcon from "@mui/icons-material/Tv";
-import GroupIcon from "@mui/icons-material/Group";
-import ShieldIcon from "@mui/icons-material/Shield";
 import SEO from "../components/common/SEO";
 import { SITE_NAME, FEE_PERCENTAGE, PLATFORM_FEE_PCT } from "../shared/constants";
 
@@ -71,8 +63,6 @@ export default function PricingPage() {
   
   // Traditional platform comparisons
   const twitchLost = Math.round(tipVolume * 0.40); // 40% average cut on Bits/Subs
-  const patreonLost = Math.round(tipVolume * 0.12); // 12% standard + processing
-  const traditionalKept = Math.round(tipVolume - patreonLost);
   const yearlySavings = Math.round((twitchLost - platformFee) * 12);
 
   const pricingCards = [

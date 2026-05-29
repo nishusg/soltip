@@ -21,19 +21,12 @@ import {
   Box, 
   Card, 
   CardContent, 
-  Button, 
   Tabs, 
   Tab, 
   Chip, 
   Tooltip, 
-  CircularProgress, 
   Link, 
-  Divider, 
   Stack, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
   Select, 
   MenuItem, 
   FormControl, 
@@ -43,16 +36,11 @@ import {
   Pagination
 } from "@mui/material";
 import { ActivityPageSkeleton } from "../components/common/LoadingSkeletons";
-import CallMadeIcon from "@mui/icons-material/CallMade";
-import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import UndoIcon from "@mui/icons-material/Undo";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import CancelIcon from "@mui/icons-material/Cancel";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import SettingsIcon from "@mui/icons-material/Settings";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import BoringAvatar from "boring-avatars";
 import { useWalletAuth } from "../hooks/useWalletAuth";
@@ -96,10 +84,6 @@ export default function ActivityPage() {
     const pref = localStorage.getItem("soltip_explorer_pref") || "solscan";
     return pref === "solanafm" ? "solscan" : pref;
   });
-
-  // Refund dialog confirmation state
-  const [refundTarget, setRefundTarget] = useState<Transaction | null>(null);
-  const [refundLoading, setRefundLoading] = useState(false);
 
   // Fetch transactions on load
   useEffect(() => {
@@ -806,68 +790,6 @@ export default function ActivityPage() {
         </Grid>
       </Container>
 
-      {/* ---- Premium Creator Refund Confirmation Modal ---- */}
-      {/* ---- Premium Creator Refund Confirmation Modal ----
-      <Dialog
-        open={Boolean(refundTarget)}
-        onClose={() => !refundLoading && setRefundTarget(null)}
-        sx={{
-          "& .MuiDialog-paper": {
-            bgcolor: "rgba(30, 30, 45, 0.95)",
-            backdropFilter: "blur(20px)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "24px",
-            p: 2,
-            boxShadow: "0 25px 50px rgba(0,0,0,0.5)"
-          }
-        }}
-      >
-        <DialogTitle sx={{ fontWeight: 850, fontSize: "1.4rem", pb: 1 }}>
-          Confirm Broadcast Refund
-        </DialogTitle>
-        <DialogContent>
-          <Typography color="text.secondary" sx={{ mb: 3, lineHeight: 1.6 }}>
-            You are about to mark the transaction <Box component="span" sx={{ fontFamily: "monospace", color: "primary.main", fontWeight: 700 }}>{shorten(refundTarget?.tx_hash || "")}</Box> as refunded.
-          </Typography>
-          <Box sx={{ p: 2.5, bgcolor: "rgba(237, 108, 2, 0.05)", borderRadius: "14px", border: "1px solid rgba(237, 108, 2, 0.15)", mb: 2 }}>
-            <Typography variant="body2" color="warning.main" sx={{ fontWeight: 750, mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-              <UndoIcon sx={{ fontSize: 18 }} /> Statistics Adjustments:
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
-              • Marks the database outcome log as <strong>Refunded</strong>.<br />
-              • Subtracts the net superchat volume (<strong>{refundTarget ? formatSol(refundTarget.amount - refundTarget.fee) : 0} SOL</strong>) from your profile's earnings.<br />
-              • Subtracts <strong>{refundTarget ? formatSol(refundTarget.amount) : 0} SOL</strong> from the sender's total contributions.
-            </Typography>
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
-          <Button 
-            onClick={() => setRefundTarget(null)} 
-            disabled={refundLoading}
-            sx={{ fontWeight: 700, color: "text.secondary" }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmRefund}
-            variant="contained"
-            color="warning"
-            disabled={refundLoading}
-             
-            sx={{ 
-              fontWeight: 800, 
-              borderRadius: "12px", 
-              px: 3,
-              bgcolor: "warning.main",
-              color: "#000",
-              "&:hover": { bgcolor: "warning.dark" }
-            }}
-          >
-            {refundLoading ? "Processing..." : "Refund Ledger Proof"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-      */}
     </Box>
   );
 }

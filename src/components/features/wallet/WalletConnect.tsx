@@ -11,7 +11,6 @@ import { SITE_NAME, SITE_URL, PLATFORM_FEE_PCT } from "../../../shared/constants
 import FlashOnIcon from "@mui/icons-material/FlashOn";
 import LockIcon from "@mui/icons-material/Lock";
 import DiamondIcon from "@mui/icons-material/Diamond";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import SpeedIcon from "@mui/icons-material/Speed";
 import StarIcon from "@mui/icons-material/Star";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -19,7 +18,6 @@ import YouTubeIcon from "@mui/icons-material/YouTube";
 import LanguageIcon from "@mui/icons-material/Language";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import MonitorIcon from "@mui/icons-material/Monitor";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
 
 export default function WalletConnect() {
   const { isAuthenticated } = useWalletAuth();

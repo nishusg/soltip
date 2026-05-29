@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { Box, Typography, Paper, keyframes } from "@mui/material";
 import { useSocket } from "../context/SocketContext";
@@ -11,12 +11,6 @@ import DiamondIcon from "@mui/icons-material/Diamond";
 import { logger } from "../utils/logger";
 import { validateMediaUrl, sanitizeMessage, sanitizeSenderName } from "../utils/security";
 import type { OverlaySettings } from "../types";
-
-// Animation for new tip entry
-const slideInLeft = keyframes`
-  from { transform: translateX(-100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-`;
 
 // Classic Bounce popup animation
 const alertPopIn = keyframes`
@@ -95,8 +89,6 @@ interface TipEntry {
 // Sizing and Duration Constants for Stream Overlay Layouts
 const ALERT_DISPLAY_DURATION = 6500; // ms
 const ACTIVE_ALERT_WIDTH = 580; // px
-const TICKER_FEED_WIDTH = 400; // px
-const TICKER_MAX_ITEMS = 5;
 
 // Typography Font Constants
 const FONT_ACCENT = "Orbitron, sans-serif";
@@ -109,13 +101,6 @@ function getTierColor(amount: number): string {
   if (amount >= 0.5) return "#ffcc00";   // 0.5-1 SOL — gold
   if (amount >= 0.1) return "#14F195";   // 0.1-0.5 SOL — cyan
   return "#8e8e93";                       // < 0.1 SOL — grey
-}
-
-function getTierGlow(amount: number): string {
-  if (amount >= 5) return "0 0 20px rgba(255, 45, 85, 0.5)";
-  if (amount >= 1) return "0 0 15px rgba(255, 149, 0, 0.4)";
-  if (amount >= 0.5) return "0 0 12px rgba(255, 204, 0, 0.3)";
-  return "none";
 }
 
 export default function OverlayPage() {
@@ -131,7 +116,6 @@ export default function OverlayPage() {
     return searchParams.get("key");
   })();
   const { socket } = useSocket();
-  const [tips, setTips] = useState<TipEntry[]>([]);
   const [authStatus, setAuthStatus] = useState<"loading" | "ok" | "denied">("loading");
   const [activeAlert, setActiveAlert] = useState<TipEntry | null>(null);
 
@@ -437,45 +421,6 @@ export default function OverlayPage() {
     }
   };
 
-  // Step 2: Load existing tips on mount (filtered to today for fresh daily streams)
-  useEffect(() => {
-    if (authStatus !== "ok" || !walletAddress) return;
-
-    const loadRecentTips = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/stats/user/${walletAddress}`);
-        if (!res.ok) throw new Error("HTTP error");
-        const contentType = res.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          throw new Error("Invalid response format");
-        }
-        const data = await res.json();
-        if (data.recent_tips && data.recent_tips.length > 0) {
-          const todayStr = new Date().toDateString();
-          const received = data.recent_tips
-            .filter((t: any) => {
-              // Only load tips sent today for a fresh daily ticker experience
-              const tipDate = new Date(t.timestamp);
-              return t.creator_wallet === walletAddress && tipDate.toDateString() === todayStr;
-            })
-            .slice(0, 20)
-            .reverse() // oldest first so newest is at bottom
-            .map((t: any) => ({
-              id: t._id || t.tx_hash,
-              sender: t.sender_wallet.slice(0, 4) + "..." + t.sender_wallet.slice(-4),
-              amount: t.amount / 1e9,
-              message: t.message || "",
-              timestamp: t.timestamp
-            }));
-          setTips(received);
-        }
-      } catch (err) {
-        // Ignore error
-      }
-    };
-
-    loadRecentTips();
-  }, [authStatus, walletAddress]);
 
   // Step 3: Subscribe to real-time tips & real-time settings synchronization
   useEffect(() => {
@@ -491,8 +436,6 @@ export default function OverlayPage() {
         message: sanitizeMessage(data.message || ""),
         timestamp: new Date().toISOString()
       };
-
-      setTips(prev => [...prev, newTip].slice(-10)); // Keep last 10
 
       if (data.goal_current !== undefined) {
         setSettings((prev: OverlaySettings) => ({ ...prev, goal_current: data.goal_current }));

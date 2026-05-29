@@ -32,13 +32,11 @@ import {
   TableRow,
   Divider
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import BoltIcon from "@mui/icons-material/Bolt";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SEO from "../components/common/SEO";
-import { blogArticles, BlogArticle } from "../data/blogArticles";
+import { blogArticles } from "../data/blogArticles";
 import { SITE_NAME } from "../shared/constants";
 
 
@@ -50,7 +48,6 @@ export default function BlogPostPage() {
 
   // Dynamic context colors from current theme
   const brandColor = theme.palette.primary.main;
-  const secondaryColor = theme.palette.secondary?.main || brandColor;
 
   // Track reading scroll progress
   useEffect(() => {

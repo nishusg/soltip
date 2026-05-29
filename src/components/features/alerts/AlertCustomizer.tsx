@@ -25,7 +25,6 @@ import {
   Slider, 
   Button, 
   Chip, 
-  CircularProgress,
   useTheme
 } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
@@ -35,8 +34,6 @@ import PaletteIcon from "@mui/icons-material/Palette";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import StarIcon from "@mui/icons-material/Star";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import toast from "react-hot-toast";
 import { logger } from "../../../utils/logger";
 import type { OverlaySettings } from "../../../types";
@@ -48,8 +45,6 @@ interface AlertCustomizerProps {
   onSave: (settings: Partial<OverlaySettings>) => Promise<void>;
   testLoading: boolean;
   onSendTestAlert: () => Promise<void>;
-  tokenLoading: boolean;
-  onGenerateToken: () => Promise<void>;
   overlayToken: string | null;
   connected: boolean;
   walletAddress: string | null;
@@ -60,8 +55,6 @@ export default function AlertCustomizer({
   onSave,
   testLoading,
   onSendTestAlert,
-  tokenLoading,
-  onGenerateToken,
   overlayToken,
   connected,
   walletAddress

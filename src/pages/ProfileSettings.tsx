@@ -12,25 +12,20 @@ import {
   TextField, 
   Button, 
   Box, 
-  CircularProgress, 
-  Avatar,
-  Card,
-  CardContent,
-  Grid,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
+  Card, 
+  CardContent, 
+  Grid, 
+  Select, 
+  MenuItem, 
+  FormControl, 
   Divider
 } from "@mui/material";
 import { ProfileSettingsSkeleton } from "../components/common/LoadingSkeletons";
-import SaveIcon from "@mui/icons-material/Save";
 import LockIcon from "@mui/icons-material/Lock";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import InfoIcon from "@mui/icons-material/Info";
 import PaletteIcon from "@mui/icons-material/Palette";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ShareIcon from "@mui/icons-material/Share";
 import BoringAvatar from "boring-avatars";
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useRealtimeTips } from "../hooks/useRealtimeTips";
-import { getLeaderboard, getUserProfile } from "../services/api";
+import { getLeaderboard } from "../services/api";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import { logger } from "../utils/logger";
 import {
@@ -10,33 +10,24 @@ import {
   Typography,
   Card,
   CardContent,
-  CircularProgress,
   List,
-  Avatar,
   Chip,
   Pagination,
   Tabs,
   Tab,
   TextField,
   InputAdornment,
-  Collapse,
   Button,
   Grid,
-  Divider,
   Paper,
-  Tooltip,
-  Zoom,
   Fade,
   Grow,
-  IconButton,
   useTheme,
   useMediaQuery
 } from "@mui/material";
 import BoringAvatar from "boring-avatars";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import SearchIcon from "@mui/icons-material/Search";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import LaunchIcon from "@mui/icons-material/Launch";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import StarIcon from "@mui/icons-material/Star";
@@ -554,7 +545,7 @@ export default function CreatorLeaderboard() {
           )}
 
           <List sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {paginatedCreators.map((creator, index) => {
+            {paginatedCreators.map((creator) => {
               // Rank index relative to the main collection (actual leaderboard position)
               const globalIndex = creators.findIndex((c) => c.wallet_address === creator.wallet_address);
               const isTop3 = globalIndex < 3;

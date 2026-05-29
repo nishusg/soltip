@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { buildSafeSocialUrl, isValidChannel, sanitizeMessage, sanitizeSenderName } from "../utils/security";
+import { buildSafeSocialUrl, isValidChannel } from "../utils/security";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { getPublicProfileByUsername, verifyAndStoreTransaction, getTransactionStatus } from "../services/api";
 import { getExplorerUrl, sendTip, calculateFeeBreakdown } from "../services/solana";
@@ -29,28 +29,16 @@ import {
   CssBaseline,
   IconButton,
   Pagination,
-  InputAdornment,
-  Paper
+  InputAdornment
 } from "@mui/material";
 import { PublicProfileSkeleton } from "../components/common/LoadingSkeletons";
 import LockIcon from "@mui/icons-material/Lock";
-import SendIcon from "@mui/icons-material/Send";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import YouTubeIcon from "@mui/icons-material/YouTube";
-import LanguageIcon from "@mui/icons-material/Language";
-import ChatIcon from "@mui/icons-material/Chat";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import ShareIcon from "@mui/icons-material/Share";
 import VerifiedIcon from "@mui/icons-material/Verified";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import SearchIcon from "@mui/icons-material/Search";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
@@ -1696,23 +1684,3 @@ export default function PublicProfilePage() {
   );
 }
 
-// Dummy icon component for Kick stream brand icon rendering
-function TvIcon(props: any) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <rect x="2" y="7" width="20" height="15" rx="2" ry="2" />
-      <polyline points="17 2 12 7 7 2" />
-    </svg>
-  );
-}

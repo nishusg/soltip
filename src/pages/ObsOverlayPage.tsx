@@ -24,21 +24,14 @@ import {
   useMediaQuery, 
   Stack, 
   Paper,
-  Divider,
   Chip
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import BoltIcon from "@mui/icons-material/Bolt";
 import TvIcon from "@mui/icons-material/Tv";
 import SettingsIcon from "@mui/icons-material/Settings";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
-import SecurityIcon from "@mui/icons-material/Security";
-import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
-import DiamondIcon from "@mui/icons-material/Diamond";
-import StarIcon from "@mui/icons-material/Star";
-import FlashOnIcon from "@mui/icons-material/FlashOn";
 import SEO from "../components/common/SEO";
 import { SITE_NAME, SITE_URL } from "../shared/constants";
 

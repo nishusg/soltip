@@ -4,12 +4,9 @@ import { getUserProfile } from "../services/api";
 import { getExplorerUrl } from "../services/solana";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWalletAuth } from "../hooks/useWalletAuth";
-import { Container, Card, CardContent, Typography, Box, CircularProgress, Button, Avatar, List, ListItem, Divider, Link, Chip, Tabs, Tab, Pagination } from "@mui/material";
+import { Container, Card, CardContent, Typography, Box, Button, List, ListItem, Divider, Link, Chip, Tabs, Tab, Pagination } from "@mui/material";
 import { ProfilePageSkeleton } from "../components/common/LoadingSkeletons";
-import CallReceivedIcon from "@mui/icons-material/CallReceived";
-import CallMadeIcon from "@mui/icons-material/CallMade";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import SettingsIcon from "@mui/icons-material/Settings";
 import ErrorIcon from "@mui/icons-material/Error";
 import TipForm from "../components/features/tips/TipForm";
 import SEO from "../components/common/SEO";
@@ -248,7 +245,7 @@ export default function ProfilePage() {
                     No activity found
                   </Typography>
                 ) : (
-                  paginatedTips.map((tip, idx, arr) => (
+                  paginatedTips.map((tip, idx) => (
                     <Box key={tip.tx_hash}>
                       <ListItem sx={{ py: 2, px: 0 }}>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>

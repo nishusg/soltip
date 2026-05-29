@@ -23,7 +23,6 @@ import {
   Button,
   Box,
   Typography,
-  Chip,
   IconButton,
   Drawer,
   List,
@@ -34,7 +33,6 @@ import {
   useTheme,
   useMediaQuery,
   Dialog,
-  Tooltip,
   Stack,
   Menu,
   MenuItem
@@ -47,8 +45,6 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import DiamondIcon from "@mui/icons-material/Diamond";
 import SettingsIcon from "@mui/icons-material/Settings";
-import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import ShieldIcon from "@mui/icons-material/Shield";
 import MenuBookIcon from "@mui/icons-material/MenuBook";

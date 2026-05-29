@@ -17,7 +17,6 @@ import {
   Box, 
   Typography, 
   Card, 
-  CardContent, 
   Button, 
   useTheme, 
   useMediaQuery, 
@@ -29,8 +28,6 @@ import {
   Stack
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import BoltIcon from "@mui/icons-material/Bolt";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ShieldIcon from "@mui/icons-material/Shield";
 import SEO from "../components/common/SEO";

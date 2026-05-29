@@ -24,7 +24,6 @@ import {
   useMediaQuery, 
   Stack, 
   Paper,
-  Divider,
   Chip,
   Slider,
   Table,
@@ -37,14 +36,10 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import BoltIcon from "@mui/icons-material/Bolt";
 import TvIcon from "@mui/icons-material/Tv";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import StarIcon from "@mui/icons-material/Star";
 import FlashOnIcon from "@mui/icons-material/FlashOn";
 import LanguageIcon from "@mui/icons-material/Language";
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import SEO from "../components/common/SEO";
-import { SITE_NAME, SITE_URL, FEE_PERCENTAGE, PLATFORM_FEE_PCT } from "../shared/constants";
+import { SITE_NAME, FEE_PERCENTAGE, PLATFORM_FEE_PCT } from "../shared/constants";
 
 
 export type PlatformType = "youtube" | "kick" | "streamlabs" | "general";
@@ -659,7 +654,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
           sx={{ 
             p: { xs: 5, md: 8 }, 
             bgcolor: "rgba(255,255,255,0.02)", 
-            border: (theme: any) => `1px solid ${brandColor}33`, 
+            border: `1px solid ${brandColor}33`, 
             borderRadius: "32px",
             textAlign: "center",
             position: "relative",
