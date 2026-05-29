@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useRealtimeTips } from "../hooks/useRealtimeTips";
 import { getLeaderboard, getUserProfile } from "../services/api";
@@ -50,22 +50,10 @@ interface Creator {
   is_premium?: boolean;
 }
 
-interface TipDetail {
-  tx_hash: string;
-  sender_wallet: string;
-  sender_name?: string;
-  amount: number;
-  message: string;
-  timestamp: string;
-}
 
-interface CreatorDetailsState {
-  loading: boolean;
-  tips: TipDetail[];
-  error?: string;
-}
 
 export default function CreatorLeaderboard() {
+  const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [creators, setCreators] = useState<Creator[]>([]);
@@ -73,8 +61,6 @@ export default function CreatorLeaderboard() {
   const [page, setPage] = useState(1);
   const [timeframe, setTimeframe] = useState<"alltime" | "monthly" | "weekly">("alltime");
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedCreator, setExpandedCreator] = useState<string | null>(null);
-  const [creatorDetails, setCreatorDetails] = useState<Record<string, CreatorDetailsState>>({});
   const [recentUpdates, setRecentUpdates] = useState<Record<string, { amount: number; timestamp: number }>>({});
 
   const { newTip } = useRealtimeTips();
@@ -147,42 +133,6 @@ export default function CreatorLeaderboard() {
       });
     }
   }, [newTip]);
-
-  // ---------------------------------------------------------------------------
-  // On-demand Tip Detail Expansion
-  // ---------------------------------------------------------------------------
-  const handleExpandRow = async (walletAddress: string) => {
-    if (expandedCreator === walletAddress) {
-      setExpandedCreator(null);
-      return;
-    }
-    setExpandedCreator(walletAddress);
-
-    if (!creatorDetails[walletAddress]) {
-      setCreatorDetails((prev) => ({
-        ...prev,
-        [walletAddress]: { loading: true, tips: [] }
-      }));
-
-      try {
-        const profileData = await getUserProfile(walletAddress);
-        const receivedTips = (profileData.recent_tips || []).filter(
-          (tip: TipDetail) => tip.sender_wallet !== walletAddress
-        );
-
-        setCreatorDetails((prev) => ({
-          ...prev,
-          [walletAddress]: { loading: false, tips: receivedTips.slice(0, 5) }
-        }));
-      } catch (err) {
-        logger.error("Failed to load creator tips details:", err);
-        setCreatorDetails((prev) => ({
-          ...prev,
-          [walletAddress]: { loading: false, tips: [], error: "Failed to load recent activity." }
-        }));
-      }
-    }
-  };
 
   // ---------------------------------------------------------------------------
   // Helpers
@@ -414,7 +364,7 @@ export default function CreatorLeaderboard() {
             <Grid size={{ xs: 12, md: 3.8 }}>
               <Grow in={true} timeout={600}>
                 <Card
-                  onClick={() => handleExpandRow(secondPlace.wallet_address)}
+                  onClick={() => navigate(`/profile/${secondPlace.wallet_address}`)}
                   className={recentUpdates[secondPlace.wallet_address] ? "pulse-new-tip" : ""}
                   sx={{
                     position: "relative",
@@ -464,14 +414,7 @@ export default function CreatorLeaderboard() {
                     <Button component={RouterLink} to={`/profile/${secondPlace.wallet_address}`} variant="contained" color="secondary" size="small" sx={{ borderRadius: "8px", py: 0.5, px: 2 }}>
                       Support <LaunchIcon sx={{ fontSize: 12, ml: 0.5 }} />
                     </Button>
-                    <IconButton size="small" color="inherit">
-                      {expandedCreator === secondPlace.wallet_address ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                    </IconButton>
                   </Box>
-
-                  <Collapse in={expandedCreator === secondPlace.wallet_address}>
-                    <CreatorDetails details={creatorDetails[secondPlace.wallet_address]} />
-                  </Collapse>
                 </Card>
               </Grow>
             </Grid>
@@ -482,7 +425,7 @@ export default function CreatorLeaderboard() {
             <Grid size={{ xs: 12, md: 4.4 }}>
               <Grow in={true} timeout={300}>
                 <Card
-                  onClick={() => handleExpandRow(firstPlace.wallet_address)}
+                  onClick={() => navigate(`/profile/${firstPlace.wallet_address}`)}
                   className={recentUpdates[firstPlace.wallet_address] ? "pulse-new-tip" : ""}
                   sx={{
                     position: "relative",
@@ -533,14 +476,7 @@ export default function CreatorLeaderboard() {
                     <Button component={RouterLink} to={`/profile/${firstPlace.wallet_address}`} variant="contained" size="small" sx={{ borderRadius: "8px", py: 0.5, px: 2, background: "linear-gradient(135deg, #ffd700, #ffa500)", color: "#000", "&:hover": { background: "linear-gradient(135deg, #ffe066, #ffb31a)" } }}>
                       Support <LaunchIcon sx={{ fontSize: 12, ml: 0.5 }} />
                     </Button>
-                    <IconButton size="small" color="inherit">
-                      {expandedCreator === firstPlace.wallet_address ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                    </IconButton>
                   </Box>
-
-                  <Collapse in={expandedCreator === firstPlace.wallet_address}>
-                    <CreatorDetails details={creatorDetails[firstPlace.wallet_address]} />
-                  </Collapse>
                 </Card>
               </Grow>
             </Grid>
@@ -551,7 +487,7 @@ export default function CreatorLeaderboard() {
             <Grid size={{ xs: 12, md: 3.8 }}>
               <Grow in={true} timeout={900}>
                 <Card
-                  onClick={() => handleExpandRow(thirdPlace.wallet_address)}
+                  onClick={() => navigate(`/profile/${thirdPlace.wallet_address}`)}
                   className={recentUpdates[thirdPlace.wallet_address] ? "pulse-new-tip" : ""}
                   sx={{
                     position: "relative",
@@ -600,14 +536,7 @@ export default function CreatorLeaderboard() {
                     <Button component={RouterLink} to={`/profile/${thirdPlace.wallet_address}`} variant="contained" color="secondary" size="small" sx={{ borderRadius: "8px", py: 0.5, px: 2 }}>
                       Support <LaunchIcon sx={{ fontSize: 12, ml: 0.5 }} />
                     </Button>
-                    <IconButton size="small" color="inherit">
-                      {expandedCreator === thirdPlace.wallet_address ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                    </IconButton>
                   </Box>
-
-                  <Collapse in={expandedCreator === thirdPlace.wallet_address}>
-                    <CreatorDetails details={creatorDetails[thirdPlace.wallet_address]} />
-                  </Collapse>
                 </Card>
               </Grow>
             </Grid>
@@ -662,7 +591,7 @@ export default function CreatorLeaderboard() {
                 <Card
                   key={creator.wallet_address}
                   id={`creator-card-${creator.wallet_address}`}
-                  onClick={() => handleExpandRow(creator.wallet_address)}
+                  onClick={() => navigate(`/profile/${creator.wallet_address}`)}
                   className={`fade-in-up ${isUpdating ? "pulse-new-tip" : ""}`}
                   sx={{
                     display: "block",
@@ -866,30 +795,12 @@ export default function CreatorLeaderboard() {
                         </Typography>
                       </Box>
 
-                      {/* Expand / Launch icons */}
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                        <Tooltip title="View Profile" arrow>
-                          <Button
-                            component={RouterLink}
-                            to={`/profile/${creator.wallet_address}`}
-                            size="small"
-                            variant="text"
-                            sx={{ minWidth: 0, p: 0.5, color: "text.secondary", "&:hover": { color: "primary.main" } }}
-                          >
-                            <LaunchIcon sx={{ fontSize: 18 }} />
-                          </Button>
-                        </Tooltip>
-                        {expandedCreator === creator.wallet_address ? <ExpandLessIcon sx={{ color: "text.secondary" }} /> : <ExpandMoreIcon sx={{ color: "text.secondary" }} />}
+                      {/* View Profile icon */}
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <LaunchIcon sx={{ fontSize: 18, color: "text.secondary", opacity: 0.6 }} />
                       </Box>
                     </Box>
                   </Box>
-
-                  {/* Dynamic Expand Section */}
-                  <Collapse in={expandedCreator === creator.wallet_address}>
-                    <Box sx={{ px: { xs: 2, sm: 8 }, pb: 3 }}>
-                      <CreatorDetails details={creatorDetails[creator.wallet_address]} />
-                    </Box>
-                  </Collapse>
                 </Card>
               );
             })}
@@ -1000,8 +911,6 @@ export default function CreatorLeaderboard() {
                   const targetCard = document.getElementById(`creator-card-${user.wallet_address}`);
                   if (targetCard) {
                     targetCard.scrollIntoView({ behavior: "smooth", block: "center" });
-                    // Briefly highlight or open details
-                    handleExpandRow(user.wallet_address);
                   }
                 }}
                 sx={{
@@ -1022,114 +931,4 @@ export default function CreatorLeaderboard() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Subcomponent: CreatorDetails
-// ---------------------------------------------------------------------------
-function CreatorDetails({ details }: { details?: CreatorDetailsState }) {
-  function formatSol(lamports: number): string {
-    return (lamports / LAMPORTS_PER_SOL).toFixed(4);
-  }
 
-  function formatTime(ts: string): string {
-    const date = new Date(ts);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-
-    if (diff < 60000) return "Just now";
-    if (diff < 3600000) {
-      const mins = Math.floor(diff / 60000);
-      return `${mins}m ago`;
-    }
-    if (diff < 86400000) {
-      const hrs = Math.floor(diff / 3600000);
-      return `${hrs}h ago`;
-    }
-    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  }
-
-  if (!details) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-        <CircularProgress size={28} />
-      </Box>
-    );
-  }
-
-  if (details.loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-        <CircularProgress size={28} />
-      </Box>
-    );
-  }
-
-  if (details.error) {
-    return (
-      <Typography color="error" variant="body2" sx={{ textAlign: "center", py: 2, fontWeight: 700 }}>
-        {details.error}
-      </Typography>
-    );
-  }
-
-  if (details.tips.length === 0) {
-    return (
-      <Box sx={{ py: 3, textAlign: "center", bgcolor: "rgba(0,0,0,0.15)", borderRadius: "14px", border: "1px solid rgba(255,255,255,0.04)" }}>
-        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-          No recent verified superchats found for this creator.
-        </Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <Box sx={{ mt: 2, p: { xs: 2, sm: 3 }, bgcolor: "rgba(0,0,0,0.18)", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.05)" }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 2, color: "text.secondary", letterSpacing: "0.05em", textTransform: "uppercase", fontSize: "0.75rem" }}>
-        Recent Supporter Activity
-      </Typography>
-      
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        {details.tips.map((tip) => (
-          <Box
-            key={tip.tx_hash}
-            sx={{
-              p: 2,
-              bgcolor: "rgba(255,255,255,0.02)",
-              border: "1px solid rgba(255,255,255,0.03)",
-              borderRadius: "12px",
-              transition: "all 0.2s",
-              "&:hover": {
-                bgcolor: "rgba(255,255,255,0.04)",
-                borderColor: "rgba(255,255,255,0.08)"
-              }
-            }}
-          >
-            <Grid container spacing={1} sx={{ justifyContent: "space-between", alignItems: "center" }}>
-              <Grid size={{ xs: 7 }}>
-                <Typography variant="body2" sx={{ fontWeight: 800, color: "text.primary" }}>
-                  {tip.sender_name || `${tip.sender_wallet.slice(0, 4)}...${tip.sender_wallet.slice(-4)}`}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {formatTime(tip.timestamp)}
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 5 }} sx={{ textAlign: "right" }}>
-                <Typography variant="body2" sx={{ color: "primary.main", fontWeight: 900, display: "inline-flex", alignItems: "baseline" }}>
-                  {formatSol(tip.amount)}
-                  <Typography component="span" variant="caption" sx={{ ml: 0.5, fontWeight: 700 }}>SOL</Typography>
-                </Typography>
-              </Grid>
-            </Grid>
-            
-            {tip.message && (
-              <Box sx={{ mt: 1.5, p: 1.5, bgcolor: "rgba(0,0,0,0.15)", borderRadius: "8px", borderLeft: "3px solid", borderColor: "secondary.main" }}>
-                <Typography variant="body2" sx={{ fontStyle: "italic", opacity: 0.9 }}>
-                  "{tip.message}"
-                </Typography>
-              </Box>
-            )}
-          </Box>
-        ))}
-      </Box>
-    </Box>
-  );
-}
