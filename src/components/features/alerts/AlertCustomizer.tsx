@@ -88,6 +88,14 @@ export default function AlertCustomizer({
   const [alertAnimation, setAlertAnimation] = useState<string>("bounce");
   const [queueSystemEnabled, setQueueSystemEnabled] = useState<boolean>(true);
   const [fontSize, setFontSize] = useState<number>(20);
+  const [textEffect, setTextEffect] = useState<string>("glow");
+
+  // Stream Crowdfunding Tipping Goals
+  const [goalEnabled, setGoalEnabled] = useState<boolean>(false);
+  const [goalTitle, setGoalTitle] = useState<string>("");
+  const [goalTarget, setGoalTarget] = useState<number>(10);
+  const [goalCurrent, setGoalCurrent] = useState<number>(0);
+  const [isGoalCurrentDirty, setIsGoalCurrentDirty] = useState<boolean>(false);
 
   // Sync state values when backend profile settings change
   useEffect(() => {
@@ -115,8 +123,15 @@ export default function AlertCustomizer({
       if (initialSettings.alert_animation !== undefined) setAlertAnimation(initialSettings.alert_animation);
       if (initialSettings.queue_system_enabled !== undefined) setQueueSystemEnabled(initialSettings.queue_system_enabled);
       if (initialSettings.font_size !== undefined) setFontSize(initialSettings.font_size);
+      if (initialSettings.text_effect !== undefined) setTextEffect(initialSettings.text_effect);
+      if (initialSettings.goal_enabled !== undefined) setGoalEnabled(initialSettings.goal_enabled);
+      if (initialSettings.goal_title !== undefined) setGoalTitle(initialSettings.goal_title);
+      if (initialSettings.goal_target !== undefined) setGoalTarget(initialSettings.goal_target);
+      if (initialSettings.goal_current !== undefined && !isGoalCurrentDirty) {
+        setGoalCurrent(initialSettings.goal_current);
+      }
     }
-  }, [initialSettings, theme]);
+  }, [initialSettings, theme, isGoalCurrentDirty]);
 
   // Handle color change when the premium theme itself switches
   useEffect(() => {
@@ -234,6 +249,33 @@ export default function AlertCustomizer({
         playNote(987.77, now + 0.75, 0.8, "sine"); // B5
         playNote(1174.66, now + 0.75, 0.8, "sine"); // D6
         playNote(1318.51, now + 0.75, 0.8, "triangle"); // E6
+      } else if (alertSoundPreset === "laser") {
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(1500, now);
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.4);
+        gainNode.gain.setValueAtTime(volume * 0.4, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        osc.start();
+        osc.stop(now + 0.4);
+      } else if (alertSoundPreset === "retro_game") {
+        const playCoinNote = (freq: number, start: number, duration: number) => {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = "square";
+          osc.frequency.setValueAtTime(freq, start);
+          gainNode.gain.setValueAtTime(volume * 0.3, start);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration - 0.01);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start(start);
+          osc.stop(start + duration);
+        };
+        playCoinNote(987.77, now, 0.08); // B5
+        playCoinNote(1318.51, now + 0.08, 0.35); // E6
       } else if (alertSoundPreset === "custom" && alertSoundUrl) {
         const audio = new Audio(alertSoundUrl);
         audio.volume = volume;
@@ -252,7 +294,7 @@ export default function AlertCustomizer({
   const handleSave = async () => {
     setSaveLoading(true);
     try {
-      await onSave({
+      const savePayload: any = {
         tts_enabled: ttsEnabled,
         tts_min_amount: ttsMinAmount,
         tts_voice: ttsVoice,
@@ -267,8 +309,19 @@ export default function AlertCustomizer({
         theme: overlayTheme,
         alert_animation: alertAnimation,
         queue_system_enabled: queueSystemEnabled,
-        font_size: fontSize
-      });
+        font_size: fontSize,
+        text_effect: textEffect,
+        goal_enabled: goalEnabled,
+        goal_title: goalTitle,
+        goal_target: goalTarget
+      };
+
+      if (isGoalCurrentDirty) {
+        savePayload.goal_current = goalCurrent;
+      }
+
+      await onSave(savePayload);
+      setIsGoalCurrentDirty(false);
     } catch (err: any) {
       toast.error(err.message || "Failed to save settings");
     } finally {
@@ -278,6 +331,10 @@ export default function AlertCustomizer({
 
   const getOverlayUrl = () => {
     return `${window.location.origin}/overlay/${walletAddress}#key=${overlayToken}`;
+  };
+
+  const getGoalOverlayUrl = () => {
+    return `${window.location.origin}/overlay/${walletAddress}?widget=goal#key=${overlayToken}`;
   };
 
   return (
@@ -375,7 +432,7 @@ export default function AlertCustomizer({
         }}>
           <Box sx={{ flexGrow: 1, minWidth: 280 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 0.5, color: userThemeColor, display: "flex", alignItems: "center", gap: 1 }}>
-              🔌 OBS Browser Source URL
+              🔌 OBS Alert Overlay URL
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
               Add this confidential link as a Browser Source in your OBS, Streamlabs, or vMix broadcaster.
@@ -401,6 +458,50 @@ export default function AlertCustomizer({
                 onClick={() => {
                   navigator.clipboard.writeText(getOverlayUrl());
                   toast.success("Overlay source link copied!");
+                }}
+                sx={{
+                  borderRadius: "10px",
+                  borderColor: `${userThemeColor}33`,
+                  color: userThemeColor,
+                  fontWeight: 800,
+                  textTransform: "none",
+                  whiteSpace: "nowrap",
+                  py: 1.2,
+                  px: 2.2,
+                  "&:hover": { borderColor: userThemeColor, bgcolor: `${userThemeColor}0f` }
+                }}
+              >
+                Copy Link
+              </Button>
+            </Box>
+
+            <Typography variant="subtitle2" sx={{ fontWeight: 900, mt: 3, mb: 0.5, color: userThemeColor, display: "flex", alignItems: "center", gap: 1 }}>
+              🏆 OBS Tipping Goal URL
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+              Add this confidential link as a Browser Source to display your tipping goal progress bar overlay on stream.
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: { xs: "wrap", sm: "nowrap" } }}>
+              <Box sx={{
+                px: 2.2,
+                py: 1.2,
+                bgcolor: "rgba(0,0,0,0.4)",
+                borderRadius: "12px",
+                fontFamily: "Space Mono, monospace",
+                fontSize: "0.72rem",
+                color: "#14F195",
+                wordBreak: "break-all",
+                border: "1px solid rgba(255,255,255,0.04)",
+                flexGrow: 1
+              }}>
+                {getGoalOverlayUrl()}
+              </Box>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  navigator.clipboard.writeText(getGoalOverlayUrl());
+                  toast.success("Goal source link copied!");
                 }}
                 sx={{
                   borderRadius: "10px",
@@ -446,7 +547,7 @@ export default function AlertCustomizer({
 
       <Grid container spacing={4}>
         {/* 1. TTS & Queue Config Column */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper sx={{
             p: 3.5,
             bgcolor: "rgba(0,0,0,0.15)",
@@ -551,7 +652,7 @@ export default function AlertCustomizer({
         </Grid>
 
         {/* 2. Visual Theme & Sizing Column */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper sx={{
             p: 3.5,
             bgcolor: "rgba(0,0,0,0.15)",
@@ -666,11 +767,30 @@ export default function AlertCustomizer({
                 }}
               />
             </Box>
+
+            <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+              <InputLabel id="text-effect-label" sx={{ "&.Mui-focused": { color: userThemeColor } }}>Alert Text Effect</InputLabel>
+              <Select
+                labelId="text-effect-label"
+                label="Alert Text Effect"
+                value={textEffect}
+                onChange={(e) => setTextEffect(e.target.value)}
+                sx={{
+                  borderRadius: "12px",
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: userThemeColor }
+                }}
+              >
+                <MenuItem value="none">Plain Solid Text 📝</MenuItem>
+                <MenuItem value="glow">Neon Pulse Glow 🌟</MenuItem>
+                <MenuItem value="rainbow">Animated Rainbow Gradient 🌈</MenuItem>
+                <MenuItem value="shine">Metallic Shine Shimmer ✨</MenuItem>
+              </Select>
+            </FormControl>
           </Paper>
         </Grid>
 
         {/* 3. Audio & Animation Customizer Column */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Paper sx={{
             p: 3.5,
             bgcolor: "rgba(0,0,0,0.15)",
@@ -703,6 +823,8 @@ export default function AlertCustomizer({
                 <MenuItem value="swoosh">Cyber Swoosh 💨 (Synthetic)</MenuItem>
                 <MenuItem value="chime">Classic Chime 🔮 (Synthetic)</MenuItem>
                 <MenuItem value="fanfare">Epic Fanfare 🎺 (Synthetic)</MenuItem>
+                <MenuItem value="laser">Retro Laser Blast ⚡ (Synthetic)</MenuItem>
+                <MenuItem value="retro_game">8-Bit Coin Chime 🪙 (Synthetic)</MenuItem>
                 <MenuItem value="custom">Custom Upload / URL 🔗</MenuItem>
               </Select>
             </FormControl>
@@ -820,6 +942,8 @@ export default function AlertCustomizer({
                 <MenuItem value="bolt">Classic Bolt ⚡ (Animated)</MenuItem>
                 <MenuItem value="crown">Golden Crown 👑 (Glowing)</MenuItem>
                 <MenuItem value="orb">Supernova Orb 🔮 (Futuristic)</MenuItem>
+                <MenuItem value="heart">Pulsing Heart ❤️ (Animated)</MenuItem>
+                <MenuItem value="diamond">Rotating Diamond 💎 (Premium)</MenuItem>
                 <MenuItem value="custom">Custom Image/GIF URL 🔗</MenuItem>
               </Select>
             </FormControl>
@@ -860,6 +984,9 @@ export default function AlertCustomizer({
                 <MenuItem value="slide">Slide In Left</MenuItem>
                 <MenuItem value="zoom">Zoom Scale Pop</MenuItem>
                 <MenuItem value="slide_down">Slide Down Drop</MenuItem>
+                <MenuItem value="flip">3D Card Flip 🔄 (Premium)</MenuItem>
+                <MenuItem value="spin">Rotate Spin Zoom 🌀 (Epic)</MenuItem>
+                <MenuItem value="slide_up">Slide In Up ⬆️ (Classic)</MenuItem>
               </Select>
             </FormControl>
 
@@ -881,6 +1008,116 @@ export default function AlertCustomizer({
                 }}
               />
             </Box>
+          </Paper>
+        </Grid>
+
+        {/* 4. Stream Crowdfunding Goal Column */}
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Paper sx={{
+            p: 3.5,
+            bgcolor: "rgba(0,0,0,0.15)",
+            border: `1px solid ${userThemeColor}1f`,
+            borderRadius: "20px",
+            height: "100%",
+            transition: "all 0.3s ease",
+            display: "flex",
+            flexDirection: "column",
+            "&:hover": {
+              borderColor: `${userThemeColor}44`,
+              boxShadow: `0 4px 24px ${userThemeColor}0d`
+            }
+          }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 850, display: "flex", alignItems: "center", gap: 1, mb: 3, color: userThemeColor }}>
+              <StarIcon sx={{ fontSize: 20 }} /> 🏆 Tipping Goal Widget
+            </Typography>
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={goalEnabled}
+                  onChange={(e) => setGoalEnabled(e.target.checked)}
+                  sx={{
+                    "& .MuiSwitch-switchBase.Mui-checked": { color: userThemeColor },
+                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": { backgroundColor: userThemeColor }
+                  }}
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>Enable Goal</Typography>
+                  <Typography variant="caption" color="text.secondary">Display goal on overlay & profile</Typography>
+                </Box>
+              }
+              sx={{ mb: 3, display: "flex", width: "100%" }}
+            />
+
+            <TextField
+              label="Goal Title"
+              size="small"
+              fullWidth
+              disabled={!goalEnabled}
+              placeholder="e.g. Upgrade Setup!"
+              value={goalTitle}
+              onChange={(e) => setGoalTitle(e.target.value)}
+              sx={{
+                mb: 3,
+                "& .MuiInputLabel-root.Mui-focused": { color: userThemeColor },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "12px",
+                  "&.Mui-focused fieldset": { borderColor: userThemeColor }
+                }
+              }}
+            />
+
+            <TextField
+              label="Goal Target"
+              type="number"
+              size="small"
+              fullWidth
+              disabled={!goalEnabled}
+              value={goalTarget}
+              onChange={(e) => setGoalTarget(Number(e.target.value))}
+              slotProps={{
+                input: {
+                  startAdornment: <InputAdornment position="start"><BoltIcon sx={{ color: userThemeColor }} /></InputAdornment>,
+                  endAdornment: <InputAdornment position="end"><Typography sx={{ fontWeight: 700, fontSize: "0.8rem", color: "text.secondary" }}>SOL</Typography></InputAdornment>
+                }
+              }}
+              sx={{
+                mb: 3,
+                "& .MuiInputLabel-root.Mui-focused": { color: userThemeColor },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "12px",
+                  "&.Mui-focused fieldset": { borderColor: userThemeColor }
+                }
+              }}
+            />
+
+            <TextField
+              label="Current Progress"
+              type="number"
+              size="small"
+              fullWidth
+              disabled={!goalEnabled}
+              value={goalCurrent}
+              onChange={(e) => {
+                setGoalCurrent(Number(e.target.value));
+                setIsGoalCurrentDirty(true);
+              }}
+              slotProps={{
+                input: {
+                  startAdornment: <InputAdornment position="start"><BoltIcon sx={{ color: userThemeColor }} /></InputAdornment>,
+                  endAdornment: <InputAdornment position="end"><Typography sx={{ fontWeight: 700, fontSize: "0.8rem", color: "text.secondary" }}>SOL</Typography></InputAdornment>
+                }
+              }}
+              sx={{
+                "& .MuiInputLabel-root.Mui-focused": { color: userThemeColor },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "12px",
+                  "&.Mui-focused fieldset": { borderColor: userThemeColor }
+                }
+              }}
+            />
           </Paper>
         </Grid>
       </Grid>

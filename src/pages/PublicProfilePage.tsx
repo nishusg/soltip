@@ -5,6 +5,7 @@ import { getPublicProfileByUsername, verifyAndStoreTransaction, getTransactionSt
 import { getExplorerUrl, sendTip, calculateFeeBreakdown } from "../services/solana";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../context/SocketContext";
 import { baseTheme, premiumThemes } from "../themes";
 import { getPremiumOverrides } from "../themes/shared";
 import BoringAvatar from "boring-avatars";
@@ -78,6 +79,12 @@ interface CreatorProfile {
     platform?: string;
     channel?: string;
   };
+  overlay_settings?: {
+    goal_enabled?: boolean;
+    goal_title?: string;
+    goal_target?: number;
+    goal_current?: number;
+  };
 }
 
 interface EnrichedTip {
@@ -110,6 +117,7 @@ export default function PublicProfilePage() {
   const { connection } = useConnection();
   const wallet = useWallet();
   const { isAuthenticated, login, isLoading: authLoading } = useAuth();
+  const { socket } = useSocket();
 
   const [creator, setCreator] = useState<CreatorProfile | null>(null);
   const [tips, setTips] = useState<EnrichedTip[]>([]);
@@ -157,6 +165,55 @@ export default function PublicProfilePage() {
 
     fetchCreator();
   }, [username]);
+
+  // Real-time socket updates for global tipping events
+  useEffect(() => {
+    if (!socket || !creator) return;
+
+    const handleGlobalSuperchat = (data: any) => {
+      // Check if this tip was sent to the creator whose profile is currently being viewed
+      if (data.creator_wallet?.toLowerCase() === creator.wallet_address?.toLowerCase()) {
+        const amountSol = data.amount / 1e9;
+
+        // Increment overlay settings tipping goal progress
+        setCreator((prev) => {
+          if (!prev) return null;
+          const overlay = prev.overlay_settings || {};
+          return {
+            ...prev,
+            overlay_settings: {
+              ...overlay,
+              goal_current: (overlay.goal_current || 0) + amountSol
+            }
+          };
+        });
+
+        // Add the new tip to the top of the tips list (if not already stored)
+        setTips((prev) => {
+          if (prev.some((t) => t.tx_hash === data.tx_hash)) return prev;
+          const newTip: EnrichedTip = {
+            tx_hash: data.tx_hash,
+            sender_wallet: data.sender_wallet,
+            creator_wallet: data.creator_wallet,
+            sender_name: data.sender_name,
+            creator_name: data.creator_name,
+            amount: data.amount,
+            fee: data.fee,
+            message: data.message || "",
+            timestamp: data.timestamp || new Date().toISOString(),
+            status: data.status || "verified"
+          };
+          return [newTip, ...prev].slice(0, 50); // Keep up to 50 tips
+        });
+      }
+    };
+
+    socket.on("new_superchat_global", handleGlobalSuperchat);
+
+    return () => {
+      socket.off("new_superchat_global", handleGlobalSuperchat);
+    };
+  }, [socket, creator]);
 
 
 
@@ -297,8 +354,9 @@ export default function PublicProfilePage() {
       setMessage("");
       setShowConfetti(true); // Trigger Confetti upon signature confirmation
       
-      // Reload recent superchats
+      // Reload recent superchats & profile settings (including goal progress)
       const updatedData = await getPublicProfileByUsername(username!);
+      setCreator(updatedData.user);
       setTips(updatedData.recent_tips || []);
       setPage(1);
     } catch (err: any) {
@@ -319,6 +377,10 @@ export default function PublicProfilePage() {
       if (res.status === "verified") {
         setShowConfetti(true); // Celebrate again on verified state confirmation
         toast.success("Tip verified successfully!", { icon: "🎉" });
+        // Reload recent superchats & profile settings
+        const updatedData = await getPublicProfileByUsername(username!);
+        setCreator(updatedData.user);
+        setTips(updatedData.recent_tips || []);
       }
     } catch (err: any) {
       logger.error("Status check failed:", err);
@@ -1038,6 +1100,108 @@ export default function PublicProfilePage() {
               </Card>
             </Grid>
           </Grid>
+
+          {/* ---- Tipping Goal Section ---- */}
+          {creator.overlay_settings?.goal_enabled && (
+            <Card
+              sx={{
+                mb: 4,
+                p: 3,
+                bgcolor: "rgba(255, 255, 255, 0.015)",
+                border: `1px solid ${currentTheme.palette.primary.main}33`,
+                borderRadius: "20px",
+                backdropFilter: "blur(20px)",
+                boxShadow: `0 8px 32px rgba(0, 0, 0, 0.2), 0 0 20px ${currentTheme.palette.primary.main}0d`,
+                position: "relative",
+                overflow: "hidden"
+              }}
+            >
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2, flexWrap: "wrap", gap: 1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 900,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      color: currentTheme.palette.primary.main,
+                      letterSpacing: "-0.01em"
+                    }}
+                  >
+                    <EmojiEventsIcon /> {creator.overlay_settings.goal_title || "Tipping Goal"}
+                  </Typography>
+                </Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 950 }}>
+                  <span style={{ color: currentTheme.palette.primary.main }}>
+                    {(creator.overlay_settings.goal_current || 0).toFixed(2)}
+                  </span>{" "}
+                  / {creator.overlay_settings.goal_target || 10} SOL
+                </Typography>
+              </Box>
+
+              {/* Progress Bar Track */}
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "24px",
+                  borderRadius: "12px",
+                  bgcolor: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  overflow: "hidden",
+                  position: "relative",
+                  boxShadow: "inset 0 2px 4px rgba(0, 0, 0, 0.4)"
+                }}
+              >
+                {/* Progress Bar Fill with stripes animation */}
+                <Box
+                  sx={{
+                    width: `${Math.min(100, Math.max(0, ((creator.overlay_settings.goal_current || 0) / (creator.overlay_settings.goal_target || 10)) * 100))}%`,
+                    height: "100%",
+                    borderRadius: "12px",
+                    background: `linear-gradient(90deg, ${currentTheme.palette.primary.main}88, ${currentTheme.palette.primary.main})`,
+                    boxShadow: `0 0 15px ${currentTheme.palette.primary.main}aa`,
+                    transition: "width 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
+                    position: "relative",
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundImage: "linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent)",
+                      backgroundSize: "20px 20px",
+                      animation: "stripeMove 1.5s linear infinite",
+                      "@keyframes stripeMove": {
+                        "0%": { backgroundPosition: "0 0" },
+                        "100%": { backgroundPosition: "200px 0" }
+                      }
+                    }
+                  }}
+                />
+
+                {/* Percentage Text Overlay */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    pointerEvents: "none"
+                  }}
+                >
+                  <Typography sx={{ fontSize: "0.8rem", fontWeight: 950, color: "#ffffff", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
+                    {Math.min(100, Math.max(0, ((creator.overlay_settings.goal_current || 0) / (creator.overlay_settings.goal_target || 10)) * 100)).toFixed(0)}%
+                  </Typography>
+                </Box>
+              </Box>
+            </Card>
+          )}
 
           {/* ---- Body Container Grid ---- */}
           <Grid container spacing={4}>

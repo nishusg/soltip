@@ -6,6 +6,8 @@ import { API_BASE } from "../shared/constants";
 import BoltIcon from "@mui/icons-material/Bolt";
 import LockIcon from "@mui/icons-material/Lock";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import DiamondIcon from "@mui/icons-material/Diamond";
 import { logger } from "../utils/logger";
 import { validateMediaUrl, sanitizeMessage, sanitizeSenderName } from "../utils/security";
 import type { OverlaySettings } from "../types";
@@ -56,6 +58,30 @@ const alertSlideDown = keyframes`
   10% { transform: translate(-50%, -50%); opacity: 1; }
   90% { transform: translate(-50%, -50%); opacity: 1; }
   100% { transform: translate(-50%, 150%); opacity: 0; }
+`;
+
+// 3D Card Flip animation
+const alertFlip = keyframes`
+  0% { transform: translate(-50%, -50%) rotateY(90deg); opacity: 0; filter: blur(5px); }
+  10% { transform: translate(-50%, -50%) rotateY(0deg); opacity: 1; filter: blur(0px); }
+  90% { transform: translate(-50%, -50%) rotateY(0deg); opacity: 1; filter: blur(0px); }
+  100% { transform: translate(-50%, -50%) rotateY(90deg); opacity: 0; filter: blur(5px); }
+`;
+
+// Spin Pop Zoom animation
+const alertSpin = keyframes`
+  0% { transform: translate(-50%, -50%) rotate(-180deg) scale(0.1); opacity: 0; }
+  10% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
+  90% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) rotate(180deg) scale(0.1); opacity: 0; }
+`;
+
+// Slide In Up animation
+const alertSlideUp = keyframes`
+  0% { transform: translate(-50%, 150%); opacity: 0; }
+  10% { transform: translate(-50%, -50%); opacity: 1; }
+  90% { transform: translate(-50%, -50%); opacity: 1; }
+  100% { transform: translate(-50%, -150%); opacity: 0; }
 `;
 
 interface TipEntry {
@@ -131,7 +157,8 @@ export default function OverlayPage() {
     theme: "standard",
     alert_animation: "bounce",
     queue_system_enabled: true,
-    font_size: 20
+    font_size: 20,
+    text_effect: "glow"
   });
 
   const settingsRef = useRef(settings);
@@ -221,6 +248,33 @@ export default function OverlayPage() {
         playNote(987.77, now + 0.75, 0.8, "sine"); // B5
         playNote(1174.66, now + 0.75, 0.8, "sine"); // D6
         playNote(1318.51, now + 0.75, 0.8, "triangle"); // E6
+      } else if (soundPreset === "laser") {
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(1500, now);
+        osc.frequency.exponentialRampToValueAtTime(150, now + 0.4);
+        gainNode.gain.setValueAtTime(vol * 0.4, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        osc.start();
+        osc.stop(now + 0.4);
+      } else if (soundPreset === "retro_game") {
+        const playCoinNote = (freq: number, start: number, duration: number) => {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = "square";
+          osc.frequency.setValueAtTime(freq, start);
+          gainNode.gain.setValueAtTime(vol * 0.3, start);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration - 0.01);
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.start(start);
+          osc.stop(start + duration);
+        };
+        playCoinNote(987.77, now, 0.08); // B5
+        playCoinNote(1318.51, now + 0.08, 0.35); // E6
       } else if (soundPreset === "custom" && settingsRef.current.alert_sound_url) {
         const safeUrl = validateMediaUrl(settingsRef.current.alert_sound_url);
         if (safeUrl) {
@@ -440,6 +494,10 @@ export default function OverlayPage() {
 
       setTips(prev => [...prev, newTip].slice(-10)); // Keep last 10
 
+      if (data.goal_current !== undefined) {
+        setSettings((prev: OverlaySettings) => ({ ...prev, goal_current: data.goal_current }));
+      }
+
       if (settingsRef.current.queue_system_enabled !== false) {
         setAlertQueue(prev => [...prev, newTip]);
       } else {
@@ -494,6 +552,8 @@ export default function OverlayPage() {
     );
   }
 
+  const widget = searchParams.get("widget");
+
   return (
     <Box
       sx={{
@@ -504,221 +564,423 @@ export default function OverlayPage() {
         position: "relative"
       }}
     >
-      {/* Cinematic Alert Popup */}
-      {activeAlert && (() => {
+      {widget === "goal" ? (() => {
+        // Render the beautiful Crowdfunding Goal progress bar
         const selectedTheme = settings.theme || "standard";
-        let accentColor = settings.theme_color || getTierColor(activeAlert.amount);
+        let accentColor = settings.theme_color || "#14F195";
         let borderStyleColor = accentColor;
-        let bgStyleColor = "rgba(0, 0, 0, 0.85)";
-        let shadowStyle = `0 0 50px ${accentColor}33, inset 0 0 20px ${accentColor}1a`;
-        let computedHeaderIcon = settings.alert_gif_preset || "bolt";
+        let bgStyleColor = "rgba(0, 0, 0, 0.75)";
+        let shadowStyle = `0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px ${accentColor}1a`;
 
-        // Layout Theme Configs
         if (selectedTheme === "gold") {
           borderStyleColor = "#FFD700";
-          bgStyleColor = "linear-gradient(135deg, rgba(15, 12, 5, 0.97) 0%, rgba(30, 24, 10, 0.99) 100%)";
-          shadowStyle = "0 0 60px rgba(255, 215, 0, 0.45), inset 0 0 25px rgba(255, 215, 0, 0.2)";
+          bgStyleColor = "linear-gradient(135deg, rgba(15, 12, 5, 0.95) 0%, rgba(30, 24, 10, 0.97) 100%)";
+          shadowStyle = "0 8px 32px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.25)";
           accentColor = "#FFD700";
-          if (settings.alert_gif_preset === "bolt") {
-            computedHeaderIcon = "crown";
-          }
         } else if (selectedTheme === "neon") {
           borderStyleColor = "#FF007F";
-          bgStyleColor = "rgba(8, 4, 18, 0.95)";
-          shadowStyle = "0 0 60px rgba(255, 0, 127, 0.55), inset 0 0 25px rgba(255, 0, 127, 0.25)";
+          bgStyleColor = "rgba(8, 4, 18, 0.92)";
+          shadowStyle = "0 8px 32px rgba(0, 0, 0, 0.5), 0 0 30px rgba(255, 0, 127, 0.35)";
           accentColor = "#00FFFF";
         } else if (selectedTheme === "midnight") {
           borderStyleColor = "#9945FF";
-          bgStyleColor = "linear-gradient(135deg, rgba(5, 5, 12, 0.98) 0%, rgba(15, 8, 30, 0.98) 100%)";
-          shadowStyle = "0 0 60px rgba(153, 69, 255, 0.45), inset 0 0 25px rgba(153, 69, 255, 0.2)";
+          bgStyleColor = "linear-gradient(135deg, rgba(5, 5, 12, 0.95) 0%, rgba(15, 8, 30, 0.95) 100%)";
+          shadowStyle = "0 8px 32px rgba(0, 0, 0, 0.5), 0 0 30px rgba(153, 69, 255, 0.25)";
           accentColor = "#14F195";
         }
 
         const fontStylePrimary = settings.font_family ? `${settings.font_family}, sans-serif` : FONT_PRIMARY;
-        const fontStyleAccent = settings.font_family ? `${settings.font_family}, sans-serif` : FONT_ACCENT;
-        const customFontSize = settings.font_size || 20;
-
-        // Custom Broadcaster Transitions
-        let activeKeyframe = alertPopIn;
-        if (settings.alert_animation === "fade") activeKeyframe = alertFadeIn;
-        else if (settings.alert_animation === "slide") activeKeyframe = alertSlideLeft;
-        else if (settings.alert_animation === "zoom") activeKeyframe = alertZoomIn;
-        else if (settings.alert_animation === "slide_down") activeKeyframe = alertSlideDown;
+        const goalTitle = settings.goal_title || "Tipping Goal";
+        const goalTarget = settings.goal_target || 10;
+        const goalCurrent = settings.goal_current || 0;
+        const percentage = Math.min(100, Math.max(0, (goalCurrent / goalTarget) * 100));
 
         return (
-          <Box
-            sx={{
-              position: "absolute",
-              top: "45%",
-              left: "50%",
-              zIndex: 999,
-              width: ACTIVE_ALERT_WIDTH,
-              animation: `${activeKeyframe} ${settings.alert_duration || ALERT_DISPLAY_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
-              pointerEvents: "none"
-            }}
-          >
-            <Paper
-              elevation={0}
-              sx={{
-                p: 4,
-                borderRadius: "28px",
-                background: bgStyleColor,
-                border: `2px solid ${borderStyleColor}`,
-                backdropFilter: "blur(20px)",
-                boxShadow: shadowStyle,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                textAlign: "center",
+          <Box sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "90%",
+            maxWidth: 600,
+            p: 3,
+            borderRadius: "20px",
+            background: bgStyleColor,
+            border: `2px solid ${borderStyleColor}4d`,
+            backdropFilter: "blur(20px)",
+            boxShadow: shadowStyle,
+            color: "#ffffff"
+          }}>
+            {/* Title and stats row */}
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
+              <Typography sx={{
+                fontFamily: fontStylePrimary,
+                fontWeight: 800,
+                fontSize: "1.2rem",
+                letterSpacing: "-0.01em",
+                textShadow: `0 0 10px ${accentColor}4d`
+              }}>
+                {goalTitle}
+              </Typography>
+              <Typography sx={{
+                fontFamily: fontStylePrimary,
+                fontWeight: 950,
+                fontSize: "1.1rem"
+              }}>
+                <span style={{ color: accentColor }}>{goalCurrent.toFixed(2)}</span> / {goalTarget} SOL
+              </Typography>
+            </Box>
+
+            {/* Progress Bar background track */}
+            <Box sx={{
+              width: "100%",
+              height: "22px",
+              borderRadius: "11px",
+              bgcolor: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              overflow: "hidden",
+              position: "relative",
+              boxShadow: "inset 0 2px 4px rgba(0,0,0,0.5)"
+            }}>
+              {/* Progress Bar Fill with smooth animation */}
+              <Box sx={{
+                width: `${percentage}%`,
+                height: "100%",
+                borderRadius: "11px",
+                background: `linear-gradient(90deg, ${accentColor}88, ${accentColor})`,
+                boxShadow: `0 0 15px ${accentColor}aa`,
+                transition: "width 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
                 position: "relative",
-                overflow: "hidden"
-              }}
-            >
-              {/* Glowing top line matching tier */}
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundImage: "linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent)",
+                  backgroundSize: "20px 20px",
+                  animation: "stripeMove 1.5s linear infinite",
+                  "@keyframes stripeMove": {
+                    "0%": { backgroundPosition: "0 0" },
+                    "100%": { backgroundPosition: "200px 0" }
+                  }
+                }
+              }} />
+
+              {/* Centered Percentage Label */}
               <Box sx={{
                 position: "absolute",
                 top: 0,
                 left: 0,
                 right: 0,
-                height: 4,
-                background: `linear-gradient(90deg, transparent, ${borderStyleColor}, transparent)`
-              }} />
-
-              {/* Glowing Category Header */}
-              <Typography
-                variant="caption"
-                sx={{
-                  fontFamily: fontStyleAccent,
-                  fontSize: "0.85rem",
+                bottom: 0,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                pointerEvents: "none"
+              }}>
+                <Typography sx={{
+                  fontFamily: fontStylePrimary,
+                  fontSize: "0.75rem",
                   fontWeight: 900,
-                  letterSpacing: "4px",
-                  color: accentColor,
-                  textTransform: "uppercase",
-                  mb: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  textShadow: `0 0 10px ${accentColor}4d`
-                }}
-              >
-                ⚡ {activeAlert.amount >= 5 ? "Legendary Tip!" : activeAlert.amount >= 1 ? "Epic Super Chat!" : "New Super Chat!"} ⚡
-              </Typography>
+                  color: "#ffffff",
+                  textShadow: "0 1px 3px rgba(0,0,0,0.8)"
+                }}>
+                  {percentage.toFixed(0)}%
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        );
+      })() : (
+        <>
+          {/* Cinematic Alert Popup */}
+          {activeAlert && (() => {
+            const selectedTheme = settings.theme || "standard";
+            let accentColor = settings.theme_color || getTierColor(activeAlert.amount);
+            let borderStyleColor = accentColor;
+            let bgStyleColor = "rgba(0, 0, 0, 0.85)";
+            let shadowStyle = `0 0 50px ${accentColor}33, inset 0 0 20px ${accentColor}1a`;
+            let computedHeaderIcon = settings.alert_gif_preset || "bolt";
 
-              {/* Large Avatar or Custom Preset representing tier */}
+            // Layout Theme Configs
+            if (selectedTheme === "gold") {
+              borderStyleColor = "#FFD700";
+              bgStyleColor = "linear-gradient(135deg, rgba(15, 12, 5, 0.97) 0%, rgba(30, 24, 10, 0.99) 100%)";
+              shadowStyle = "0 0 60px rgba(255, 215, 0, 0.45), inset 0 0 25px rgba(255, 215, 0, 0.2)";
+              accentColor = "#FFD700";
+              if (settings.alert_gif_preset === "bolt") {
+                computedHeaderIcon = "crown";
+              }
+            } else if (selectedTheme === "neon") {
+              borderStyleColor = "#FF007F";
+              bgStyleColor = "rgba(8, 4, 18, 0.95)";
+              shadowStyle = "0 0 60px rgba(255, 0, 127, 0.55), inset 0 0 25px rgba(255, 0, 127, 0.25)";
+              accentColor = "#00FFFF";
+            } else if (selectedTheme === "midnight") {
+              borderStyleColor = "#9945FF";
+              bgStyleColor = "linear-gradient(135deg, rgba(5, 5, 12, 0.98) 0%, rgba(15, 8, 30, 0.98) 100%)";
+              shadowStyle = "0 0 60px rgba(153, 69, 255, 0.45), inset 0 0 25px rgba(153, 69, 255, 0.2)";
+              accentColor = "#14F195";
+            }
+
+            const fontStylePrimary = settings.font_family ? `${settings.font_family}, sans-serif` : FONT_PRIMARY;
+            const fontStyleAccent = settings.font_family ? `${settings.font_family}, sans-serif` : FONT_ACCENT;
+            const customFontSize = settings.font_size || 20;
+
+            const textEffect = settings.text_effect || "glow";
+            let textEffectSx = {};
+            if (textEffect === "glow") {
+              textEffectSx = {
+                textShadow: `0 0 10px ${accentColor}, 0 0 20px ${accentColor}aa`
+              };
+            } else if (textEffect === "rainbow") {
+              textEffectSx = {
+                backgroundImage: "linear-gradient(90deg, #ff007f, #7f00ff, #00f0ff, #ff007f)",
+                backgroundSize: "200% auto",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                animation: "rainbowText 3s linear infinite",
+                "@keyframes rainbowText": {
+                  "0%": { backgroundPosition: "0% center" },
+                  "100%": { backgroundPosition: "200% center" }
+                }
+              };
+            } else if (textEffect === "shine") {
+              textEffectSx = {
+                backgroundImage: `linear-gradient(120deg, #ffffff 30%, ${accentColor}88 40%, #ffffff 50%)`,
+                backgroundSize: "200% auto",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                animation: "shineSweep 4s linear infinite",
+                "@keyframes shineSweep": {
+                  "0%": { backgroundPosition: "200% center" },
+                  "100%": { backgroundPosition: "-200% center" }
+                }
+              };
+            }
+
+            // Custom Broadcaster Transitions
+            let activeKeyframe = alertPopIn;
+            if (settings.alert_animation === "fade") activeKeyframe = alertFadeIn;
+            else if (settings.alert_animation === "slide") activeKeyframe = alertSlideLeft;
+            else if (settings.alert_animation === "zoom") activeKeyframe = alertZoomIn;
+            else if (settings.alert_animation === "slide_down") activeKeyframe = alertSlideDown;
+            else if (settings.alert_animation === "flip") activeKeyframe = alertFlip;
+            else if (settings.alert_animation === "spin") activeKeyframe = alertSpin;
+            else if (settings.alert_animation === "slide_up") activeKeyframe = alertSlideUp;
+
+            return (
               <Box
                 sx={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: "50%",
-                  bgcolor: `${accentColor}1a`,
-                  border: `2px solid ${accentColor}33`,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  mb: 3,
-                  boxShadow: `0 0 20px ${accentColor}26`,
-                  overflow: "hidden"
+                  position: "absolute",
+                  top: "45%",
+                  left: "50%",
+                  zIndex: 999,
+                  width: ACTIVE_ALERT_WIDTH,
+                  animation: `${activeKeyframe} ${settings.alert_duration || ALERT_DISPLAY_DURATION}ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+                  pointerEvents: "none"
                 }}
               >
-                {(() => {
-                  if (computedHeaderIcon === "bolt") {
-                    return <BoltIcon sx={{ fontSize: 40, color: accentColor }} />;
-                  }
-                  if (computedHeaderIcon === "crown") {
-                    return <EmojiEventsIcon sx={{ fontSize: 40, color: accentColor }} />;
-                  }
-                  if (computedHeaderIcon === "orb") {
-                    return (
-                      <Box
-                        sx={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: "50%",
-                          background: `radial-gradient(circle, ${accentColor} 0%, transparent 70%)`,
-                          animation: "pulseGlow 1.5s infinite ease-in-out",
-                          "@keyframes pulseGlow": {
-                            "0%": { transform: "scale(0.95)", opacity: 0.7, boxShadow: `0 0 10px ${accentColor}` },
-                            "50%": { transform: "scale(1.1)", opacity: 1, boxShadow: `0 0 25px ${accentColor}` },
-                            "100%": { transform: "scale(0.95)", opacity: 0.7, boxShadow: `0 0 10px ${accentColor}` }
-                          }
-                        }}
-                      />
-                    );
-                  }
-                  if (computedHeaderIcon === "custom" && settings.alert_gif_url) {
-                    const safeGifUrl = validateMediaUrl(settings.alert_gif_url);
-                    return safeGifUrl ? (
-                      <img
-                        src={safeGifUrl}
-                        alt="custom-alert"
-                        style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: "10px" }}
-                      />
-                    ) : <BoltIcon sx={{ fontSize: 40, color: accentColor }} />;
-                  }
-                  return <BoltIcon sx={{ fontSize: 40, color: accentColor }} />;
-                })()}
-              </Box>
-
-              {/* Combined Sender Name, Amount & Superchat Alert */}
-              <Typography
-                sx={{
-                  fontFamily: fontStylePrimary,
-                  fontWeight: 700,
-                  fontSize: `${customFontSize + 6}px`,
-                  color: "#ffffff",
-                  lineHeight: 1.4,
-                  mb: activeAlert.message ? 3.5 : 0,
-                  textAlign: "center",
-                  width: "100%",
-                  letterSpacing: "-0.01em"
-                }}
-              >
-                <span style={{ color: accentColor, fontWeight: 800 }}>
-                  {activeAlert.sender}
-                </span>{" "}
-                sent{" "}
-                <span style={{ color: accentColor, fontWeight: 900, textShadow: `0 0 15px ${accentColor}55` }}>
-                  {activeAlert.amount.toFixed(activeAlert.amount >= 1 ? 2 : 4)} SOL
-                </span>{" "}
-                Superchat!
-              </Typography>
-
-              {/* User message speech bubble */}
-              {activeAlert.message && (
-                <Box
+                <Paper
+                  elevation={0}
                   sx={{
-                    width: "100%",
-                    p: 3,
-                    borderRadius: "18px",
-                    bgcolor: "rgba(255,255,255,0.02)",
-                    border: "1px solid rgba(255,255,255,0.06)",
-                    borderLeft: `5px solid ${borderStyleColor}`,
-                    boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 12px ${accentColor}08`,
-                    position: "relative",
+                    p: 4,
+                    borderRadius: "28px",
+                    background: bgStyleColor,
+                    border: `2px solid ${borderStyleColor}`,
+                    backdropFilter: "blur(20px)",
+                    boxShadow: shadowStyle,
                     display: "flex",
+                    flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "center"
+                    textAlign: "center",
+                    position: "relative",
+                    overflow: "hidden"
                   }}
                 >
+                  {/* Glowing top line matching tier */}
+                  <Box sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 4,
+                    background: `linear-gradient(90deg, transparent, ${borderStyleColor}, transparent)`
+                  }} />
+
+                  {/* Glowing Category Header */}
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontFamily: fontStyleAccent,
+                      fontSize: "0.85rem",
+                      fontWeight: 900,
+                      letterSpacing: "4px",
+                      color: accentColor,
+                      textTransform: "uppercase",
+                      mb: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      textShadow: `0 0 10px ${accentColor}4d`
+                    }}
+                  >
+                    ⚡ {activeAlert.amount >= 5 ? "Legendary Tip!" : activeAlert.amount >= 1 ? "Epic Super Chat!" : "New Super Chat!"} ⚡
+                  </Typography>
+
+                  {/* Large Avatar or Custom Preset representing tier */}
+                  <Box
+                    sx={{
+                      width: 72,
+                      height: 72,
+                      borderRadius: "50%",
+                      bgcolor: `${accentColor}1a`,
+                      border: `2px solid ${accentColor}33`,
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      mb: 3,
+                      boxShadow: `0 0 20px ${accentColor}26`,
+                      overflow: "hidden"
+                    }}
+                  >
+                    {(() => {
+                      if (computedHeaderIcon === "bolt") {
+                        return <BoltIcon sx={{ fontSize: 40, color: accentColor }} />;
+                      }
+                      if (computedHeaderIcon === "crown") {
+                        return <EmojiEventsIcon sx={{ fontSize: 40, color: accentColor }} />;
+                      }
+                      if (computedHeaderIcon === "heart") {
+                        return (
+                          <FavoriteIcon
+                            sx={{
+                              fontSize: 40,
+                              color: accentColor,
+                              animation: "heartBeat 1.2s infinite ease-in-out",
+                              "@keyframes heartBeat": {
+                                "0%": { transform: "scale(1)" },
+                                "25%": { transform: "scale(1.2)" },
+                                "40%": { transform: "scale(1)" },
+                                "60%": { transform: "scale(1.15)" },
+                                "100%": { transform: "scale(1)" }
+                              }
+                            }}
+                          />
+                        );
+                      }
+                      if (computedHeaderIcon === "diamond") {
+                        return (
+                          <DiamondIcon
+                            sx={{
+                              fontSize: 40,
+                              color: accentColor,
+                              animation: "spinDiamond 3s infinite linear",
+                              "@keyframes spinDiamond": {
+                                "0%": { transform: "rotate(0deg)" },
+                                "100%": { transform: "rotate(360deg)" }
+                              }
+                            }}
+                          />
+                        );
+                      }
+                      if (computedHeaderIcon === "orb") {
+                        return (
+                          <Box
+                            sx={{
+                              width: 44,
+                              height: 44,
+                              borderRadius: "50%",
+                              background: `radial-gradient(circle, ${accentColor} 0%, transparent 70%)`,
+                              animation: "pulseGlow 1.5s infinite ease-in-out",
+                              "@keyframes pulseGlow": {
+                                "0%": { transform: "scale(0.95)", opacity: 0.7, boxShadow: `0 0 10px ${accentColor}` },
+                                "50%": { transform: "scale(1.1)", opacity: 1, boxShadow: `0 0 25px ${accentColor}` },
+                                "100%": { transform: "scale(0.95)", opacity: 0.7, boxShadow: `0 0 10px ${accentColor}` }
+                              }
+                            }}
+                          />
+                        );
+                      }
+                      if (computedHeaderIcon === "custom" && settings.alert_gif_url) {
+                        const safeGifUrl = validateMediaUrl(settings.alert_gif_url);
+                        return safeGifUrl ? (
+                          <img
+                            src={safeGifUrl}
+                            alt="custom-alert"
+                            style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: "10px" }}
+                          />
+                        ) : <BoltIcon sx={{ fontSize: 40, color: accentColor }} />;
+                      }
+                      return <BoltIcon sx={{ fontSize: 40, color: accentColor }} />;
+                    })()}
+                  </Box>
+
+                  {/* Combined Sender Name, Amount & Superchat Alert */}
                   <Typography
                     sx={{
                       fontFamily: fontStylePrimary,
-                      fontWeight: 500,
-                      color: "#f8fafc",
-                      lineHeight: 1.6,
-                      fontSize: `${customFontSize}px`,
-                      fontStyle: "italic",
-                      textAlign: "center"
+                      fontWeight: 700,
+                      fontSize: `${customFontSize + 6}px`,
+                      color: "#ffffff",
+                      lineHeight: 1.4,
+                      mb: activeAlert.message ? 3.5 : 0,
+                      textAlign: "center",
+                      width: "100%",
+                      letterSpacing: "-0.01em",
+                      ...textEffectSx
                     }}
                   >
-                    “{activeAlert.message}”
+                    <span style={{ color: (textEffect === "rainbow" || textEffect === "shine") ? "inherit" : accentColor, fontWeight: 800 }}>
+                      {activeAlert.sender}
+                    </span>{" "}
+                    sent{" "}
+                    <span style={{ color: (textEffect === "rainbow" || textEffect === "shine") ? "inherit" : accentColor, fontWeight: 900, textShadow: (textEffect === "rainbow" || textEffect === "shine") ? "none" : `0 0 15px ${accentColor}55` }}>
+                      {activeAlert.amount.toFixed(activeAlert.amount >= 1 ? 2 : 4)} SOL
+                    </span>{" "}
+                    Superchat!
                   </Typography>
-                </Box>
-              )}
-            </Paper>
-          </Box>
-        );
-      })()}
+
+                  {/* User message speech bubble */}
+                  {activeAlert.message && (
+                    <Box
+                      sx={{
+                        width: "100%",
+                        p: 3,
+                        borderRadius: "18px",
+                        bgcolor: "rgba(255,255,255,0.02)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        borderLeft: `5px solid ${borderStyleColor}`,
+                        boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4), inset 0 0 12px ${accentColor}08`,
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center"
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontFamily: fontStylePrimary,
+                          fontWeight: 500,
+                          color: "#f8fafc",
+                          lineHeight: 1.6,
+                          fontSize: `${customFontSize}px`,
+                          fontStyle: "italic",
+                          textAlign: "center"
+                        }}
+                      >
+                        “{activeAlert.message}”
+                      </Typography>
+                    </Box>
+                  )}
+                </Paper>
+              </Box>
+            );
+          })()}
+        </>
+      )}
     </Box>
   );
 }

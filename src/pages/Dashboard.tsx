@@ -178,9 +178,25 @@ export default function Dashboard() {
   const [chartTab, setChartTab] = useState<"daily" | "weekly" | "monthly">("daily");
   const [filterDate, setFilterDate] = useState<string>("");
   const [page, setPage] = useState(1);
-  const { connected } = useSocket();
+  const { socket, connected } = useSocket();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNotification = (notif: any) => {
+      if (notif.type === "tip_received") {
+        logger.log("Dashboard received tip notification, reloading...");
+        loadDashboard();
+      }
+    };
+
+    socket.on("notification", handleNotification);
+    return () => {
+      socket.off("notification", handleNotification);
+    };
+  }, [socket]);
 
   useEffect(() => {
     setPage(1);

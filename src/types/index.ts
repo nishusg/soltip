@@ -100,4 +100,9 @@ export interface OverlaySettings {
   alert_animation: string;
   queue_system_enabled: boolean;
   font_size: number;
+  text_effect?: string;
+  goal_enabled?: boolean;
+  goal_title?: string;
+  goal_target?: number;
+  goal_current?: number;
 }
