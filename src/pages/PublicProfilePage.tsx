@@ -10,20 +10,20 @@ import { baseTheme, premiumThemes } from "../themes";
 import { getPremiumOverrides } from "../themes/shared";
 import BoringAvatar from "boring-avatars";
 import SEO from "../components/common/SEO";
-import { 
-  Container, 
-  Card, 
-  CardContent, 
-  Typography, 
-  Box, 
-  CircularProgress, 
-  Button, 
-  TextField, 
-  Alert, 
-  Stack, 
-  Chip, 
-  Grid, 
-  Link, 
+import {
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  CircularProgress,
+  Button,
+  TextField,
+  Alert,
+  Stack,
+  Chip,
+  Grid,
+  Link,
   Divider,
   ThemeProvider,
   CssBaseline,
@@ -223,20 +223,20 @@ export default function PublicProfilePage() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    
+
     let animationFrameId: number;
     const particles: ConfettiParticle[] = [];
     const colors = ["#9945FF", "#14F195", "#38BDF8", "#FFD700", "#FF2D55", "#FF9500"];
-    
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    
+
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
     window.addEventListener("resize", handleResize);
-    
+
     for (let i = 0; i < 180; i++) {
       particles.push({
         x: Math.random() * canvas.width,
@@ -250,24 +250,24 @@ export default function PublicProfilePage() {
         opacity: 1
       });
     }
-    
+
     let frames = 0;
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let active = false;
-      
+
       particles.forEach(p => {
         p.y += p.speedY;
         p.x += p.speedX;
         p.rotation += p.rotationSpeed;
-        
+
         if (p.y < canvas.height) {
           active = true;
         } else {
           p.opacity -= 0.015;
           if (p.opacity > 0) active = true;
         }
-        
+
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate((p.rotation * Math.PI) / 180);
@@ -276,7 +276,7 @@ export default function PublicProfilePage() {
         ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
         ctx.restore();
       });
-      
+
       frames++;
       if (active && frames < 300) {
         animationFrameId = requestAnimationFrame(animate);
@@ -284,9 +284,9 @@ export default function PublicProfilePage() {
         setShowConfetti(false);
       }
     };
-    
+
     animate();
-    
+
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
@@ -332,7 +332,7 @@ export default function PublicProfilePage() {
         creator.wallet_address,
         parseFloat(amount)
       );
-      
+
       setTxHash(signature);
       setTxStatus("verifying");
 
@@ -353,7 +353,7 @@ export default function PublicProfilePage() {
       setAmount("");
       setMessage("");
       setShowConfetti(true); // Trigger Confetti upon signature confirmation
-      
+
       // Reload recent superchats & profile settings (including goal progress)
       const updatedData = await getPublicProfileByUsername(username!);
       setCreator(updatedData.user);
@@ -449,16 +449,16 @@ export default function PublicProfilePage() {
       const messageMatch = (tip.message || "").toLowerCase().includes(searchQuery.toLowerCase());
       const walletMatch = (tip.sender_wallet || "").toLowerCase().includes(searchQuery.toLowerCase());
       const matchesSearch = nameMatch || messageMatch || walletMatch;
-      
+
       if (!matchesSearch) return false;
-      
+
       if (filterType === "large") {
         return tip.amount >= 0.5 * 1e9; // 0.5 SOL
       }
       if (filterType === "message") {
         return !!tip.message;
       }
-      
+
       return true;
     });
   }, [tips, searchQuery, filterType]);
@@ -600,7 +600,7 @@ export default function PublicProfilePage() {
         />
 
         <Container maxWidth="lg" sx={{ py: { xs: 4, md: 8 } }}>
-          <SEO 
+          <SEO
             title={`${creator.name || creator.username} (@${creator.username})`}
             description={creator.bio || `Watch streams, click social links, and send instant tip superchats to @${creator.username} on ${SITE_NAME}.`}
 
@@ -623,7 +623,7 @@ export default function PublicProfilePage() {
               sx={{
                 height: { xs: "100px", sm: "130px", md: "150px" },
                 borderRadius: "16px 16px 0 0",
-                background: creator.is_premium 
+                background: creator.is_premium
                   ? `linear-gradient(-45deg, ${currentTheme.palette.primary.dark}dd 0%, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}cc 35%, ${currentTheme.palette.primary.main}bb 70%, ${currentTheme.palette.secondary?.dark || currentTheme.palette.primary.dark}dd 100%)`
                   : `linear-gradient(135deg, ${currentTheme.palette.primary.dark}bb 0%, ${currentTheme.palette.background.default} 70%, ${currentTheme.palette.secondary?.dark || currentTheme.palette.primary.dark}66 100%)`,
                 backgroundSize: "400% 400%",
@@ -729,10 +729,10 @@ export default function PublicProfilePage() {
             </Box>
 
             <CardContent sx={{ pt: 0, px: { xs: 3, md: 6 }, pb: 5 }}>
-              <Box sx={{ 
-                display: "flex", 
-                flexDirection: { xs: "column", sm: "row" }, 
-                alignItems: { xs: "center", sm: "flex-end" }, 
+              <Box sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                alignItems: { xs: "center", sm: "flex-end" },
                 gap: { xs: 2.5, sm: 3.5 },
                 mb: 4,
                 flexWrap: { xs: "wrap", sm: "nowrap" },
@@ -762,10 +762,10 @@ export default function PublicProfilePage() {
                     }
                   }}
                 >
-                  <Box sx={{ 
-                    borderRadius: "50%", 
-                    overflow: "hidden", 
-                    width: { xs: 88, sm: 108 }, 
+                  <Box sx={{
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    width: { xs: 88, sm: 108 },
                     height: { xs: 88, sm: 108 },
                     "& svg": {
                       width: "100% !important",
@@ -782,30 +782,30 @@ export default function PublicProfilePage() {
                 </Box>
 
                 {/* Creator info details: Name, Username, Badges */}
-                <Box sx={{ 
-                  flexGrow: 1, 
+                <Box sx={{
+                  flexGrow: 1,
                   minWidth: 0,
                   textAlign: { xs: "center", sm: "left" },
                   width: "100%",
                   mt: { xs: 1, sm: 0 }
                 }}>
-                  <Stack 
-                    direction={{ xs: "column", sm: "row" }} 
-                    spacing={1.5} 
-                    sx={{ 
-                      alignItems: "center", 
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={1.5}
+                    sx={{
+                      alignItems: "center",
                       justifyContent: "space-between",
                       mb: 2,
                       width: "100%"
                     }}
                   >
                     <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
-                      <Stack 
-                        direction="row" 
-                        spacing={1.5} 
-                        sx={{ 
+                      <Stack
+                        direction="row"
+                        spacing={1.5}
+                        sx={{
                           alignItems: "center",
-                          justifyContent: { xs: "center", sm: "flex-start" } 
+                          justifyContent: { xs: "center", sm: "flex-start" }
                         }}
                       >
                         <Typography variant="h4" sx={{ fontWeight: 900, fontSize: { xs: "1.65rem", sm: "2.125rem" } }}>
@@ -815,15 +815,15 @@ export default function PublicProfilePage() {
                           <VerifiedIcon sx={{ color: "#14F195", fontSize: { xs: 22, sm: 26 }, filter: "drop-shadow(0 0 5px rgba(20,241,149,0.3))" }} />
                         )}
                         {creator.is_premium && (
-                          <Chip 
-                            label="PREMIUM" 
-                            size="small" 
-                            sx={{ 
-                              background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)", 
-                              color: "#000", 
+                          <Chip
+                            label="PREMIUM"
+                            size="small"
+                            sx={{
+                              background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+                              color: "#000",
                               fontWeight: 900,
                               fontSize: "0.6rem"
-                            }} 
+                            }}
                           />
                         )}
                       </Stack>
@@ -833,10 +833,10 @@ export default function PublicProfilePage() {
                     </Box>
 
                     {/* Live Badge + Share Button */}
-                    <Stack 
-                      direction="row" 
-                      spacing={1.5} 
-                      sx={{ 
+                    <Stack
+                      direction="row"
+                      spacing={1.5}
+                      sx={{
                         alignItems: "center",
                         justifyContent: { xs: "center", sm: "flex-end" },
                         mt: { xs: 1.5, sm: 0 }
@@ -845,10 +845,10 @@ export default function PublicProfilePage() {
                       <Chip
                         label={isLive ? "🔴 LIVE" : "● ONLINE"}
                         size="small"
-                        sx={{ 
+                        sx={{
                           fontWeight: 900,
                           px: 1.2,
-                          borderRadius: "50px", 
+                          borderRadius: "50px",
                           fontSize: "0.7rem",
                           border: isLive ? "1px solid #ff17444d" : "1px solid #00e6764d",
                           bgcolor: isLive ? "rgba(255,23,68,0.1)" : "rgba(0,230,118,0.08)",
@@ -860,7 +860,7 @@ export default function PublicProfilePage() {
                         variant="outlined"
                         size="small"
                         onClick={copyShareableLink}
-                         
+
                         sx={{
                           borderRadius: "8px",
                           fontWeight: 700,
@@ -883,27 +883,27 @@ export default function PublicProfilePage() {
                   </Stack>
 
                   {/* Creator Wallet Address + Share row */}
-                  <Stack 
-                    direction="row" 
-                    spacing={1.5} 
-                    sx={{ 
-                      alignItems: "center", 
-                      mb: 2, 
-                      flexWrap: "wrap", 
+                  <Stack
+                    direction="row"
+                    spacing={1.5}
+                    sx={{
+                      alignItems: "center",
+                      mb: 2,
+                      flexWrap: "wrap",
                       gap: 1.5,
                       justifyContent: { xs: "center", sm: "flex-start" }
                     }}
                   >
-                    <Box 
+                    <Box
                       onClick={copyWallet}
-                      sx={{ 
-                        display: "inline-flex", 
-                        alignItems: "center", 
-                        gap: 1, 
-                        px: 1.5, 
-                        py: 0.6, 
-                        borderRadius: "6px", 
-                        bgcolor: "rgba(255,255,255,0.03)", 
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 1,
+                        px: 1.5,
+                        py: 0.6,
+                        borderRadius: "6px",
+                        bgcolor: "rgba(255,255,255,0.03)",
                         border: "1px solid rgba(255,255,255,0.06)",
                         cursor: "pointer",
                         transition: "all 0.2s",
@@ -919,7 +919,7 @@ export default function PublicProfilePage() {
                       variant="contained"
                       size="small"
                       onClick={copyShareableLink}
-                       
+
                       sx={{
                         borderRadius: "6px",
                         fontWeight: 800,
@@ -936,12 +936,12 @@ export default function PublicProfilePage() {
                   </Stack>
 
                   {creator.bio && (
-                    <Typography 
-                      variant="body1" 
-                      sx={{ 
-                        color: "text.secondary", 
-                        maxWidth: 700, 
-                        lineHeight: 1.6, 
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: "text.secondary",
+                        maxWidth: 700,
+                        lineHeight: 1.6,
                         fontSize: { xs: "0.9rem", sm: "1rem" },
                         textAlign: { xs: "center", sm: "left" },
                         mx: { xs: "auto", sm: 0 }
@@ -960,66 +960,76 @@ export default function PublicProfilePage() {
                     Social Networks
                   </Typography>
                   <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap", gap: 1.5 }}>
-                    {(() => { const url = buildSafeSocialUrl("twitter", creator.socials.twitter); return url ? (
-                      <Button
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        variant="outlined"
-                         
-                        sx={{ borderRadius: "10px", fontWeight: 700 }}
-                      >
-                        Twitter
-                      </Button>
-                    ) : null; })()}
-                    {(() => { const url = buildSafeSocialUrl("twitch", creator.socials.twitch); return url ? (
-                      <Button
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        variant="outlined"
-                         
-                        sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#6441a5", color: "#b9a3e3", "&:hover": { bgcolor: "rgba(100,65,165,0.1)", borderColor: "#7d5bbe" } }}
-                      >
-                        Twitch
-                      </Button>
-                    ) : null; })()}
-                    {(() => { const url = buildSafeSocialUrl("youtube", creator.socials.youtube); return url ? (
-                      <Button
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        variant="outlined"
-                         
-                        sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#ff0000", color: "#ff8080", "&:hover": { bgcolor: "rgba(255,0,0,0.1)", borderColor: "#cc0000" } }}
-                      >
-                        YouTube
-                      </Button>
-                    ) : null; })()}
-                    {(() => { const url = buildSafeSocialUrl("kick", creator.socials.kick); return url ? (
-                      <Button
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        variant="outlined"
-                         
-                        sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#53fc18", color: "#9fff7d", "&:hover": { bgcolor: "rgba(83,252,24,0.1)", borderColor: "#41d60f" } }}
-                      >
-                        Kick
-                      </Button>
-                    ) : null; })()}
-                    {(() => { const url = buildSafeSocialUrl("discord", creator.socials.discord); return url ? (
-                      <Button
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        variant="outlined"
-                         
-                        sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#5865F2", color: "#8ea1ff", "&:hover": { bgcolor: "rgba(88,101,242,0.1)", borderColor: "#4752c4" } }}
-                      >
-                        Discord
-                      </Button>
-                    ) : null; })()}
+                    {(() => {
+                      const url = buildSafeSocialUrl("twitter", creator.socials.twitter); return url ? (
+                        <Button
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          variant="outlined"
+
+                          sx={{ borderRadius: "10px", fontWeight: 700 }}
+                        >
+                          Twitter
+                        </Button>
+                      ) : null;
+                    })()}
+                    {(() => {
+                      const url = buildSafeSocialUrl("twitch", creator.socials.twitch); return url ? (
+                        <Button
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          variant="outlined"
+
+                          sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#6441a5", color: "#b9a3e3", "&:hover": { bgcolor: "rgba(100,65,165,0.1)", borderColor: "#7d5bbe" } }}
+                        >
+                          Twitch
+                        </Button>
+                      ) : null;
+                    })()}
+                    {(() => {
+                      const url = buildSafeSocialUrl("youtube", creator.socials.youtube); return url ? (
+                        <Button
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          variant="outlined"
+
+                          sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#ff0000", color: "#ff8080", "&:hover": { bgcolor: "rgba(255,0,0,0.1)", borderColor: "#cc0000" } }}
+                        >
+                          YouTube
+                        </Button>
+                      ) : null;
+                    })()}
+                    {(() => {
+                      const url = buildSafeSocialUrl("kick", creator.socials.kick); return url ? (
+                        <Button
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          variant="outlined"
+
+                          sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#53fc18", color: "#9fff7d", "&:hover": { bgcolor: "rgba(83,252,24,0.1)", borderColor: "#41d60f" } }}
+                        >
+                          Kick
+                        </Button>
+                      ) : null;
+                    })()}
+                    {(() => {
+                      const url = buildSafeSocialUrl("discord", creator.socials.discord); return url ? (
+                        <Button
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          variant="outlined"
+
+                          sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#5865F2", color: "#8ea1ff", "&:hover": { bgcolor: "rgba(88,101,242,0.1)", borderColor: "#4752c4" } }}
+                        >
+                          Discord
+                        </Button>
+                      ) : null;
+                    })()}
                   </Stack>
                 </Box>
               )}
@@ -1029,8 +1039,8 @@ export default function PublicProfilePage() {
           {/* ---- Glassmorphic Stats Section ---- */}
           <Grid container spacing={2.5} sx={{ mb: 4 }}>
             <Grid size={{ xs: 12, sm: 4 }}>
-              <Card sx={{ 
-                bgcolor: "rgba(255, 255, 255, 0.015)", 
+              <Card sx={{
+                bgcolor: "rgba(255, 255, 255, 0.015)",
                 border: "1px solid rgba(255,255,255,0.04)",
                 boxShadow: "none",
                 "&:hover": { bgcolor: "rgba(255, 255, 255, 0.03)", transform: "translateY(-2px)" },
@@ -1051,10 +1061,10 @@ export default function PublicProfilePage() {
                 </CardContent>
               </Card>
             </Grid>
-            
+
             <Grid size={{ xs: 12, sm: 4 }}>
-              <Card sx={{ 
-                bgcolor: "rgba(255, 255, 255, 0.015)", 
+              <Card sx={{
+                bgcolor: "rgba(255, 255, 255, 0.015)",
                 border: "1px solid rgba(255,255,255,0.04)",
                 boxShadow: "none",
                 "&:hover": { bgcolor: "rgba(255, 255, 255, 0.03)", transform: "translateY(-2px)" },
@@ -1077,8 +1087,8 @@ export default function PublicProfilePage() {
             </Grid>
 
             <Grid size={{ xs: 12, sm: 4 }}>
-              <Card sx={{ 
-                bgcolor: "rgba(255, 255, 255, 0.015)", 
+              <Card sx={{
+                bgcolor: "rgba(255, 255, 255, 0.015)",
                 border: "1px solid rgba(255,255,255,0.04)",
                 boxShadow: "none",
                 "&:hover": { bgcolor: "rgba(255, 255, 255, 0.03)", transform: "translateY(-2px)" },
@@ -1196,7 +1206,7 @@ export default function PublicProfilePage() {
                   }}
                 >
                   <Typography sx={{ fontSize: "0.8rem", fontWeight: 950, color: "#ffffff", textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>
-                    {Math.min(100, Math.max(0, ((creator.overlay_settings.goal_current || 0) / (creator.overlay_settings.goal_target || 10)) * 100)).toFixed(0)}%
+                    {((creator.overlay_settings.goal_current || 0) >= (creator.overlay_settings.goal_target || 10)) ? "Completed!" : `${Math.min(100, Math.max(0, ((creator.overlay_settings.goal_current || 0) / (creator.overlay_settings.goal_target || 10)) * 100)).toFixed(0)}%`}
                   </Typography>
                 </Box>
               </Box>
@@ -1205,11 +1215,11 @@ export default function PublicProfilePage() {
 
           {/* ---- Body Container Grid ---- */}
           <Grid container spacing={4}>
-            
+
             {/* Left/Middle: Live Stream & Recent Superchats */}
             <Grid size={{ xs: 12, md: isLive ? 7 : 6 }}>
               <Stack spacing={4}>
-                
+
                 {/* 📺 Embedded Stream Section */}
                 {isLive && (
                   <Card>
@@ -1218,11 +1228,11 @@ export default function PublicProfilePage() {
                         <Typography variant="h6" sx={{ fontWeight: 900, display: "flex", alignItems: "center", gap: 1 }}>
                           📺 Creator Live Broadcast
                         </Typography>
-                        <Button 
-                          size="small" 
+                        <Button
+                          size="small"
                           variant="text"
                           onClick={() => setStreamVisible(!streamVisible)}
-                           
+
                           sx={{ textTransform: "none", fontWeight: 700 }}
                         >
                           {streamVisible ? "Collapse Stream" : "Expand Stream"}
@@ -1296,7 +1306,7 @@ export default function PublicProfilePage() {
                           }
                         }}
                       />
-                      
+
                       <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
                         <Chip
                           label="All Tips"
@@ -1346,7 +1356,7 @@ export default function PublicProfilePage() {
                                   colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
                                 />
                               </Box>
-                              
+
                               <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                                 <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
                                   <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
@@ -1361,12 +1371,12 @@ export default function PublicProfilePage() {
                                 </Stack>
 
                                 {tip.message && (
-                                  <Box sx={{ 
-                                    mt: 1.5, 
-                                    p: 1.5, 
-                                    bgcolor: "rgba(255,255,255,0.02)", 
-                                    borderRadius: "8px", 
-                                    borderLeft: `3.5px solid ${getTipTierColor(tip.amount)}` 
+                                  <Box sx={{
+                                    mt: 1.5,
+                                    p: 1.5,
+                                    bgcolor: "rgba(255,255,255,0.02)",
+                                    borderRadius: "8px",
+                                    borderLeft: `3.5px solid ${getTipTierColor(tip.amount)}`
                                   }}>
                                     <Typography variant="body2" sx={{ fontStyle: "italic", opacity: 0.95, lineHeight: 1.5 }}>
                                       "{tip.message}"
@@ -1426,10 +1436,10 @@ export default function PublicProfilePage() {
 
             {/* Right: Quick Tip Widget Panel */}
             <Grid size={{ xs: 12, md: isLive ? 5 : 6 }}>
-              
+
               {/* Tipping Panel Widget */}
-              <Card sx={{ 
-                position: "relative", 
+              <Card sx={{
+                position: "relative",
                 overflow: "visible",
                 border: `2px solid ${tipTier.color}`,
                 boxShadow: tipTier.glow,
@@ -1458,7 +1468,7 @@ export default function PublicProfilePage() {
                         <Typography variant="caption" color="text.secondary">@{creator.username}</Typography>
                       </Box>
                     </Stack>
-                    
+
                     {amount && parseFloat(amount) > 0 && (
                       <Chip
                         label={tipTier.badge}
@@ -1513,7 +1523,7 @@ export default function PublicProfilePage() {
                   ) : (
                     <form onSubmit={handleSendTip}>
                       <Stack spacing={3}>
-                        
+
                         {/* Preset Tipping Buttons Grid */}
                         <Box>
                           <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -1526,18 +1536,18 @@ export default function PublicProfilePage() {
                                   variant="outlined"
                                   fullWidth
                                   onClick={() => handlePresetTip(preset)}
-                                  sx={{ 
-                                    py: 1.5, 
+                                  sx={{
+                                    py: 1.5,
                                     display: "flex",
                                     flexDirection: "column",
-                                    borderRadius: "12px", 
-                                    fontWeight: 800, 
+                                    borderRadius: "12px",
+                                    fontWeight: 800,
                                     transition: "all 0.2s ease",
-                                    border: amount === preset.toString() 
-                                      ? `2px solid ${tipTier.color}` 
+                                    border: amount === preset.toString()
+                                      ? `2px solid ${tipTier.color}`
                                       : "1px solid rgba(255,255,255,0.06)",
-                                    bgcolor: amount === preset.toString() 
-                                      ? `${tipTier.color}14` 
+                                    bgcolor: amount === preset.toString()
+                                      ? `${tipTier.color}14`
                                       : "rgba(255,255,255,0.02)",
                                     "&:hover": {
                                       bgcolor: "rgba(255,255,255,0.05)",
@@ -1568,7 +1578,7 @@ export default function PublicProfilePage() {
                             disabled={txStatus === "sending" || txStatus === "verifying"}
                             slotProps={{
                               htmlInput: { min: 0.01, step: 0.01 },
-                              input: { 
+                              input: {
                                 sx: { fontSize: "1.02rem" }
                               }
                             }}
@@ -1621,7 +1631,7 @@ export default function PublicProfilePage() {
                           color="primary"
                           size="large"
                           disabled={!isFormValid || txStatus === "sending" || txStatus === "verifying"}
-                           
+
                           sx={{ py: 1.8, fontSize: "1.05rem", borderRadius: "10px", background: `linear-gradient(135deg, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main} 0%, ${currentTheme.palette.primary.main} 100%)` }}
                         >
                           {txStatus === "sending" && "Executing Tip..."}

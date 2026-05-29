@@ -868,6 +868,7 @@ export default function Dashboard() {
                           </Box>
                         </ListItemAvatar>
                         <ListItemText
+                          disableTypography
                           primary={
                             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
                               <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>

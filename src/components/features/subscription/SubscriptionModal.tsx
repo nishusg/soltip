@@ -118,22 +118,25 @@ export default function SubscriptionModal({ open, onClose }: SubscriptionModalPr
           <ListItem sx={{ px: 0 }}>
             <ListItemIcon><PaletteIcon sx={{ color: "#FFD700" }} /></ListItemIcon>
             <ListItemText 
-              primary={<Typography sx={{ fontWeight: 700 }}>Exclusive Gold Theme</Typography>} 
-              secondary={<Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)" }}>A premium aesthetic across the entire site.</Typography>}
+              disableTypography
+              primary={<Typography sx={{ fontWeight: 700, display: "block" }}>Exclusive Gold Theme</Typography>} 
+              secondary={<Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)", display: "block" }}>A premium aesthetic across the entire site.</Typography>}
             />
           </ListItem>
           <ListItem sx={{ px: 0 }}>
             <ListItemIcon><StarsIcon sx={{ color: "#FFD700" }} /></ListItemIcon>
             <ListItemText 
-              primary={<Typography sx={{ fontWeight: 700 }}>Diamond Badge</Typography>} 
-              secondary={<Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)" }}>Stand out on the leaderboard and profiles.</Typography>}
+              disableTypography
+              primary={<Typography sx={{ fontWeight: 700, display: "block" }}>Diamond Badge</Typography>} 
+              secondary={<Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)", display: "block" }}>Stand out on the leaderboard and profiles.</Typography>}
             />
           </ListItem>
           <ListItem sx={{ px: 0 }}>
             <ListItemIcon><BoltIcon sx={{ color: "#FFD700" }} /></ListItemIcon>
             <ListItemText 
-              primary={<Typography sx={{ fontWeight: 700 }}>Early Access</Typography>} 
-              secondary={<Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)" }}>Be the first to try new engagement tools.</Typography>}
+              disableTypography
+              primary={<Typography sx={{ fontWeight: 700, display: "block" }}>Early Access</Typography>} 
+              secondary={<Typography variant="caption" sx={{ color: "rgba(255,255,255,0.5)", display: "block" }}>Be the first to try new engagement tools.</Typography>}
             />
           </ListItem>
         </List>
