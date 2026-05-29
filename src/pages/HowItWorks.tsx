@@ -745,7 +745,7 @@ export default function HowItWorks() {
                 to="/"
                 variant="contained" 
                 size="large"
-                startIcon={<BoltIcon sx={{ color: "#000" }} />}
+                 
                 sx={{ px: 5, py: 1.8, borderRadius: "14px", fontWeight: 800 }}
               >
                 Go to Home

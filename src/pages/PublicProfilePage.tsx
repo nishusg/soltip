@@ -542,7 +542,7 @@ export default function PublicProfilePage() {
             Verify the username slug or check if the creator is registered on {SITE_NAME}.
 
           </Typography>
-          <Button component={RouterLink} to="/" variant="outlined" startIcon={<ArrowBackIcon />}>
+          <Button component={RouterLink} to="/" variant="outlined"  >
             Back to Home
           </Button>
         </Card>
@@ -860,7 +860,7 @@ export default function PublicProfilePage() {
                         variant="outlined"
                         size="small"
                         onClick={copyShareableLink}
-                        startIcon={<ShareIcon sx={{ fontSize: 13 }} />}
+                         
                         sx={{
                           borderRadius: "8px",
                           fontWeight: 700,
@@ -919,7 +919,7 @@ export default function PublicProfilePage() {
                       variant="contained"
                       size="small"
                       onClick={copyShareableLink}
-                      startIcon={<ShareIcon sx={{ fontSize: 13 }} />}
+                       
                       sx={{
                         borderRadius: "6px",
                         fontWeight: 800,
@@ -966,7 +966,7 @@ export default function PublicProfilePage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         variant="outlined"
-                        startIcon={<TwitterIcon />}
+                         
                         sx={{ borderRadius: "10px", fontWeight: 700 }}
                       >
                         Twitter
@@ -978,7 +978,7 @@ export default function PublicProfilePage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         variant="outlined"
-                        startIcon={<LanguageIcon />}
+                         
                         sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#6441a5", color: "#b9a3e3", "&:hover": { bgcolor: "rgba(100,65,165,0.1)", borderColor: "#7d5bbe" } }}
                       >
                         Twitch
@@ -990,7 +990,7 @@ export default function PublicProfilePage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         variant="outlined"
-                        startIcon={<YouTubeIcon />}
+                         
                         sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#ff0000", color: "#ff8080", "&:hover": { bgcolor: "rgba(255,0,0,0.1)", borderColor: "#cc0000" } }}
                       >
                         YouTube
@@ -1002,7 +1002,7 @@ export default function PublicProfilePage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         variant="outlined"
-                        startIcon={<TvIcon />}
+                         
                         sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#53fc18", color: "#9fff7d", "&:hover": { bgcolor: "rgba(83,252,24,0.1)", borderColor: "#41d60f" } }}
                       >
                         Kick
@@ -1014,7 +1014,7 @@ export default function PublicProfilePage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         variant="outlined"
-                        startIcon={<ChatIcon />}
+                         
                         sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#5865F2", color: "#8ea1ff", "&:hover": { bgcolor: "rgba(88,101,242,0.1)", borderColor: "#4752c4" } }}
                       >
                         Discord
@@ -1222,7 +1222,7 @@ export default function PublicProfilePage() {
                           size="small" 
                           variant="text"
                           onClick={() => setStreamVisible(!streamVisible)}
-                          startIcon={streamVisible ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                           
                           sx={{ textTransform: "none", fontWeight: 700 }}
                         >
                           {streamVisible ? "Collapse Stream" : "Expand Stream"}
@@ -1621,13 +1621,7 @@ export default function PublicProfilePage() {
                           color="primary"
                           size="large"
                           disabled={!isFormValid || txStatus === "sending" || txStatus === "verifying"}
-                          startIcon={
-                            txStatus === "sending" || txStatus === "verifying" ? (
-                              <CircularProgress size={20} color="inherit" />
-                            ) : (
-                              <SendIcon />
-                            )
-                          }
+                           
                           sx={{ py: 1.8, fontSize: "1.05rem", borderRadius: "10px", background: `linear-gradient(135deg, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main} 0%, ${currentTheme.palette.primary.main} 100%)` }}
                         >
                           {txStatus === "sending" && "Executing Tip..."}

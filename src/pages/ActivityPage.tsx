@@ -585,7 +585,7 @@ export default function ActivityPage() {
                                     variant="outlined"
                                     color="warning"
                                     onClick={() => setRefundTarget(tx)}
-                                    startIcon={<UndoIcon />}
+                                     
                                     sx={{ 
                                       borderRadius: "8px", 
                                       fontWeight: 800, 
@@ -853,7 +853,7 @@ export default function ActivityPage() {
             variant="contained"
             color="warning"
             disabled={refundLoading}
-            startIcon={refundLoading ? <CircularProgress size={16} color="inherit" /> : <UndoIcon />}
+             
             sx={{ 
               fontWeight: 800, 
               borderRadius: "12px", 

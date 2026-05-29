@@ -434,7 +434,7 @@ export default function ProfileSettings() {
                             variant="contained"
                             color="primary"
                             size="small"
-                            startIcon={<ContentCopyIcon sx={{ fontSize: 14 }} />}
+                             
                             onClick={() => {
                               navigator.clipboard.writeText(`${window.location.origin}/${username.trim().toLowerCase()}`);
                               toast.success("Shareable link copied!", { icon: "🔗" });
@@ -595,7 +595,7 @@ export default function ProfileSettings() {
                         color="primary"
                         size="large"
                         disabled={loading}
-                        startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
+                         
                         sx={{ px: 6, py: 1.5, fontSize: "1.1rem" }}
                       >
                         {loading ? "Saving Changes..." : "Save Profile"}

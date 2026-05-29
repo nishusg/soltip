@@ -1107,7 +1107,7 @@ export default function Dashboard() {
                       fullWidth
                       onClick={handleSendTestAlert}
                       disabled={testLoading}
-                      startIcon={testLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
+                       
                       sx={{
                         borderRadius: "14px",
                         py: 1.5,
@@ -1131,7 +1131,7 @@ export default function Dashboard() {
                       fullWidth
                       onClick={handleGenerateToken}
                       disabled={tokenLoading}
-                      startIcon={tokenLoading ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon sx={{ fontSize: 16 }} />}
+                       
                       sx={{ borderRadius: "12px", py: 1.2, fontWeight: 800, textTransform: "none", fontSize: "0.85rem" }}
                     >
                       Regenerate Secret Key
@@ -1148,7 +1148,7 @@ export default function Dashboard() {
                   fullWidth
                   onClick={handleGenerateToken}
                   disabled={tokenLoading}
-                  startIcon={tokenLoading ? <CircularProgress size={20} color="inherit" /> : <BoltIcon />}
+                   
                   sx={{ py: 1.8, borderRadius: "14px", fontWeight: 800, boxShadow: (theme: any) => `0 8px 20px ${theme.palette.primary.main}4d` }}
                 >
                   {tokenLoading ? "Generating..." : "Generate Overlay URL"}

@@ -207,7 +207,7 @@ export default function WalletConnect() {
               to="/dashboard"
               variant="contained"
               size="large"
-              endIcon={<ArrowForwardIcon />}
+               
               sx={{
                 px: 6,
                 py: 2,
@@ -226,7 +226,7 @@ export default function WalletConnect() {
               variant="contained"
               size="large"
               onClick={() => document.querySelector<HTMLButtonElement>(".wallet-adapter-button")?.click()}
-              endIcon={<ArrowForwardIcon />}
+               
               sx={{
                 px: 6,
                 py: 2,
@@ -422,7 +422,7 @@ export default function WalletConnect() {
                     variant="contained"
                     size="large"
                     onClick={triggerDemoAlert}
-                    startIcon={<FlashOnIcon />}
+                     
                     sx={{
                       py: 1.5,
                       fontWeight: 800,
@@ -883,7 +883,7 @@ export default function WalletConnect() {
               variant="contained"
               size="large"
               onClick={() => document.querySelector<HTMLButtonElement>(".wallet-adapter-button")?.click()}
-              endIcon={<ArrowForwardIcon />}
+               
               sx={{
                 px: 7,
                 py: 2.2,

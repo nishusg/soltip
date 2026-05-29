@@ -319,13 +319,7 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
               color="primary"
               size="large"
               disabled={!isFormValid || txStatus === "sending" || txStatus === "verifying"}
-              startIcon={
-                txStatus === "sending" || txStatus === "verifying" ? (
-                  <CircularProgress size={20} color="inherit" />
-                ) : (
-                  <SendIcon />
-                )
-              }
+               
               sx={{
                 py: 2,
                 fontSize: "1.1rem",
@@ -410,7 +404,7 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
                   size="small"
                   onClick={handleCheckStatus}
                   disabled={checkingStatus}
-                  startIcon={checkingStatus ? <CircularProgress size={14} color="inherit" /> : <RefreshIcon />}
+                   
                   sx={{
                     borderRadius: "10px",
                     fontWeight: 700,

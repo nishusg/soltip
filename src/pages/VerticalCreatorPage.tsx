@@ -687,7 +687,7 @@ export default function VerticalCreatorPage({ platform }: VerticalCreatorPagePro
                 to="/"
                 variant="contained" 
                 size="large"
-                startIcon={<BoltIcon sx={{ color: "#000" }} />}
+                 
                 sx={{ bgcolor: brandColor, color: "#000", px: 5, py: 1.8, borderRadius: "14px", fontWeight: 800, "&:hover": { bgcolor: brandColor, opacity: 0.9 } }}
               >
                 Go to Home

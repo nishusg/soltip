@@ -120,7 +120,7 @@ export default function BlogPostPage() {
         <Button 
           component={RouterLink}
           to="/blog"
-          startIcon={<ArrowBackIcon />}
+           
           sx={{ color: "text.secondary", fontWeight: 800, mb: 5, "&:hover": { color: brandColor } }}
         >
           Back to Blog Listing
@@ -295,7 +295,7 @@ export default function BlogPostPage() {
                           component={RouterLink}
                           to="/"
                           variant="contained" 
-                          startIcon={<BoltIcon sx={{ color: "#000" }} />}
+                           
                           sx={{ bgcolor: brandColor, color: "#000", px: 4, py: 1.6, borderRadius: "12px", fontWeight: 800, "&:hover": { bgcolor: brandColor, opacity: 0.9 } }}
                         >
                           Get Started Now
@@ -418,7 +418,7 @@ export default function BlogPostPage() {
                     to={`/blog/${art.slug}`}
                     variant="text" 
                     color="inherit" 
-                    endIcon={<BoltIcon sx={{ color: brandColor }} />}
+                     
                     sx={{ fontWeight: 800, px: 0, justifyContent: "flex-start", "&:hover": { color: brandColor } }}
                   >
                     Read

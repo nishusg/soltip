@@ -320,7 +320,7 @@ export default function Navbar() {
               aria-haspopup="true"
               aria-expanded={openMenu ? 'true' : undefined}
               onClick={handleOpenMenu}
-              endIcon={<KeyboardArrowDownIcon sx={{ transition: "transform 0.3s", transform: openMenu ? "rotate(180deg)" : "rotate(0)" }} />}
+               
               sx={{
                 px: 2.2,
                 py: 0.8,
@@ -423,7 +423,7 @@ export default function Navbar() {
             <Button
               variant="contained"
               onClick={() => setTipModalOpen(true)}
-              startIcon={<BoltIcon sx={{ color: "#000" }} />}
+               
               sx={{
                 height: 42,
                 borderRadius: "12px",
@@ -474,7 +474,7 @@ export default function Navbar() {
               variant="contained"
               onClick={login}
               disabled={isLoading}
-              startIcon={<VpnKeyIcon sx={{ color: "#000", fontSize: "0.9rem" }} />}
+               
               sx={{
                 height: 42,
                 borderRadius: "12px",
@@ -504,11 +504,7 @@ export default function Navbar() {
                 aria-haspopup="true"
                 aria-expanded={openProfileMenu ? 'true' : undefined}
                 onClick={handleOpenProfileMenu}
-                endIcon={<KeyboardArrowDownIcon sx={{
-                  color: "rgba(255,255,255,0.4)",
-                  transition: "transform 0.3s",
-                  transform: openProfileMenu ? "rotate(180deg)" : "rotate(0)"
-                }} />}
+                 
                 sx={{
                   alignItems: "center",
                   p: 0.5,
@@ -639,7 +635,7 @@ export default function Navbar() {
                           handleCloseProfileMenu();
                           setSubModalOpen(true);
                         }}
-                        startIcon={<DiamondIcon sx={{ color: "#000", fontSize: "0.85rem !important" }} />}
+                         
                         sx={{
                           height: 36,
                           borderRadius: "10px",
@@ -991,7 +987,7 @@ export default function Navbar() {
                       setMobileOpen(false);
                       setTipModalOpen(true);
                     }}
-                    startIcon={<BoltIcon sx={{ color: "#000" }} />}
+                     
                     sx={{
                       py: 1.5,
                       borderRadius: "12px",
@@ -1016,7 +1012,7 @@ export default function Navbar() {
                     handleNavClick(`/profile/${walletAddress}`);
                   }}
                   sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800 }}
-                  startIcon={<PersonIcon />}
+                   
                 >
                   My Public Profile
                 </Button>
@@ -1032,7 +1028,7 @@ export default function Navbar() {
                     handleNavClick("/settings");
                   }}
                   sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800, color: "text.secondary" }}
-                  startIcon={<SettingsIcon />}
+                   
                 >
                   Profile Settings
                 </Button>
@@ -1053,7 +1049,7 @@ export default function Navbar() {
                       color: "#000",
                       boxShadow: "0 0 15px rgba(255, 215, 0, 0.3)"
                     }}
-                    startIcon={<DiamondIcon />}
+                     
                   >
                     Go Premium Gold 👑
                   </Button>
@@ -1070,7 +1066,7 @@ export default function Navbar() {
                   setMobileOpen(false);
                   setTipModalOpen(true);
                 }}
-                startIcon={<BoltIcon sx={{ color: "#000" }} />}
+                 
                 sx={{
                   py: 1.5,
                   borderRadius: "12px",
@@ -1115,7 +1111,7 @@ export default function Navbar() {
                   navigate("/");
                 }}
                 sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800, borderColor: "rgba(239, 68, 68, 0.3)" }}
-                startIcon={<LogoutIcon />}
+                 
               >
                 Sign Out
               </Button>

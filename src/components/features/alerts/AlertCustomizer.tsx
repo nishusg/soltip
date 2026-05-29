@@ -373,7 +373,7 @@ export default function AlertCustomizer({
             variant="outlined"
             onClick={onSendTestAlert}
             disabled={testLoading}
-            startIcon={testLoading ? <CircularProgress size={16} color="inherit" /> : <BoltIcon />}
+             
             sx={{
               borderRadius: "14px",
               px: 3,
@@ -395,7 +395,7 @@ export default function AlertCustomizer({
             variant="contained"
             onClick={handleSave}
             disabled={saveLoading}
-            startIcon={saveLoading ? <CircularProgress size={20} color="inherit" /> : <StarIcon />}
+             
             sx={{
               borderRadius: "14px",
               px: 3.5,
@@ -853,7 +853,7 @@ export default function AlertCustomizer({
                     variant="outlined"
                     component="label"
                     size="small"
-                    startIcon={<CloudUploadIcon />}
+                     
                     sx={{
                       borderRadius: "10px",
                       textTransform: "none",
@@ -908,7 +908,7 @@ export default function AlertCustomizer({
                 variant="outlined"
                 size="small"
                 onClick={playPreviewSound}
-                startIcon={<VolumeUpIcon sx={{ fontSize: 16 }} />}
+                 
                 sx={{
                   borderRadius: "10px",
                   borderColor: `${userThemeColor}44`,

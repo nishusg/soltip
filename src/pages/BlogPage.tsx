@@ -253,7 +253,7 @@ export default function BlogPage() {
                   to={`/blog/${featuredArticle.slug}`}
                   variant="contained" 
                   size="large"
-                  endIcon={<BoltIcon sx={{ color: "#000" }} />}
+                   
                   sx={{ bgcolor: brandColor, color: "#000", px: 4, py: 1.5, borderRadius: "12px", fontWeight: 800, "&:hover": { bgcolor: brandColor, opacity: 0.95 } }}
                 >
                   Read Article
@@ -357,7 +357,7 @@ export default function BlogPage() {
                       to={`/blog/${art.slug}`}
                       variant="text" 
                       color="inherit" 
-                      endIcon={<BoltIcon sx={{ color: brandColor }} />}
+                       
                       sx={{ fontWeight: 800, px: 0, "&:hover": { color: brandColor } }}
                     >
                       Read Post

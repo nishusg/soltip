@@ -196,7 +196,7 @@ export default function ProfilePage() {
               </Box>
               
               {walletAddress === user.wallet_address ? (
-                <Button component={RouterLink} to="/settings" variant="outlined" color="secondary" size="large" startIcon={<SettingsIcon />}>
+                <Button component={RouterLink} to="/settings" variant="outlined" color="secondary" size="large"  >
                   Edit Profile
                 </Button>
               ) : (

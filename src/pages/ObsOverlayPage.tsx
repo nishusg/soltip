@@ -289,7 +289,7 @@ export default function ObsOverlayPage() {
                       color: activeTheme === "standard" ? "primary.main" : "text.secondary",
                       "&:hover": { borderColor: "primary.main", bgcolor: "rgba(56, 189, 248, 0.05)" }
                     }}
-                    endIcon={<StarIcon />}
+                     
                   >
                     Standard Sky Blue
                   </Button>
@@ -308,7 +308,7 @@ export default function ObsOverlayPage() {
                       color: activeTheme === "gold" ? "#FFD700" : "text.secondary",
                       "&:hover": { borderColor: "#FFD700", bgcolor: "rgba(255, 215, 0, 0.05)" }
                     }}
-                    endIcon={<DiamondIcon />}
+                     
                   >
                     Premium Gold Edition
                   </Button>
@@ -327,7 +327,7 @@ export default function ObsOverlayPage() {
                       color: activeTheme === "neon" ? "secondary.main" : "text.secondary",
                       "&:hover": { borderColor: "secondary.main", bgcolor: "rgba(129, 140, 248, 0.05)" }
                     }}
-                    endIcon={<BoltIcon />}
+                     
                   >
                     Neon Shock Cyber
                   </Button>
@@ -346,7 +346,7 @@ export default function ObsOverlayPage() {
                       color: activeTheme === "midnight" ? "#a855f7" : "text.secondary",
                       "&:hover": { borderColor: "#a855f7", bgcolor: "rgba(168, 85, 247, 0.05)" }
                     }}
-                    endIcon={<TvIcon />}
+                     
                   >
                     Midnight Void Glow
                   </Button>
@@ -747,7 +747,7 @@ export default function ObsOverlayPage() {
                 to="/"
                 variant="contained" 
                 size="large"
-                startIcon={<BoltIcon sx={{ color: "#000" }} />}
+                 
                 sx={{ px: 5, py: 1.8, borderRadius: "14px", fontWeight: 800 }}
               >
                 Go to Home
