@@ -115,8 +115,9 @@ export default function OverlayPage() {
     if (hashMatch) return hashMatch[1];
     return searchParams.get("key");
   })();
+  const widget = searchParams.get("widget");
   const { socket } = useSocket();
-  const [authStatus, setAuthStatus] = useState<"loading" | "ok" | "denied">("loading");
+  const [authStatus, setAuthStatus] = useState<"loading" | "ok" | "denied" | "rate_limited">("loading");
   const [activeAlert, setActiveAlert] = useState<TipEntry | null>(null);
 
   // Sequential alerts queue engine variables
@@ -404,6 +405,10 @@ export default function OverlayPage() {
       const res = await fetch(
         `${API_BASE}/creators/overlay-verify?wallet=${encodeURIComponent(walletAddress || "")}&key=${encodeURIComponent(overlayKey || "")}`
       );
+      if (res.status === 429) {
+        setAuthStatus("rate_limited");
+        return;
+      }
       if (!res.ok) throw new Error("HTTP error");
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
@@ -448,6 +453,10 @@ export default function OverlayPage() {
         setSettings((prev: OverlaySettings) => ({ ...prev, goal_current: data.goal_current }));
       }
 
+      if (widget === "goal") {
+        return;
+      }
+
       if (settingsRef.current.queue_system_enabled !== false) {
         setAlertQueue(prev => [...prev, newTip]);
       } else {
@@ -476,7 +485,7 @@ export default function OverlayPage() {
       socket.off("settings_updated", handleSettingsUpdated);
       socket.emit("unsubscribe_overlay", walletAddress);
     };
-  }, [authStatus, socket, walletAddress, overlayKey]);
+  }, [authStatus, socket, walletAddress, overlayKey, widget]);
 
   if (!walletAddress) return null;
 
@@ -484,6 +493,20 @@ export default function OverlayPage() {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", bgcolor: "transparent" }}>
         <Typography sx={{ color: "rgba(255,255,255,0.5)" }}>Verifying overlay access...</Typography>
+      </Box>
+    );
+  }
+
+  if (authStatus === "rate_limited") {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100vh", gap: 2 }}>
+        <LockIcon sx={{ fontSize: 48, color: "rgba(255,152,0,0.7)" }} />
+        <Typography variant="h6" sx={{ color: "rgba(255,152,0,0.9)", fontWeight: 800 }}>
+          Rate Limit Exceeded
+        </Typography>
+        <Typography sx={{ color: "rgba(255,255,255,0.5)", textAlign: "center", maxWidth: 400 }}>
+          Too many verification attempts. Please try again in a few minutes.
+        </Typography>
       </Box>
     );
   }
@@ -501,8 +524,6 @@ export default function OverlayPage() {
       </Box>
     );
   }
-
-  const widget = searchParams.get("widget");
 
   return (
     <Box
