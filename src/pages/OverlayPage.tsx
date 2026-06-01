@@ -401,7 +401,9 @@ export default function OverlayPage() {
 
   const verifyOverlay = async () => {
     try {
-      const res = await fetch(`${API_BASE}/creators/overlay-verify?wallet=${walletAddress}&key=${overlayKey}`);
+      const res = await fetch(
+        `${API_BASE}/creators/overlay-verify?wallet=${encodeURIComponent(walletAddress || "")}&key=${encodeURIComponent(overlayKey || "")}`
+      );
       if (!res.ok) throw new Error("HTTP error");
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
@@ -431,7 +433,12 @@ export default function OverlayPage() {
     const handleSuperChat = (data: any) => {
       const newTip: TipEntry = {
         id: data._id || data.tx_hash || Math.random().toString(),
-        sender: sanitizeSenderName(data.name || (data.wallet.slice(0, 4) + "..." + data.wallet.slice(-4))),
+        sender: sanitizeSenderName(
+          data.name ||
+          (typeof data.wallet === "string" && data.wallet.length >= 8
+            ? `${data.wallet.slice(0, 4)}...${data.wallet.slice(-4)}`
+            : "Anonymous")
+        ),
         amount: data.amount / 1e9,
         message: sanitizeMessage(data.message || ""),
         timestamp: new Date().toISOString()

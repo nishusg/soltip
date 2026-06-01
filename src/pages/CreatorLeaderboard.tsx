@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useRealtimeTips } from "../hooks/useRealtimeTips";
@@ -56,6 +56,7 @@ export default function CreatorLeaderboard() {
 
   const { newTip } = useRealtimeTips();
   const { user } = useWalletAuth();
+  const activeTimersRef = useRef<Set<any>>(new Set());
 
   const itemsPerPage = 10;
 
@@ -83,27 +84,32 @@ export default function CreatorLeaderboard() {
   // ---------------------------------------------------------------------------
   useEffect(() => {
     if (newTip && newTip.creator_wallet && newTip.amount) {
+      const creatorWallet = newTip.creator_wallet;
+
+      // Trigger visual pulse/glowing feedback for this creator
+      setRecentUpdates((prevUpdates) => ({
+        ...prevUpdates,
+        [creatorWallet]: {
+          amount: newTip.amount,
+          timestamp: Date.now()
+        }
+      }));
+
+      // Reset the animation class after 3 seconds
+      const timerId = setTimeout(() => {
+        setRecentUpdates((prevUpdates) => {
+          const next = { ...prevUpdates };
+          delete next[creatorWallet];
+          return next;
+        });
+        activeTimersRef.current.delete(timerId);
+      }, 3000);
+
+      activeTimersRef.current.add(timerId);
+
       setCreators((prev) => {
         const existingIndex = prev.findIndex((c) => c.wallet_address === newTip.creator_wallet);
         let updatedList = [...prev];
-
-        // Trigger visual pulse/glowing feedback for this creator
-        setRecentUpdates((prevUpdates) => ({
-          ...prevUpdates,
-          [newTip.creator_wallet]: {
-            amount: newTip.amount,
-            timestamp: Date.now()
-          }
-        }));
-
-        // Reset the animation class after 3 seconds
-        setTimeout(() => {
-          setRecentUpdates((prevUpdates) => {
-            const next = { ...prevUpdates };
-            delete next[newTip.creator_wallet];
-            return next;
-          });
-        }, 3000);
 
         if (existingIndex >= 0) {
           updatedList[existingIndex] = {
@@ -124,6 +130,14 @@ export default function CreatorLeaderboard() {
       });
     }
   }, [newTip]);
+
+  // Clean up all active timers on unmount
+  useEffect(() => {
+    const timers = activeTimersRef.current;
+    return () => {
+      timers.forEach((timerId) => clearTimeout(timerId));
+    };
+  }, []);
 
   // ---------------------------------------------------------------------------
   // Helpers
