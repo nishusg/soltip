@@ -31,7 +31,7 @@ import BoringAvatar from "boring-avatars";
 
 
 export default function ProfileSettings() {
-  const { walletAddress, isAuthenticated, user, refreshUser } = useWalletAuth();
+  const { walletAddress, isAuthenticated, refreshUser } = useWalletAuth();
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -300,49 +300,49 @@ export default function ProfileSettings() {
                 </CardContent>
               </Card>
 
-              {user?.is_premium && (
-                <Card sx={{ border: "1px solid rgba(255, 215, 0, 0.3)", background: "linear-gradient(135deg, rgba(255,215,0,0.05) 0%, rgba(0,0,0,0) 100%)" }}>
-                  <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-                    <Typography variant="h6" sx={{ fontWeight: 800, mb: 3, display: "flex", alignItems: "center", gap: 1 }}>
-                      <PaletteIcon sx={{ color: "#FFD700" }} /> Premium Themes
-                    </Typography>
-                    
-                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-                      {[
-                        { id: "gold", color: "#FFD700", label: "Gold" },
-                        { id: "discord", color: "#5865F2", label: "Discord" },
-                        { id: "diamond", color: "#B9F2FF", label: "Diamond" },
-                        { id: "neon", color: "#FF00FF", label: "Neon" },
-                        { id: "midnight", color: "#FF3333", label: "Midnight" }
-                      ].map((t) => (
-                        <Box
-                          key={t.id}
-                          onClick={() => !themeLoading && handleThemeChange(t.id)}
-                          sx={{
-                            p: 2,
-                            borderRadius: "12px",
-                            cursor: "pointer",
-                            textAlign: "center",
-                            border: `2px solid ${selectedTheme === t.id ? t.color : "rgba(255,255,255,0.05)"}`,
-                            bgcolor: selectedTheme === t.id ? `${t.color}11` : "rgba(255,255,255,0.02)",
-                            transition: "all 0.2s ease",
-                            position: "relative",
-                            "&:hover": { bgcolor: "rgba(255,255,255,0.05)", transform: "scale(1.02)" }
-                          }}
-                        >
-                          <Box sx={{ width: 30, height: 30, borderRadius: "50%", bgcolor: t.color, mx: "auto", mb: 1, boxShadow: `0 0 10px ${t.color}` }} />
-                          <Typography variant="caption" sx={{ fontWeight: 700, color: selectedTheme === t.id ? t.color : "text.secondary" }}>
-                            {t.label}
-                          </Typography>
-                          {selectedTheme === t.id && (
-                            <CheckCircleIcon sx={{ position: "absolute", top: 4, right: 4, fontSize: 16, color: t.color }} />
-                          )}
-                        </Box>
-                      ))}
-                    </Box>
-                  </CardContent>
-                </Card>
-              )}
+              <Card sx={{ border: "1px solid rgba(255, 255, 255, 0.08)", background: "rgba(255,255,255,0.01)" }}>
+                <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800, mb: 3, display: "flex", alignItems: "center", gap: 1 }}>
+                    <PaletteIcon sx={{ color: "primary.main" }} /> Profile Themes
+                  </Typography>
+                  
+                  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+                    {[
+                      { id: "gold", color: "#FFD700", label: "Gold" },
+                      { id: "discord", color: "#5865F2", label: "Discord" },
+                      { id: "diamond", color: "#B9F2FF", label: "Diamond" },
+                      { id: "neon", color: "#FF00FF", label: "Neon" },
+                      { id: "midnight", color: "#FF3333", label: "Midnight" },
+                      { id: "cyberpunk", color: "#FF0055", label: "Cyberpunk" },
+                      { id: "sakura", color: "#FF80BF", label: "Sakura" }
+                    ].map((t) => (
+                      <Box
+                        key={t.id}
+                        onClick={() => !themeLoading && handleThemeChange(t.id)}
+                        sx={{
+                          p: 2,
+                          borderRadius: "12px",
+                          cursor: "pointer",
+                          textAlign: "center",
+                          border: `2px solid ${selectedTheme === t.id ? t.color : "rgba(255,255,255,0.05)"}`,
+                          bgcolor: selectedTheme === t.id ? `${t.color}11` : "rgba(255,255,255,0.02)",
+                          transition: "all 0.2s ease",
+                          position: "relative",
+                          "&:hover": { bgcolor: "rgba(255,255,255,0.05)", transform: "scale(1.02)" }
+                        }}
+                      >
+                        <Box sx={{ width: 30, height: 30, borderRadius: "50%", bgcolor: t.color, mx: "auto", mb: 1, boxShadow: `0 0 10px ${t.color}` }} />
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: selectedTheme === t.id ? t.color : "text.secondary" }}>
+                          {t.label}
+                        </Typography>
+                        {selectedTheme === t.id && (
+                          <CheckCircleIcon sx={{ position: "absolute", top: 4, right: 4, fontSize: 16, color: t.color }} />
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
             </Box>
           </Grid>
 

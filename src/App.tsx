@@ -72,7 +72,7 @@ function AppLayout() {
   // Determine which theme to use
   let currentTheme = baseTheme;
   let premiumStyles = "";
-  if (user?.is_premium) {
+  if (user) {
     const themeKey = user.selected_theme || "gold";
     currentTheme = premiumThemes[themeKey] || premiumThemes.gold;
 

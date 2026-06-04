@@ -473,7 +473,7 @@ export default function PublicProfilePage() {
 
   // Load Custom Theme Dynamically
   const currentTheme = useMemo(() => {
-    if (creator?.is_premium) {
+    if (creator) {
       const themeKey = creator.selected_theme || "gold";
       return premiumThemes[themeKey] || premiumThemes.gold;
     }
@@ -482,7 +482,7 @@ export default function PublicProfilePage() {
 
   const premiumStyles = useMemo(() => {
     let styles = "";
-    if (creator?.is_premium) {
+    if (creator) {
       const primaryColor = currentTheme.palette.primary.main;
       const secondaryColor = currentTheme.palette.secondary?.main || primaryColor;
       const bgColor = currentTheme.palette.background.default || "#050508";
@@ -611,11 +611,11 @@ export default function PublicProfilePage() {
               sx={{
                 height: { xs: "100px", sm: "130px", md: "150px" },
                 borderRadius: "16px 16px 0 0",
-                background: creator.is_premium
+                background: creator.selected_theme
                   ? `linear-gradient(-45deg, ${currentTheme.palette.primary.dark}dd 0%, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}cc 35%, ${currentTheme.palette.primary.main}bb 70%, ${currentTheme.palette.secondary?.dark || currentTheme.palette.primary.dark}dd 100%)`
                   : `linear-gradient(135deg, ${currentTheme.palette.primary.dark}bb 0%, ${currentTheme.palette.background.default} 70%, ${currentTheme.palette.secondary?.dark || currentTheme.palette.primary.dark}66 100%)`,
                 backgroundSize: "400% 400%",
-                animation: creator.is_premium ? "gradientShift 15s ease infinite" : "none",
+                animation: creator.selected_theme ? "gradientShift 15s ease infinite" : "none",
                 position: "relative",
                 overflow: "hidden",
                 borderBottom: `2px solid ${currentTheme.palette.primary.main}44`,
@@ -624,7 +624,7 @@ export default function PublicProfilePage() {
                   position: "absolute",
                   inset: 0,
                   background: "url(\"data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 30 0 L 0 0 0 30' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1'/%3E%3C/svg%3E\")",
-                  animation: creator.is_premium ? "techGridScroll 25s linear infinite" : "none",
+                  animation: creator.selected_theme ? "techGridScroll 25s linear infinite" : "none",
                 }
               }}
             >
@@ -686,7 +686,7 @@ export default function PublicProfilePage() {
               {/* Floating Glassmorphic Creator Rank / Premium Status Badge */}
               <Chip
                 icon={<VerifiedIcon sx={{ color: "inherit !important", fontSize: "14px !important" }} />}
-                label={creator.is_premium ? "PREMIUM PARTNER" : "VERIFIED CREATOR"}
+                label="VERIFIED CREATOR" /* creator.is_premium ? "PREMIUM PARTNER" : "VERIFIED CREATOR" */
                 sx={{
                   position: "absolute",
                   top: 15,
@@ -738,7 +738,7 @@ export default function PublicProfilePage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    animation: creator.is_premium ? "pulseBorder 4s ease-in-out infinite" : "none",
+                    animation: creator.selected_theme ? "pulseBorder 4s ease-in-out infinite" : "none",
                     transition: "transform 0.3s ease-in-out",
                     position: "relative",
                     zIndex: 5,
@@ -799,10 +799,10 @@ export default function PublicProfilePage() {
                         <Typography variant="h4" sx={{ fontWeight: 900, fontSize: { xs: "1.65rem", sm: "2.125rem" } }}>
                           {creator.name}
                         </Typography>
-                        {creator.is_premium && (
+                        {/* creator.is_premium && (
                           <VerifiedIcon sx={{ color: "#14F195", fontSize: { xs: 22, sm: 26 }, filter: "drop-shadow(0 0 5px rgba(20,241,149,0.3))" }} />
-                        )}
-                        {creator.is_premium && (
+                        ) */}
+                        {/* creator.is_premium && (
                           <Chip
                             label="PREMIUM"
                             size="small"
@@ -813,7 +813,7 @@ export default function PublicProfilePage() {
                               fontSize: "0.6rem"
                             }}
                           />
-                        )}
+                        ) */}
                       </Stack>
                       <Typography variant="h6" color="primary" sx={{ fontWeight: 700, mt: 0.2, fontSize: { xs: "0.95rem", sm: "1.25rem" }, textAlign: { xs: "center", sm: "left" } }}>
                         @{creator.username}

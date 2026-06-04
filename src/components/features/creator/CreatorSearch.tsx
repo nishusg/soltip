@@ -165,11 +165,11 @@ export default function CreatorSearch() {
                     textAlign: "left",
                     "&:hover": {
                       bgcolor: "rgba(255,255,255,0.05)",
-                      borderColor: creator.is_premium ? "#FFD700" : "primary.main",
+                      borderColor: "primary.main", /* creator.is_premium ? "#FFD700" : "primary.main" */
                       transform: "translateY(-3px)",
-                      boxShadow: creator.is_premium
+                      boxShadow: "0 8px 24px rgba(153, 69, 242, 0.15)" /* creator.is_premium
                         ? "0 8px 24px rgba(255, 215, 0, 0.12)"
-                        : "0 8px 24px rgba(153, 69, 242, 0.15)"
+                        : "0 8px 24px rgba(153, 69, 242, 0.15)" */
                     }
                   }}
                 >
@@ -200,7 +200,7 @@ export default function CreatorSearch() {
                       <Typography variant="subtitle2" noWrap sx={{ fontWeight: 800, color: "#fff", fontSize: "0.9rem" }}>
                         {creator.name || creator.username || "Creator"}
                       </Typography>
-                      {creator.is_premium && (
+                      {/* creator.is_premium && (
                         <Chip
                           label="GOLD"
                           size="small"
@@ -214,7 +214,7 @@ export default function CreatorSearch() {
                             "& .MuiChip-label": { px: 0.5 }
                           }}
                         />
-                      )}
+                      ) */}
                     </Stack>
                     <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
                       {creator.username ? `@${creator.username}` : `${creator.wallet_address.slice(0, 4)}...${creator.wallet_address.slice(-4)}`}

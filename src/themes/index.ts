@@ -5,6 +5,8 @@ import { discordThemeOptions } from "./discord";
 import { neonThemeOptions } from "./neon";
 import { diamondThemeOptions } from "./diamond";
 import { midnightThemeOptions } from "./midnight";
+import { cyberpunkThemeOptions } from "./cyberpunk";
+import { sakuraThemeOptions } from "./sakura";
 
 // Base Solana/Discord Theme (Default for all users)
 export const baseTheme = createTheme({
@@ -52,5 +54,13 @@ export const premiumThemes: Record<string, Theme> = {
   midnight: createTheme({
     ...sharedThemeOptions,
     ...midnightThemeOptions,
+  }),
+  cyberpunk: createTheme({
+    ...sharedThemeOptions,
+    ...cyberpunkThemeOptions,
+  }),
+  sakura: createTheme({
+    ...sharedThemeOptions,
+    ...sakuraThemeOptions,
   }),
 };

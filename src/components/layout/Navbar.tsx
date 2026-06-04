@@ -43,7 +43,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import PersonIcon from "@mui/icons-material/Person";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import DiamondIcon from "@mui/icons-material/Diamond";
+// import DiamondIcon from "@mui/icons-material/Diamond";
 import SettingsIcon from "@mui/icons-material/Settings";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import ShieldIcon from "@mui/icons-material/Shield";
@@ -316,7 +316,7 @@ export default function Navbar() {
               aria-haspopup="true"
               aria-expanded={openMenu ? 'true' : undefined}
               onClick={handleOpenMenu}
-               
+
               sx={{
                 px: 2.2,
                 py: 0.8,
@@ -419,7 +419,7 @@ export default function Navbar() {
             <Button
               variant="contained"
               onClick={() => setTipModalOpen(true)}
-               
+
               sx={{
                 height: 42,
                 borderRadius: "12px",
@@ -470,7 +470,7 @@ export default function Navbar() {
               variant="contained"
               onClick={login}
               disabled={isLoading}
-               
+
               sx={{
                 height: 42,
                 borderRadius: "12px",
@@ -500,7 +500,7 @@ export default function Navbar() {
                 aria-haspopup="true"
                 aria-expanded={openProfileMenu ? 'true' : undefined}
                 onClick={handleOpenProfileMenu}
-                 
+
                 sx={{
                   alignItems: "center",
                   p: 0.5,
@@ -584,8 +584,8 @@ export default function Navbar() {
                     </Box>
                   </Stack>
 
-                  {/* Gold Member or Standard badge */}
-                  {user?.is_premium ? (
+                  {/* Gold Member badge */}
+                  {/* user?.is_premium && (
                     <Box sx={{
                       display: "flex",
                       alignItems: "center",
@@ -604,54 +604,7 @@ export default function Navbar() {
                         GOLD MEMBER 👑
                       </Typography>
                     </Box>
-                  ) : (
-                    <Stack spacing={1}>
-                      <Box sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        py: 0.6,
-                        px: 1,
-                        borderRadius: "10px",
-                        bgcolor: "rgba(255, 255, 255, 0.04)",
-                        border: "1px solid rgba(255, 255, 255, 0.08)",
-                        color: "rgba(255, 255, 255, 0.6)"
-                      }}>
-                        <Typography variant="caption" sx={{ fontWeight: 800, fontSize: "0.68rem", letterSpacing: "0.02em", fontFamily: "Space Grotesk, sans-serif" }}>
-                          Standard Creator
-                        </Typography>
-                      </Box>
-
-                      {/* Go Gold subscription prompt */}
-                      <Button
-                        variant="contained"
-                        size="small"
-                        fullWidth
-                        onClick={() => {
-                          handleCloseProfileMenu();
-                          setSubModalOpen(true);
-                        }}
-                         
-                        sx={{
-                          height: 36,
-                          borderRadius: "10px",
-                          fontWeight: 900,
-                          fontSize: "0.72rem",
-                          background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
-                          color: "#000",
-                          boxShadow: "0 0 10px rgba(255, 215, 0, 0.2)",
-                          transition: "all 0.2s",
-                          "&:hover": {
-                            background: "linear-gradient(135deg, #ffea00 0%, #ffb400 100%)",
-                            transform: "scale(1.02)",
-                            boxShadow: "0 0 18px rgba(255, 215, 0, 0.4)"
-                          }
-                        }}
-                      >
-                        Go Premium Gold 👑
-                      </Button>
-                    </Stack>
-                  )}
+                  ) */}
                 </Box>
 
                 {/* Dropdown Items */}
@@ -784,7 +737,7 @@ export default function Navbar() {
           enter: 200,
           exit: 150,
         }}
-        ModalProps={{ 
+        ModalProps={{
           keepMounted: true,
           disableScrollLock: true // Prevents layout/header shifting when drawer opens
         }}
@@ -936,7 +889,7 @@ export default function Navbar() {
                       </Typography>
                       <CheckCircleIcon sx={{ color: "success.main", fontSize: "1rem" }} />
                     </Stack>
-                    {user?.is_premium ? (
+                    {/* user?.is_premium && (
                       <Box sx={{
                         mt: 0.6,
                         display: "inline-flex",
@@ -954,23 +907,7 @@ export default function Navbar() {
                           GOLD MEMBER 👑
                         </Typography>
                       </Box>
-                    ) : (
-                      <Box sx={{
-                        mt: 0.6,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        py: 0.2,
-                        px: 0.8,
-                        borderRadius: "6px",
-                        bgcolor: "rgba(255, 255, 255, 0.04)",
-                        border: "1px solid rgba(255, 255, 255, 0.08)",
-                        color: "rgba(255, 255, 255, 0.6)"
-                      }}>
-                        <Typography variant="caption" sx={{ fontWeight: 800, fontSize: "0.64rem", letterSpacing: "0.02em", fontFamily: "Space Grotesk, sans-serif" }}>
-                          Standard Creator
-                        </Typography>
-                      </Box>
-                    )}
+                    ) */}
                   </Box>
                 </Stack>
 
@@ -983,7 +920,7 @@ export default function Navbar() {
                       setMobileOpen(false);
                       setTipModalOpen(true);
                     }}
-                     
+
                     sx={{
                       py: 1.5,
                       borderRadius: "12px",
@@ -1008,7 +945,7 @@ export default function Navbar() {
                     handleNavClick(`/profile/${walletAddress}`);
                   }}
                   sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800 }}
-                   
+
                 >
                   My Public Profile
                 </Button>
@@ -1024,32 +961,12 @@ export default function Navbar() {
                     handleNavClick("/settings");
                   }}
                   sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800, color: "text.secondary" }}
-                   
+
                 >
                   Profile Settings
                 </Button>
 
-                {!user?.is_premium && (
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    onClick={() => {
-                      setMobileOpen(false);
-                      setSubModalOpen(true);
-                    }}
-                    sx={{
-                      py: 1.5,
-                      borderRadius: "12px",
-                      fontWeight: 800,
-                      background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
-                      color: "#000",
-                      boxShadow: "0 0 15px rgba(255, 215, 0, 0.3)"
-                    }}
-                     
-                  >
-                    Go Premium Gold 👑
-                  </Button>
-                )}
+
               </Box>
             )}
 
@@ -1062,7 +979,7 @@ export default function Navbar() {
                   setMobileOpen(false);
                   setTipModalOpen(true);
                 }}
-                 
+
                 sx={{
                   py: 1.5,
                   borderRadius: "12px",
@@ -1107,7 +1024,7 @@ export default function Navbar() {
                   navigate("/");
                 }}
                 sx={{ py: 1.5, borderRadius: "12px", fontWeight: 800, borderColor: "rgba(239, 68, 68, 0.3)" }}
-                 
+
               >
                 Sign Out
               </Button>

@@ -570,25 +570,25 @@ export default function CreatorLeaderboard() {
               const rankColors = ["#ffd700", "#c0c0c0", "#cd7f32"];
               const borderStyle = isCurrentUser
                 ? "2px solid #38BDF8"
-                : creator.is_premium
+                : /* creator.is_premium
                   ? "1px solid rgba(255, 215, 0, 0.4)"
-                  : isTop3
+                  : */ isTop3
                     ? `1px solid ${rankColors[globalIndex]}66`
                     : "1px solid rgba(255,255,255,0.06)";
 
               const backgroundStyle = isCurrentUser
                 ? "rgba(56, 189, 248, 0.08)"
-                : creator.is_premium
+                : /* creator.is_premium
                   ? "linear-gradient(135deg, rgba(255, 215, 0, 0.07) 0%, rgba(255, 215, 0, 0.02) 100%)"
-                  : isTop3
+                  : */ isTop3
                     ? `linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%)`
                     : "rgba(255,255,255,0.02)";
 
               const glowBoxShadow = isCurrentUser
                 ? "0 0 25px rgba(56, 189, 248, 0.15)"
-                : creator.is_premium
+                : /* creator.is_premium
                   ? "0 0 25px rgba(255, 215, 0, 0.08)"
-                  : isTop3
+                  : */ isTop3
                     ? `0 0 25px ${rankColors[globalIndex]}1a`
                     : "0 4px 15px rgba(0,0,0,0.15)";
 
@@ -612,12 +612,12 @@ export default function CreatorLeaderboard() {
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     "&:hover": {
                       transform: "translateY(-4px)",
-                      borderColor: isCurrentUser ? "#38BDF8" : creator.is_premium ? "#FFD700" : "rgba(255,255,255,0.25)",
+                      borderColor: isCurrentUser ? "#38BDF8" : /* creator.is_premium ? "#FFD700" : */ "rgba(255,255,255,0.25)",
                       boxShadow: isCurrentUser
                         ? "0 10px 30px rgba(56, 189, 248, 0.25)"
-                        : creator.is_premium
+                        : /* creator.is_premium
                           ? "0 10px 30px rgba(255, 215, 0, 0.18)"
-                          : "0 10px 30px rgba(255,255,255,0.05)"
+                          : */ "0 10px 30px rgba(255,255,255,0.05)"
                     }
                   }}
                 >
@@ -630,7 +630,7 @@ export default function CreatorLeaderboard() {
                     }}
                   >
                     {/* Visual Indicator Lines */}
-                    {(isTop3 || creator.is_premium || isCurrentUser) && (
+                    {(isTop3 || /* creator.is_premium || */ isCurrentUser) && (
                       <Box
                         sx={{
                           position: "absolute",
@@ -638,8 +638,8 @@ export default function CreatorLeaderboard() {
                           left: 0,
                           width: 5,
                           height: "100%",
-                          bgcolor: isCurrentUser ? "#38BDF8" : creator.is_premium ? "#FFD700" : rankColors[globalIndex],
-                          boxShadow: `0 0 10px ${isCurrentUser ? "#38BDF8" : creator.is_premium ? "#FFD700" : rankColors[globalIndex]}`
+                          bgcolor: isCurrentUser ? "#38BDF8" : /* creator.is_premium ? "#FFD700" : */ rankColors[globalIndex],
+                          boxShadow: `0 0 10px ${isCurrentUser ? "#38BDF8" : /* creator.is_premium ? "#FFD700" : */ rankColors[globalIndex]}`
                         }}
                       />
                     )}
@@ -655,17 +655,17 @@ export default function CreatorLeaderboard() {
                         borderRadius: "50%",
                         bgcolor: isCurrentUser
                           ? "rgba(56, 189, 248, 0.1)"
-                          : creator.is_premium
+                          : /* creator.is_premium
                             ? "rgba(255, 215, 0, 0.08)"
-                            : isTop3
+                            : */ isTop3
                               ? `${rankColors[globalIndex]}12`
                               : "rgba(255,255,255,0.03)",
-                        border: `1.5px solid ${isCurrentUser ? "#38BDF8" : creator.is_premium ? "#FFD700" : isTop3 ? rankColors[globalIndex] + "66" : "rgba(255,255,255,0.08)"}`,
+                        border: `1.5px solid ${isCurrentUser ? "#38BDF8" : /* creator.is_premium ? "#FFD700" : */ isTop3 ? rankColors[globalIndex] + "66" : "rgba(255,255,255,0.08)"}`,
                         color: isCurrentUser
                           ? "#38BDF8"
-                          : creator.is_premium
+                          : /* creator.is_premium
                             ? "#FFD700"
-                            : isTop3
+                            : */ isTop3
                               ? rankColors[globalIndex]
                               : "text.secondary",
                         fontSize: isTop3 ? { xs: "1rem", sm: "1.25rem" } : "0.95rem",
@@ -690,16 +690,16 @@ export default function CreatorLeaderboard() {
                         justifyContent: "center",
                         bgcolor: isCurrentUser
                           ? "rgba(56, 189, 248, 0.2)"
-                          : creator.is_premium
+                          : /* creator.is_premium
                             ? "rgba(255, 215, 0, 0.15)"
-                            : isTop3
+                            : */ isTop3
                               ? `${rankColors[globalIndex]}22`
                               : "rgba(255,255,255,0.08)",
                         border: isCurrentUser
                           ? "1px solid #38BDF8"
-                          : creator.is_premium
+                          : /* creator.is_premium
                             ? "1px solid #FFD700"
-                            : isTop3
+                            : */ isTop3
                               ? `1px solid ${rankColors[globalIndex]}66`
                               : "1px solid rgba(255,255,255,0.08)",
                         flexShrink: 0
@@ -716,7 +716,7 @@ export default function CreatorLeaderboard() {
                     {/* Info */}
                     <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                       <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1, mb: 0.5 }}>
-                        <Typography variant="h6" noWrap sx={{ fontWeight: 800, fontSize: { xs: "0.95rem", sm: "1.15rem" }, color: creator.is_premium ? "#FFD700" : isCurrentUser ? "#38BDF8" : "inherit" }}>
+                        <Typography variant="h6" noWrap sx={{ fontWeight: 800, fontSize: { xs: "0.95rem", sm: "1.15rem" }, color: /* creator.is_premium ? "#FFD700" : */ isCurrentUser ? "#38BDF8" : "inherit" }}>
                           {creator.name || shorten(creator.wallet_address)}
                         </Typography>
 
@@ -735,7 +735,7 @@ export default function CreatorLeaderboard() {
                           />
                         )}
 
-                        {creator.is_premium && (
+                        {/* creator.is_premium && (
                           <Chip
                             label="PREMIUM"
                             size="small"
@@ -749,9 +749,9 @@ export default function CreatorLeaderboard() {
                               px: 0.5
                             }}
                           />
-                        )}
+                        ) */}
 
-                        {isTop3 && !creator.is_premium && (
+                        {isTop3 && (
                           <Chip
                             label={["Champion", "Runner-up", "Bronze"][globalIndex]}
                             size="small"
