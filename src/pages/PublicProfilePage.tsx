@@ -1608,7 +1608,8 @@ export default function PublicProfilePage() {
                             helperText={`${message.length}/280`}
                             slotProps={{
                               formHelperText: { sx: { textAlign: "right", fontWeight: 500 } },
-                              input: { sx: { fontSize: "1.02rem" } }
+                              input: { sx: { fontSize: "1.02rem" } },
+                              htmlInput: { maxLength: 280 }
                             }}
                           />
                         </Box>

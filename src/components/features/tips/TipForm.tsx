@@ -307,7 +307,8 @@ export default function TipForm({ defaultCreatorAddress = "" }: { defaultCreator
               helperText={`${message.length}/280`}
               slotProps={{
                 formHelperText: { sx: { textAlign: "right", fontWeight: 500 } },
-                input: { sx: { fontSize: "1.05rem" } }
+                input: { sx: { fontSize: "1.05rem" } },
+                htmlInput: { maxLength: 280 }
               }}
             />
 

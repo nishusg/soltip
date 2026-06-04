@@ -163,7 +163,7 @@ export function isTokenValid(token: string): boolean {
 // ---------------------------------------------------------------------------
 
 /** Maximum allowed message length for display */
-const MAX_DISPLAY_MESSAGE_LENGTH = 300;
+const MAX_DISPLAY_MESSAGE_LENGTH = 280;
 
 /**
  * Sanitize a user-provided message for display in the UI and TTS.
