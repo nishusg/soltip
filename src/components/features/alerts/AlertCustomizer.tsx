@@ -34,6 +34,7 @@ import PaletteIcon from "@mui/icons-material/Palette";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import StarIcon from "@mui/icons-material/Star";
+import BlockIcon from "@mui/icons-material/Block";
 import toast from "react-hot-toast";
 import { logger } from "../../../utils/logger";
 import type { OverlaySettings } from "../../../types";
@@ -89,6 +90,7 @@ export default function AlertCustomizer({
   const [goalTarget, setGoalTarget] = useState<number>(10);
   const [goalCurrent, setGoalCurrent] = useState<number>(0);
   const [isGoalCurrentDirty, setIsGoalCurrentDirty] = useState<boolean>(false);
+  const [blockedWordsInput, setBlockedWordsInput] = useState<string>("");
 
   // Sync state values when backend profile settings change
   useEffect(() => {
@@ -122,6 +124,9 @@ export default function AlertCustomizer({
       if (initialSettings.goal_target !== undefined) setGoalTarget(initialSettings.goal_target);
       if (initialSettings.goal_current !== undefined && !isGoalCurrentDirty) {
         setGoalCurrent(initialSettings.goal_current);
+      }
+      if (initialSettings.blocked_words !== undefined) {
+        setBlockedWordsInput(initialSettings.blocked_words.join(", "));
       }
     }
   }, [initialSettings, theme, isGoalCurrentDirty]);
@@ -306,7 +311,11 @@ export default function AlertCustomizer({
         text_effect: textEffect,
         goal_enabled: goalEnabled,
         goal_title: goalTitle,
-        goal_target: goalTarget
+        goal_target: goalTarget,
+        blocked_words: blockedWordsInput
+          .split(",")
+          .map((w) => w.trim())
+          .filter(Boolean)
       };
 
       if (isGoalCurrentDirty) {
@@ -1111,6 +1120,61 @@ export default function AlertCustomizer({
                 }
               }}
             />
+          </Paper>
+        </Grid>
+
+        {/* 5. Message Moderation & Word Filter Column */}
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Paper sx={{
+            p: 3.5,
+            bgcolor: "rgba(0,0,0,0.15)",
+            border: `1px solid ${userThemeColor}1f`,
+            borderRadius: "20px",
+            height: "100%",
+            transition: "all 0.3s ease",
+            display: "flex",
+            flexDirection: "column",
+            "&:hover": {
+              borderColor: `${userThemeColor}44`,
+              boxShadow: `0 4px 24px ${userThemeColor}0d`
+            }
+          }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 850, display: "flex", alignItems: "center", gap: 1, mb: 3, color: userThemeColor }}>
+              <BlockIcon sx={{ fontSize: 20 }} /> 🛡️ Word Moderation
+            </Typography>
+
+            <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>Blocked Words List</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+              Censors custom words matching on your stream overlay & TTS. Separate words with commas (max 50).
+            </Typography>
+
+            <TextField
+              multiline
+              rows={4}
+              placeholder="e.g. scam, hack, spam"
+              value={blockedWordsInput}
+              onChange={(e) => setBlockedWordsInput(e.target.value)}
+              sx={{
+                mb: 2,
+                "& .MuiInputLabel-root.Mui-focused": { color: userThemeColor },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "12px",
+                  "&.Mui-focused fieldset": { borderColor: userThemeColor }
+                }
+              }}
+            />
+
+            <Box sx={{ display: "flex", justifyContent: "space-between", mt: "auto" }}>
+              <Typography variant="caption" color="text.secondary">
+                Active custom:
+              </Typography>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: userThemeColor }}>
+                {blockedWordsInput.split(",").map(w => w.trim()).filter(Boolean).length} / 50
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, fontSize: "0.68rem", opacity: 0.8 }}>
+              💡 A default general profanity blocklist is always active as a base layer.
+            </Typography>
           </Paper>
         </Grid>
       </Grid>

@@ -105,4 +105,5 @@ export interface OverlaySettings {
   goal_title?: string;
   goal_target?: number;
   goal_current?: number;
+  blocked_words?: string[];
 }
