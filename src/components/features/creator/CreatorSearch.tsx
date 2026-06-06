@@ -24,7 +24,6 @@ export default function CreatorSearch() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [failedAvatars, setFailedAvatars] = useState<Record<string, boolean>>({});
 
   // Fetch searched creators
   useEffect(() => {
@@ -175,23 +174,12 @@ export default function CreatorSearch() {
                 >
                   {/* Avatar Wrapper */}
                   <Box sx={{ width: 44, height: 44, borderRadius: "12px", overflow: "hidden", display: "flex", flexShrink: 0 }}>
-                    {creator.avatar_url && !failedAvatars[creator.wallet_address] ? (
-                      <img
-                        src={creator.avatar_url}
-                        alt={creator.name || creator.username || "creator"}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        onError={() => {
-                          setFailedAvatars((prev) => ({ ...prev, [creator.wallet_address]: true }));
-                        }}
-                      />
-                    ) : (
-                      <BoringAvatar
-                        size={44}
-                        name={creator.username || creator.wallet_address}
-                        variant="marble"
-                        colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
-                      />
-                    )}
+                    <BoringAvatar
+                      size={44}
+                      name={creator.username || creator.wallet_address}
+                      variant="marble"
+                      colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                    />
                   </Box>
 
                   {/* Details */}

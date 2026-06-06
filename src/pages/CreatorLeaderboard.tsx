@@ -36,7 +36,6 @@ import { CreatorLeaderboardSkeleton } from "../components/common/LoadingSkeleton
 interface Creator {
   wallet_address: string;
   name: string;
-  avatar_url?: string;
   total_received: number;
   is_premium?: boolean;
 }

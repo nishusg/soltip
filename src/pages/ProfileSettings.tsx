@@ -34,7 +34,6 @@ export default function ProfileSettings() {
   const { walletAddress, isAuthenticated, refreshUser } = useWalletAuth();
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
   const [selectedTheme, setSelectedTheme] = useState("gold");
   const [username, setUsername] = useState("");
   
@@ -68,7 +67,6 @@ export default function ProfileSettings() {
       if (data.user) {
         setName(data.user.name || "");
         setBio(data.user.bio || "");
-        setAvatarUrl(data.user.avatar_url || "");
         setSelectedTheme(data.user.selected_theme || "gold");
         setUsername(data.user.username || "");
         
@@ -109,10 +107,6 @@ export default function ProfileSettings() {
       return;
     }
 
-    if (avatarUrl.length > 2048) {
-      toast.error("Avatar URL must be 2048 characters or less!");
-      return;
-    }
 
     if (username.trim()) {
       const usernameRegex = /^[a-z0-9-]+$/;
@@ -174,7 +168,6 @@ export default function ProfileSettings() {
       await updateProfile({ 
         name: name.trim(), 
         bio, 
-        avatar_url: avatarUrl,
         username: username.trim(),
         socials: {
           twitter: twitter.trim(),

@@ -11,7 +11,7 @@ interface SEOProps {
   creatorProfile?: {
     name: string;
     bio: string;
-    avatarUrl: string;
+    avatarUrl?: string;
     walletAddress: string;
     socials?: {
       twitter?: string;
@@ -86,7 +86,7 @@ export default function SEO({
       "@type": "Person",
       "name": creatorProfile.name,
       "description": creatorProfile.bio,
-      "image": creatorProfile.avatarUrl,
+      "image": creatorProfile.avatarUrl || (typeof window !== "undefined" ? `${window.location.origin}/og-image.png` : `${SITE_URL}/og-image.png`),
       "identifier": creatorProfile.walletAddress,
       "sameAs": Object.values(creatorProfile.socials || {}).filter(Boolean)
     }

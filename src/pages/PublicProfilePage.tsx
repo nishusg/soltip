@@ -53,7 +53,6 @@ interface CreatorProfile {
   name: string;
   username: string;
   bio?: string;
-  avatar_url?: string;
   is_premium: boolean;
   selected_theme: string;
   socials: {
@@ -592,13 +591,11 @@ export default function PublicProfilePage() {
             title={`${creator.name || creator.username} (@${creator.username})`}
             description={creator.bio || `Watch streams, click social links, and send instant tip superchats to @${creator.username} on ${SITE_NAME}.`}
 
-            image={creator.avatar_url || "/og-image.png"}
+            image="/og-image.png"
             keywords={`solana, tipping, superchat, creator, ${creator.username}, ${creator.name || ""}, stream alerts, web3`}
             creatorProfile={{
               name: creator.name || creator.username || "",
               bio: creator.bio || `Solana stream creator on ${SITE_NAME}.`,
-
-              avatarUrl: creator.avatar_url || "",
               walletAddress: creator.wallet_address || "",
               socials: creator.socials
             }}

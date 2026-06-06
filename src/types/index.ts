@@ -32,7 +32,6 @@ export interface User {
   name?: string;
   username?: string;
   bio?: string;
-  avatar_url?: string;
   is_premium?: boolean;
   selected_theme?: string;
   total_received: number;

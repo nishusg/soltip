@@ -235,7 +235,6 @@ export async function getPublicProfileByUsername(username: string) {
 export async function updateProfile(data: {
   name?: string;
   bio?: string;
-  avatar_url?: string;
   username?: string;
   socials?: {
     twitter?: string;

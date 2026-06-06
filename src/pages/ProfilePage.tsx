@@ -18,7 +18,6 @@ interface UserProfile {
   wallet_address: string;
   name: string;
   bio?: string;
-  avatar_url?: string;
   total_received: number;
   total_sent: number;
 }
