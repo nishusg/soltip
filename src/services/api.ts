@@ -185,9 +185,14 @@ export async function verifyAndStoreTransaction(data: {
   });
 }
 
-/** List recent transactions for a wallet */
-export async function listTransactions(wallet: string) {
-  return api(`/tx/list?wallet=${wallet}`);
+/** List recent transactions for a wallet with pagination and tab filter */
+export async function listTransactions(wallet: string, page: number = 1, limit: number = 50, tab: string = "all") {
+  const queryParams = new URLSearchParams();
+  queryParams.append("wallet", wallet);
+  queryParams.append("page", page.toString());
+  queryParams.append("limit", limit.toString());
+  queryParams.append("tab", tab);
+  return api(`/tx/list?${queryParams.toString()}`);
 }
 
 /** Get the verification status of a specific transaction */
@@ -210,25 +215,43 @@ export async function getDailyStats() {
 }
 
 /** Get creator dashboard statistics (authenticated) */
-export async function getDashboardData() {
-  return api("/stats/dashboard");
+export async function getDashboardData(page: number = 1, limit: number = 5, date?: string) {
+  const queryParams = new URLSearchParams();
+  queryParams.append("page", String(page));
+  queryParams.append("limit", String(limit));
+  if (date) queryParams.append("date", date);
+
+  return api(`/stats/dashboard?${queryParams.toString()}`);
 }
 
-/** Get creator leaderboard with optional timeframe */
-export async function getLeaderboard(timeframe?: string) {
-  const query = timeframe ? `?timeframe=${timeframe}` : "";
-  return api(`/stats/leaderboard${query}`);
+/** Get creator leaderboard with optional timeframe, page, limit, and search query */
+export async function getLeaderboard(timeframe?: string, page: number = 1, limit: number = 10, search: string = "") {
+  const queryParams = new URLSearchParams();
+  if (timeframe) queryParams.append("timeframe", timeframe);
+  queryParams.append("page", page.toString());
+  queryParams.append("limit", limit.toString());
+  if (search.trim()) queryParams.append("search", search.trim());
+  return api(`/stats/leaderboard?${queryParams.toString()}`);
 }
 
 
-/** Get a user's profile and recent tips (both sent and received) */
-export async function getUserProfile(wallet: string) {
-  return api(`/stats/user/${wallet}`);
+/** Get a user's profile and recent tips with optional pagination and tab filter */
+export async function getUserProfile(wallet: string, page: number = 1, limit: number = 5, tab: string = "received") {
+  const queryParams = new URLSearchParams();
+  queryParams.append("page", page.toString());
+  queryParams.append("limit", limit.toString());
+  queryParams.append("tab", tab);
+  return api(`/stats/user/${wallet}?${queryParams.toString()}`);
 }
 
-/** Get a public creator's profile by their unique username slug */
-export async function getPublicProfileByUsername(username: string) {
-  return api(`/stats/username/${username}`);
+/** Get a public creator's profile by their unique username slug with pagination and search filters */
+export async function getPublicProfileByUsername(username: string, page: number = 1, limit: number = 5, search: string = "", filter: string = "all") {
+  const queryParams = new URLSearchParams();
+  queryParams.append("page", page.toString());
+  queryParams.append("limit", limit.toString());
+  if (search.trim()) queryParams.append("search", search.trim());
+  queryParams.append("filter", filter);
+  return api(`/stats/username/${username}?${queryParams.toString()}`);
 }
 
 /** Update the creator profile for the authenticated user */

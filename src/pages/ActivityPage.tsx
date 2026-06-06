@@ -12,7 +12,7 @@
 //   6. **Explicit Timestamps**: Absolute date/time formatting with relative hover tooltips.
 // ============================================================================
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { logger } from "../utils/logger";
 import { Link as RouterLink } from "react-router-dom";
 import { 
@@ -72,13 +72,27 @@ export default function ActivityPage() {
   
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const ITEMS_PER_PAGE = 5;
+
+  const [stats, setStats] = useState({
+    netEarnings: 0,
+    tipsCount: 0,
+    failedCount: 0,
+    refundedVolume: 0
+  });
+  const [topSupporters, setTopSupporters] = useState<{ wallet: string; name: string; total: number }[]>([]);
+
+  const lastTabRef = useRef(activeTab);
+  const tabMapping = ["all", "verified", "failed", "sent"];
 
   // Reset pagination to page 1 when active tab changes
   useEffect(() => {
-    setCurrentPage(1);
+    if (activeTab !== lastTabRef.current) {
+      setCurrentPage(1);
+    }
   }, [activeTab]);
-  
+
   // Explorer preference (Persisted in LocalStorage)
   const [explorerPref, setExplorerPref] = useState<string>(() => {
     const pref = localStorage.getItem("soltip_explorer_pref") || "solscan";
@@ -89,11 +103,25 @@ export default function ActivityPage() {
   useEffect(() => {
     if (!walletAddress || !isAuthenticated) return;
 
+    // If activeTab changed but currentPage is not reset to 1 yet, wait for the reset
+    if (activeTab !== lastTabRef.current && currentPage !== 1) {
+      return;
+    }
+    lastTabRef.current = activeTab;
+
     async function fetchTxs() {
       setLoading(true);
       try {
-        const data = await listTransactions(walletAddress!);
+        const tabKey = tabMapping[activeTab];
+        const data = await listTransactions(walletAddress!, currentPage, ITEMS_PER_PAGE, tabKey);
         setTransactions(data.transactions || []);
+        setTotalPages(data.pagination?.pages || 1);
+        if (data.stats) {
+          setStats(data.stats);
+        }
+        if (data.topSupporters) {
+          setTopSupporters(data.topSupporters);
+        }
       } catch (err) {
         logger.error("Failed to fetch transactions:", err);
         toast.error("Failed to sync your activity log.");
@@ -103,7 +131,7 @@ export default function ActivityPage() {
     }
 
     fetchTxs();
-  }, [walletAddress, isAuthenticated]);
+  }, [walletAddress, isAuthenticated, currentPage, activeTab]);
 
   // Save explorer preference
   const handleExplorerChange = (pref: string) => {
@@ -159,87 +187,10 @@ export default function ActivityPage() {
     return `${days}d ago`;
   };
 
-  // 1. Calculate Live Aggregated Statistics
-  const stats = useMemo(() => {
-    let verifiedEarnings = 0;
-    let verifiedCount = 0;
-    let failedCount = 0;
-    let refundedVolume = 0;
-
-    transactions.forEach((tx) => {
-      // Received stats (authenticated user is the recipient)
-      if (tx.creator_wallet === walletAddress) {
-        if (tx.status === "verified") {
-          verifiedEarnings += (tx.amount - tx.fee);
-          verifiedCount += 1;
-        } else if (tx.status === "failed") {
-          failedCount += 1;
-        } else if (tx.status === "refunded") {
-          refundedVolume += tx.amount;
-        }
-      }
-    });
-
-    return {
-      netEarnings: verifiedEarnings / LAMPORTS_PER_SOL,
-      tipsCount: verifiedCount,
-      failedCount,
-      refundedVolume: refundedVolume / LAMPORTS_PER_SOL
-    };
-  }, [transactions, walletAddress]);
-
-  // 2. Calculate Top Supporters (Real-Time Contribution Leaderboard)
-  const topSupporters = useMemo(() => {
-    const contributorMap: Record<string, { total: number; name: string }> = {};
-
-    transactions.forEach((tx) => {
-      if (tx.creator_wallet === walletAddress && tx.status === "verified") {
-        const key = tx.sender_wallet;
-        const displayName = tx.sender_name || shorten(tx.sender_wallet);
-        if (!contributorMap[key]) {
-          contributorMap[key] = { total: 0, name: displayName };
-        }
-        contributorMap[key].total += tx.amount / LAMPORTS_PER_SOL;
-      }
-    });
-
-    return Object.entries(contributorMap)
-      .map(([wallet, data]) => ({
-        wallet,
-        name: data.name,
-        total: data.total
-      }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 5);
-  }, [transactions, walletAddress]);
-
   const maxSupporterTotal = useMemo(() => {
     if (topSupporters.length === 0) return 1;
     return topSupporters[0].total;
   }, [topSupporters]);
-
-  // 3. Filter Transactions based on active tab
-  const filteredTransactions = useMemo(() => {
-    return transactions.filter((tx) => {
-      const isReceived = tx.creator_wallet === walletAddress;
-      const isSent = tx.sender_wallet === walletAddress;
-
-      if (activeTab === 0) return true; // All
-      if (activeTab === 1) return isReceived && tx.status === "verified"; // Verified Tips
-      if (activeTab === 2) return isReceived && tx.status === "failed"; // Failed
-      // if (activeTab === 3) return isReceived && tx.status === "refunded"; // Refunds (Disabled)
-      if (activeTab === 3) return isSent; // Sent Tips (Index adjusted from 4 to 3)
-      return true;
-    });
-  }, [transactions, activeTab, walletAddress]);
-
-  // 4. Calculate Paginated Transactions
-  const paginatedTransactions = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredTransactions.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredTransactions, currentPage]);
-
-  const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
 
   // Execute Refund Action
   /*
@@ -427,7 +378,7 @@ export default function ActivityPage() {
               <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
                 {loading && <ActivityPageSkeleton />}
 
-                {!loading && filteredTransactions.length === 0 && (
+                {!loading && transactions.length === 0 && (
                   <Box sx={{ textAlign: "center", py: 10, bgcolor: "rgba(255,255,255,0.01)", borderRadius: "20px", border: "1px dashed rgba(255,255,255,0.08)" }}>
                     <Typography variant="body1" color="text.secondary" sx={{ mb: 2, fontWeight: 500 }}>
                       No matching records found in this category.
@@ -438,9 +389,9 @@ export default function ActivityPage() {
                   </Box>
                 )}
 
-                {!loading && filteredTransactions.length > 0 && (
+                {!loading && transactions.length > 0 && (
                   <Stack spacing={2.5}>
-                    {paginatedTransactions.map((tx) => {
+                    {transactions.map((tx) => {
                       const isSent = tx.sender_wallet === walletAddress;
                       return (
                         <Box 

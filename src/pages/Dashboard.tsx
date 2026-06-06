@@ -166,6 +166,9 @@ export default function Dashboard() {
   const [chartTab, setChartTab] = useState<"daily" | "weekly" | "monthly">("daily");
   const [filterDate, setFilterDate] = useState<string>("");
   const [page, setPage] = useState(1);
+  const [tips, setTips] = useState<Tip[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalTipsCount, setTotalTipsCount] = useState(0);
   const { socket, connected } = useSocket();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -222,8 +225,11 @@ export default function Dashboard() {
     await saveOverlaySettings(settings);
     toast.success("Overlay settings saved successfully!");
     try {
-      const refreshed = await getDashboardData();
+      const refreshed = await getDashboardData(page, 5, filterDate);
       setData(refreshed);
+      setTips(refreshed.recentTips || []);
+      setTotalPages(refreshed.pagination?.pages || 1);
+      setTotalTipsCount(refreshed.pagination?.total || 0);
     } catch (e) {
       logger.error("Failed to refresh dashboard stats:", e);
     }
@@ -235,8 +241,11 @@ export default function Dashboard() {
 
   const loadDashboard = async () => {
     try {
-      const dashboardData = await getDashboardData();
+      const dashboardData = await getDashboardData(1, 5, "");
       setData(dashboardData);
+      setTips(dashboardData.recentTips || []);
+      setTotalPages(dashboardData.pagination?.pages || 1);
+      setTotalTipsCount(dashboardData.pagination?.total || 0);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -250,6 +259,24 @@ export default function Dashboard() {
       // Ignore error
     }
   };
+
+  // Fetch paginated tips on page or filterDate changes
+  useEffect(() => {
+    if (loading) return;
+
+    async function fetchPaginatedTips() {
+      try {
+        const dashboardData = await getDashboardData(page, 5, filterDate);
+        setTips(dashboardData.recentTips || []);
+        setTotalPages(dashboardData.pagination?.pages || 1);
+        setTotalTipsCount(dashboardData.pagination?.total || 0);
+      } catch (err: any) {
+        logger.error("Failed to fetch paginated tips for dashboard:", err);
+      }
+    }
+
+    fetchPaginatedTips();
+  }, [page, filterDate, loading]);
 
   const handleGenerateToken = async () => {
     setTokenLoading(true);
@@ -310,11 +337,11 @@ export default function Dashboard() {
 
   if (!data) return null;
 
-  const { user, recentTips, dailyEarnings } = data;
+  const { user, dailyEarnings } = data;
 
   // Calculate stats
   const totalEarned = user?.total_received || 0;
-  const totalTips = recentTips?.length || 0;
+  const totalTips = totalTipsCount;
   const totalDays = dailyEarnings?.length || 0;
   const avgPerDay = totalDays > 0
     ? dailyEarnings.reduce((sum: number, d: DailyEarning) => sum + d.total_earned, 0) / totalDays
@@ -322,25 +349,6 @@ export default function Dashboard() {
 
   // Streak calculations
   const streaks = calculateStreaks(dailyEarnings);
-
-  // Filter recent tips by selected date in local timezone
-  const filteredTips = recentTips?.filter((tip: Tip) => {
-    if (!filterDate) return true;
-    try {
-      const d = new Date(tip.timestamp);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const date = String(d.getDate()).padStart(2, "0");
-      const localDateStr = `${year}-${month}-${date}`;
-      return localDateStr === filterDate;
-    } catch (e) {
-      return false;
-    }
-  }) || [];
-
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(filteredTips.length / itemsPerPage);
-  const paginatedTips = filteredTips.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -724,11 +732,11 @@ export default function Dashboard() {
                 <BoltIcon sx={{ color: "secondary.main", mr: 1 }} /> Tip Distribution
               </Typography>
               <Box sx={{ flexGrow: 1, minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {recentTips && recentTips.length > 0 ? (
+                {tips && tips.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={recentTips.slice(0, 5).map((t: any, i: number) => ({ name: `Tip ${i + 1}`, value: t.amount / LAMPORTS_PER_SOL }))}
+                        data={tips.slice(0, 5).map((t: any, i: number) => ({ name: `Tip ${i + 1}`, value: t.amount / LAMPORTS_PER_SOL }))}
                         innerRadius={isMobile ? 60 : 75}
                         outerRadius={isMobile ? 80 : 100}
                         paddingAngle={5}
@@ -826,14 +834,14 @@ export default function Dashboard() {
                 </Box>
               </Box>
               <List disablePadding sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-                {filteredTips.length === 0 ? (
+                {tips.length === 0 ? (
                   <Box sx={{ p: 8, textAlign: "center", opacity: 0.5, flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Typography variant="h6" sx={{ fontWeight: 600 }}>
                       {filterDate ? "No superchats received on this day." : "No transactions yet."}
                     </Typography>
                   </Box>
                 ) : (
-                  paginatedTips.map((tip: any, idx: number) => (
+                  tips.map((tip: any, idx: number) => (
                     <Box key={tip._id}>
                       <ListItem sx={{ py: 3, px: { xs: 3, sm: 4 }, transition: "all 0.2s ease", "&:hover": { bgcolor: "rgba(255,255,255,0.02)" } }}>
                         <ListItemAvatar sx={{ mr: 2 }}>
@@ -903,7 +911,7 @@ export default function Dashboard() {
                           }
                         />
                       </ListItem>
-                      {idx < paginatedTips.length - 1 && <Divider sx={{ mx: 4, opacity: 0.1 }} />}
+                      {idx < tips.length - 1 && <Divider sx={{ mx: 4, opacity: 0.1 }} />}
                     </Box>
                   ))
                 )}

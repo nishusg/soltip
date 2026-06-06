@@ -111,6 +111,8 @@ export default function PublicProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [creatorStats, setCreatorStats] = useState({ totalCount: 0, volumeSol: 0, avgSol: 0 });
 
   // Enhanced visual and tracking states
   const [streamVisible, setStreamVisible] = useState(true);
@@ -118,10 +120,6 @@ export default function PublicProfilePage() {
   const [filterType, setFilterType] = useState<"all" | "large" | "message">("all");
   const [showConfetti, setShowConfetti] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  useEffect(() => {
-    setPage(1);
-  }, [username]);
 
   // Tip Form State
   const [amount, setAmount] = useState("");
@@ -133,6 +131,14 @@ export default function PublicProfilePage() {
   const [checkingStatus, setCheckingStatus] = useState(false);
   const isSubmitting = useRef(false);
 
+  // Reset states when username changes
+  useEffect(() => {
+    setPage(1);
+    setSearchQuery("");
+    setFilterType("all");
+  }, [username]);
+
+  // Fetch creator profile details
   useEffect(() => {
     if (!username) return;
 
@@ -140,9 +146,13 @@ export default function PublicProfilePage() {
       setLoading(true);
       setError(null);
       try {
-        const data = await getPublicProfileByUsername(username!);
+        const data = await getPublicProfileByUsername(username!, 1, 5, "", "all");
         setCreator(data.user);
         setTips(data.recent_tips || []);
+        setTotalPages(data.pagination?.pages || 1);
+        if (data.stats) {
+          setCreatorStats(data.stats);
+        }
       } catch (err: any) {
         setError(err.message || "Creator profile not found");
       } finally {
@@ -152,6 +162,30 @@ export default function PublicProfilePage() {
 
     fetchCreator();
   }, [username]);
+
+  // Fetch paginated tips on page, searchQuery, or filterType changes
+  useEffect(() => {
+    if (!username || loading) return;
+
+    async function fetchPaginatedTips() {
+      try {
+        const data = await getPublicProfileByUsername(username!, page, 5, searchQuery, filterType);
+        setTips(data.recent_tips || []);
+        setTotalPages(data.pagination?.pages || 1);
+        if (data.stats) {
+          setCreatorStats(data.stats);
+        }
+      } catch (err: any) {
+        logger.error("Failed to fetch paginated tips:", err);
+      }
+    }
+
+    const handler = setTimeout(() => {
+      fetchPaginatedTips();
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [username, page, searchQuery, filterType, loading]);
 
   // Real-time socket updates for global tipping events
   useEffect(() => {
@@ -342,9 +376,13 @@ export default function PublicProfilePage() {
       setShowConfetti(true); // Trigger Confetti upon signature confirmation
 
       // Reload recent superchats & profile settings (including goal progress)
-      const updatedData = await getPublicProfileByUsername(username!);
+      const updatedData = await getPublicProfileByUsername(username!, 1, 5, searchQuery, filterType);
       setCreator(updatedData.user);
       setTips(updatedData.recent_tips || []);
+      setTotalPages(updatedData.pagination?.pages || 1);
+      if (updatedData.stats) {
+        setCreatorStats(updatedData.stats);
+      }
       setPage(1);
     } catch (err: any) {
       setTxStatus("error");
@@ -365,9 +403,13 @@ export default function PublicProfilePage() {
         setShowConfetti(true); // Celebrate again on verified state confirmation
         toast.success("Tip verified successfully!", { icon: "🎉" });
         // Reload recent superchats & profile settings
-        const updatedData = await getPublicProfileByUsername(username!);
+        const updatedData = await getPublicProfileByUsername(username!, page, 5, searchQuery, filterType);
         setCreator(updatedData.user);
         setTips(updatedData.recent_tips || []);
+        setTotalPages(updatedData.pagination?.pages || 1);
+        if (updatedData.stats) {
+          setCreatorStats(updatedData.stats);
+        }
       }
     } catch (err: any) {
       logger.error("Status check failed:", err);
@@ -406,18 +448,6 @@ export default function PublicProfilePage() {
     return date.toLocaleDateString();
   }
 
-  // Dynamic stats calculated from the recent tips feed
-  const creatorStats = useMemo(() => {
-    if (!tips || tips.length === 0) {
-      return { totalCount: 0, volumeSol: 0, avgSol: 0 };
-    }
-    const totalCount = tips.length;
-    const totalLamports = tips.reduce((sum, tip) => sum + tip.amount, 0);
-    const volumeSol = totalLamports / 1e9;
-    const avgSol = volumeSol / totalCount;
-    return { totalCount, volumeSol, avgSol };
-  }, [tips]);
-
   // Dynamic Tipping Tier Configuration
   const tipTier = useMemo(() => {
     const parsed = parseFloat(amount);
@@ -428,31 +458,6 @@ export default function PublicProfilePage() {
     if (parsed >= 0.1) return { name: "Standard", color: "#14F195", glow: "0 0 14px rgba(20, 241, 149, 0.25)", text: "#14F195", badge: "⚡ Standard Support" };
     return { name: "Starter", color: "rgba(255, 255, 255, 0.15)", glow: "none", text: "text.secondary", badge: "🌱 Starter Support" };
   }, [amount]);
-
-  // Filtered and Searched Tips list
-  const filteredTips = useMemo(() => {
-    return tips.filter(tip => {
-      const nameMatch = (tip.sender_name || "").toLowerCase().includes(searchQuery.toLowerCase());
-      const messageMatch = (tip.message || "").toLowerCase().includes(searchQuery.toLowerCase());
-      const walletMatch = (tip.sender_wallet || "").toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSearch = nameMatch || messageMatch || walletMatch;
-
-      if (!matchesSearch) return false;
-
-      if (filterType === "large") {
-        return tip.amount >= 0.5 * 1e9; // 0.5 SOL
-      }
-      if (filterType === "message") {
-        return !!tip.message;
-      }
-
-      return true;
-    });
-  }, [tips, searchQuery, filterType]);
-
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(filteredTips.length / itemsPerPage);
-  const paginatedTips = filteredTips.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -1269,7 +1274,7 @@ export default function PublicProfilePage() {
                   <CardContent sx={{ p: 4 }}>
                     <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mb: 3 }}>
                       <Typography variant="h6" sx={{ fontWeight: 900 }}>🎙️ Recent Superchats</Typography>
-                      <Chip label={`${filteredTips.length} tip${filteredTips.length !== 1 ? "s" : ""}`} size="small" variant="outlined" sx={{ fontWeight: 700, borderRadius: "8px", fontSize: "0.72rem" }} />
+                      <Chip label={`${creatorStats.totalCount} tip${creatorStats.totalCount !== 1 ? "s" : ""}`} size="small" variant="outlined" sx={{ fontWeight: 700, borderRadius: "8px", fontSize: "0.72rem" }} />
                     </Stack>
 
                     {/* Filter and Search controls */}
@@ -1320,7 +1325,7 @@ export default function PublicProfilePage() {
                       </Stack>
                     </Stack>
 
-                    {filteredTips.length === 0 ? (
+                    {tips.length === 0 ? (
                       <Box sx={{ textAlign: "center", py: 6 }}>
                         <Typography sx={{ fontSize: "2.5rem", mb: 1 }}>⚡</Typography>
                         <Typography sx={{ fontWeight: 700, mb: 0.5 }}>No Superchats Found</Typography>
@@ -1330,7 +1335,7 @@ export default function PublicProfilePage() {
                       </Box>
                     ) : (
                       <Stack spacing={2.5}>
-                        {paginatedTips.map((tip, idx) => (
+                        {tips.map((tip, idx) => (
                           <Box key={tip.tx_hash}>
                             <Stack direction="row" spacing={2} sx={{ p: 2, borderRadius: "14px", bgcolor: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)" }}>
                               <Box sx={{ width: 44, height: 44, borderRadius: "10px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -1384,7 +1389,7 @@ export default function PublicProfilePage() {
                                 </Stack>
                               </Box>
                             </Stack>
-                            {idx < paginatedTips.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", my: 1 }} />}
+                            {idx < tips.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", my: 1 }} />}
                           </Box>
                         ))}
                       </Stack>

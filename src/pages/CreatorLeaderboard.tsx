@@ -49,8 +49,10 @@ export default function CreatorLeaderboard() {
   const [creators, setCreators] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [timeframe, setTimeframe] = useState<"alltime" | "monthly" | "weekly">("alltime");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [recentUpdates, setRecentUpdates] = useState<Record<string, { amount: number; timestamp: number }>>({});
 
   const { newTip } = useRealtimeTips();
@@ -59,6 +61,15 @@ export default function CreatorLeaderboard() {
 
   const itemsPerPage = 10;
 
+  // Debounce search query to prevent constant backend hits on typing
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setPage(1);
+    }, 450);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
   // ---------------------------------------------------------------------------
   // Load Leaderboard
   // ---------------------------------------------------------------------------
@@ -66,8 +77,9 @@ export default function CreatorLeaderboard() {
     async function fetchLeaderboard() {
       setLoading(true);
       try {
-        const data = await getLeaderboard(timeframe);
+        const data = await getLeaderboard(timeframe, page, itemsPerPage, debouncedSearchQuery);
         setCreators(data.creators || []);
+        setTotalPages(data.totalPages || 1);
       } catch (err) {
         logger.error("Failed to fetch leaderboard:", err);
       } finally {
@@ -76,7 +88,7 @@ export default function CreatorLeaderboard() {
     }
 
     fetchLeaderboard();
-  }, [timeframe]);
+  }, [timeframe, page, debouncedSearchQuery]);
 
   // ---------------------------------------------------------------------------
   // Handle Realtime Socket Tips
@@ -108,24 +120,16 @@ export default function CreatorLeaderboard() {
 
       setCreators((prev) => {
         const existingIndex = prev.findIndex((c) => c.wallet_address === newTip.creator_wallet);
-        let updatedList = [...prev];
-
         if (existingIndex >= 0) {
+          let updatedList = [...prev];
           updatedList[existingIndex] = {
             ...updatedList[existingIndex],
             total_received: updatedList[existingIndex].total_received + newTip.amount,
           };
-        } else {
-          updatedList.push({
-            wallet_address: newTip.creator_wallet,
-            name: newTip.sender_name || "", // fall back
-            total_received: newTip.amount,
-            is_premium: false,
-          });
+          updatedList.sort((a, b) => b.total_received - a.total_received);
+          return updatedList;
         }
-
-        updatedList.sort((a, b) => b.total_received - a.total_received);
-        return updatedList.slice(0, 50);
+        return prev;
       });
     }
   }, [newTip]);
@@ -150,21 +154,13 @@ export default function CreatorLeaderboard() {
   }
 
   // ---------------------------------------------------------------------------
-  // Search & Filtering
-  // ---------------------------------------------------------------------------
-  const filteredCreators = useMemo(() => {
-    return creators.filter((c) => {
-      const nameMatch = c.name?.toLowerCase().includes(searchQuery.toLowerCase());
-      const walletMatch = c.wallet_address.toLowerCase().includes(searchQuery.toLowerCase());
-      return nameMatch || walletMatch;
-    });
-  }, [creators, searchQuery]);
+  const filteredCreators = creators;
 
   // ---------------------------------------------------------------------------
   // Podium Logic (Top 3)
   // ---------------------------------------------------------------------------
-  // We only show the separate visual podium on larger screens when there's no active search
-  const showPodium = creators.length >= 3 && !searchQuery && !isMobile;
+  // We only show the separate visual podium on larger screens when there's no active search, and on page 1
+  const showPodium = page === 1 && creators.length >= 3 && !searchQuery && !isMobile;
 
   const firstPlace = showPodium ? creators[0] : null;
   const secondPlace = showPodium ? creators[1] : null;
@@ -175,18 +171,15 @@ export default function CreatorLeaderboard() {
     return showPodium ? filteredCreators.slice(3) : filteredCreators;
   }, [filteredCreators, showPodium]);
 
-  // Pagination slicing
-  const totalPages = Math.ceil(remainingCreators.length / itemsPerPage);
-  const paginatedCreators = useMemo(() => {
-    return remainingCreators.slice((page - 1) * itemsPerPage, page * itemsPerPage);
-  }, [remainingCreators, page]);
+  // Paginated creators is just the remaining creators on the current page slice from the server
+  const paginatedCreators = remainingCreators;
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     document.getElementById("leaderboard-title")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // Current logged in user's rank
+  // Current logged in user's rank (only check page 1 locally or we could check full leaderboard)
   const loggedInUserRank = useMemo(() => {
     if (!user || !user.wallet_address) return null;
     const index = creators.findIndex((c) => c.wallet_address === user.wallet_address);
@@ -560,7 +553,7 @@ export default function CreatorLeaderboard() {
           <List sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {paginatedCreators.map((creator) => {
               // Rank index relative to the main collection (actual leaderboard position)
-              const globalIndex = creators.findIndex((c) => c.wallet_address === creator.wallet_address);
+              const globalIndex = (page - 1) * itemsPerPage + creators.findIndex((c) => c.wallet_address === creator.wallet_address);
               const isTop3 = globalIndex < 3;
               const isCurrentUser = user && user.wallet_address === creator.wallet_address;
               const isUpdating = !!recentUpdates[creator.wallet_address];

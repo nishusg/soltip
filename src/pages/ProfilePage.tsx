@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { getUserProfile } from "../services/api";
 import { getExplorerUrl } from "../services/solana";
@@ -44,32 +44,64 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
-  const [showTipForm, setShowTipForm] = useState(false);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [showTipForm, setShowTipForm] = useState(false);
 
+  const lastTabRef = useRef(activeTab);
+
+  // Reset page when tab changes
   useEffect(() => {
-    setPage(1);
+    if (activeTab !== lastTabRef.current) {
+      setPage(1);
+    }
   }, [activeTab]);
 
+  // Fetch creator profile details
   useEffect(() => {
     if (!wallet) return;
 
-    async function fetchProfile() {
+    async function fetchCreator() {
       setLoading(true);
       setError(null);
       try {
-        const data = await getUserProfile(wallet!);
+        const data = await getUserProfile(wallet!, 1, 5, "received");
         setUser(data.user);
         setTips(data.recent_tips || []);
+        setTotalPages(data.pagination?.pages || 1);
       } catch (err: any) {
-        setError(err.message || "User not found");
+        setError(err.message || "Creator profile not found");
       } finally {
         setLoading(false);
       }
     }
 
-    fetchProfile();
+    fetchCreator();
   }, [wallet]);
+
+  // Fetch paginated tips
+  useEffect(() => {
+    if (!wallet || loading) return;
+
+    // If activeTab changed but page is not reset to 1 yet, wait for the reset
+    if (activeTab !== lastTabRef.current && page !== 1) {
+      return;
+    }
+    lastTabRef.current = activeTab;
+
+    async function fetchPaginatedTips() {
+      try {
+        const tabKey = activeTab === 0 ? "received" : "sent";
+        const data = await getUserProfile(wallet!, page, 5, tabKey);
+        setTips(data.recent_tips || []);
+        setTotalPages(data.pagination?.pages || 1);
+      } catch (err: any) {
+        console.error("Failed to fetch paginated tips:", err);
+      }
+    }
+
+    fetchPaginatedTips();
+  }, [wallet, page, activeTab, loading]);
 
   function shorten(addr: string): string {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -87,14 +119,6 @@ export default function ProfilePage() {
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
     return date.toLocaleDateString();
   }
-
-  const receivedTips = tips.filter(t => t.creator_wallet === wallet);
-  const sentTips = tips.filter(t => t.sender_wallet === wallet);
-
-  const activeTips = activeTab === 0 ? receivedTips : sentTips;
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(activeTips.length / itemsPerPage);
-  const paginatedTips = activeTips.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -233,18 +257,18 @@ export default function ProfilePage() {
           <Card id="profile-activity-header">
             <Box sx={{ borderBottom: 1, borderColor: "rgba(255,255,255,0.1)" }}>
               <Tabs value={activeTab} onChange={(_, val) => setActiveTab(val)} centered textColor="primary" indicatorColor="primary">
-                <Tab label={`Received (${receivedTips.length})`} sx={{ fontWeight: 700 }} />
-                <Tab label={`Sent (${sentTips.length})`} sx={{ fontWeight: 700 }} />
+                <Tab label="Received" sx={{ fontWeight: 700 }} />
+                <Tab label="Sent" sx={{ fontWeight: 700 }} />
               </Tabs>
             </Box>
             <CardContent sx={{ p: 4 }}>
               <List disablePadding>
-                {activeTips.length === 0 ? (
+                {tips.length === 0 ? (
                   <Typography sx={{ textAlign: "center", py: 4, color: "text.secondary", fontStyle: "italic" }}>
                     No activity found
                   </Typography>
                 ) : (
-                  paginatedTips.map((tip, idx) => (
+                  tips.map((tip, idx) => (
                     <Box key={tip.tx_hash}>
                       <ListItem sx={{ py: 2, px: 0 }}>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
@@ -327,7 +351,7 @@ export default function ProfilePage() {
                           </Box>
                         </Box>
                       </ListItem>
-                      {idx < paginatedTips.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.05)" }} />}
+                      {idx < tips.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.05)" }} />}
                     </Box>
                   ))
                 )}

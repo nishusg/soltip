@@ -83,10 +83,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [token]);
 
+  const lastTokenRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (token) {
+      if (lastTokenRef.current === token) return;
+      lastTokenRef.current = token;
       refreshUser();
     } else {
+      lastTokenRef.current = null;
       setUser(null);
     }
   }, [token, refreshUser]);
