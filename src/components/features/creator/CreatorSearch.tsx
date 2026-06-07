@@ -9,7 +9,8 @@ import {
   Paper,
   CircularProgress,
   InputAdornment,
-  Stack
+  Stack,
+  Pagination
 } from "@mui/material";
 import BoringAvatar from "boring-avatars";
 import SearchIcon from "@mui/icons-material/Search";
@@ -24,6 +25,8 @@ export default function CreatorSearch() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   // Fetch searched creators
   useEffect(() => {
@@ -31,6 +34,7 @@ export default function CreatorSearch() {
 
     if (!searchQuery.trim()) {
       setSearchResults([]);
+      setTotalPages(1);
       setSearchLoading(false);
       return;
     }
@@ -38,9 +42,10 @@ export default function CreatorSearch() {
     const delayDebounceFn = setTimeout(async () => {
       setSearchLoading(true);
       try {
-        const data = await searchCreators(searchQuery);
+        const data = await searchCreators(searchQuery, page, 6);
         if (active) {
           setSearchResults(data.creators || []);
+          setTotalPages(data.pagination?.totalPages || 1);
         }
       } catch (err) {
         if (active) {
@@ -57,7 +62,11 @@ export default function CreatorSearch() {
       active = false;
       clearTimeout(delayDebounceFn);
     };
-  }, [searchQuery]);
+  }, [searchQuery, page]);
+
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
 
   return (
     <Box
@@ -95,7 +104,10 @@ export default function CreatorSearch() {
         variant="outlined"
         placeholder="Search creator name, @username, or wallet..."
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={(e) => {
+          setSearchQuery(e.target.value);
+          setPage(1);
+        }}
         slotProps={{
           input: {
             startAdornment: (
@@ -224,6 +236,35 @@ export default function CreatorSearch() {
               </Grid>
             ))}
           </Grid>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                size="medium"
+                sx={{
+                  "& .MuiPaginationItem-root": {
+                    color: "rgba(255,255,255,0.6)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    bgcolor: "rgba(255,255,255,0.02)",
+                    borderRadius: "8px",
+                    fontWeight: 700,
+                    "&:hover": {
+                      bgcolor: "rgba(255,255,255,0.08)",
+                    },
+                    "&.Mui-selected": {
+                      boxShadow: "0 0 10px rgba(153, 69, 242, 0.25)",
+                      fontWeight: 900
+                    }
+                  }
+                }}
+              />
+            </Box>
+          )}
         </Box>
       ) : searchLoading ? (
         <CreatorSearchSkeleton />
