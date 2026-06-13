@@ -1,19 +1,22 @@
 import { useState, useEffect } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useWalletAuth } from "../../../hooks/useWalletAuth";
+import { useAuth } from "../../../context/AuthContext";
 import { useRealtimeTips } from "../../../hooks/useRealtimeTips";
 import { listTransactions } from "../../../services/api";
 import { getExplorerUrl } from "../../../services/solana";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { Card, CardContent, Typography, List, ListItem, Box, Link, Chip, Tooltip } from "@mui/material";
+import { Card, CardContent, Typography, List, ListItem, Box, Link, Chip, Tooltip, Button } from "@mui/material";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import BoringAvatar from "boring-avatars";
 import { logger } from "../../../utils/logger";
 import type { Tip } from "../../../types";
 import { RecentTipsSkeleton } from "../../common/LoadingSkeletons";
+import toast from "react-hot-toast";
 
 export default function RecentTips() {
   const { walletAddress, isAuthenticated } = useWalletAuth();
+  const { user } = useAuth();
   const { newTip, clearNewTip } = useRealtimeTips();
   const [transactions, setTransactions] = useState<Tip[]>([]);
   const [loading, setLoading] = useState(false);
@@ -98,9 +101,71 @@ export default function RecentTips() {
         {loading && <RecentTipsSkeleton />}
 
         {!loading && transactions.length === 0 && (
-          <Box sx={{ textAlign: "center", py: 8, bgcolor: "rgba(255,255,255,0.02)", borderRadius: "16px", border: "1px dashed rgba(255,255,255,0.1)" }}>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>No transactions found.</Typography>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>Ready for your first tip? 🚀</Typography>
+          <Box sx={{
+            textAlign: "center",
+            py: 6,
+            px: 4,
+            bgcolor: "rgba(255,255,255,0.01)",
+            borderRadius: "20px",
+            border: "1px dashed rgba(255,255,255,0.08)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2
+          }}>
+            <Typography sx={{ fontSize: "3rem", mb: 1, display: "inline-block", animation: "bounce 2s infinite" }}>
+              ✨
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 800 }}>
+              Your Ledger is Clean!
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, maxWidth: 450, lineHeight: 1.6 }}>
+              No transactions have been recorded yet. Share your tipping link or support other creators to populate this feed.
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2, width: "100%", justifyContent: "center", alignItems: "center" }}>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  if (user?.username) {
+                    const tippingLink = `${window.location.origin}/${user.username}`;
+                    navigator.clipboard.writeText(tippingLink);
+                    toast.success("Tipping link copied!");
+                  } else {
+                    toast.error("Please set a username in settings first!");
+                  }
+                }}
+                sx={{
+                  borderRadius: "10px",
+                  fontWeight: 800,
+                  fontSize: "0.8rem",
+                  px: 3,
+                  py: 1,
+                  background: (theme: any) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary?.main || theme.palette.primary.main} 100%)`,
+                  boxShadow: (theme: any) => `0 4px 12px ${theme.palette.primary.main}33`,
+                  "&.MuiButton-root": { color: "#fff" },
+                  "&:hover": { transform: "translateY(-1px)" }
+                }}
+              >
+                Copy Tipping Link
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/leaderboard"
+                variant="outlined"
+                sx={{
+                  borderRadius: "10px",
+                  fontWeight: 800,
+                  fontSize: "0.8rem",
+                  px: 3,
+                  py: 1,
+                  borderColor: "rgba(255,255,255,0.1)",
+                  color: "text.primary",
+                  "&:hover": { bgcolor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.2)", transform: "translateY(-1px)" }
+                }}
+              >
+                Find Creators
+              </Button>
+            </Box>
           </Box>
         )}
 

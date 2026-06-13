@@ -33,7 +33,8 @@ import {
   InputLabel,
   LinearProgress,
   Grid,
-  Pagination
+  Pagination,
+  Button
 } from "@mui/material";
 import { ActivityPageSkeleton } from "../components/common/LoadingSkeletons";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -44,6 +45,7 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import BoringAvatar from "boring-avatars";
 import { useWalletAuth } from "../hooks/useWalletAuth";
+import { useAuth } from "../context/AuthContext";
 import { listTransactions/*, refundTransaction*/ } from "../services/api";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import SEO from "../components/common/SEO";
@@ -66,9 +68,11 @@ interface Transaction {
 
 export default function ActivityPage() {
   const { walletAddress, isAuthenticated } = useWalletAuth();
+  const { user } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
+  const [hasNoActivityOverall, setHasNoActivityOverall] = useState<boolean | null>(null);
   
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,7 +88,7 @@ export default function ActivityPage() {
   const [topSupporters, setTopSupporters] = useState<{ wallet: string; name: string; total: number }[]>([]);
 
   const lastTabRef = useRef(activeTab);
-  const tabMapping = ["all", "verified", "failed", "sent"];
+  const tabMapping = ["all", "verified", "failed", "received", "sent"];
 
   // Reset pagination to page 1 when active tab changes
   useEffect(() => {
@@ -121,6 +125,9 @@ export default function ActivityPage() {
         }
         if (data.topSupporters) {
           setTopSupporters(data.topSupporters);
+        }
+        if (activeTab === 0 && currentPage === 1) {
+          setHasNoActivityOverall((data.transactions || []).length === 0);
         }
       } catch (err) {
         logger.error("Failed to fetch transactions:", err);
@@ -282,8 +289,98 @@ export default function ActivityPage() {
           </FormControl>
         </Box>
 
-        {/* ---- LED statistics cards ---- */}
-        <Grid container spacing={3} sx={{ mb: 5 }} className="fade-in-up">
+        {hasNoActivityOverall ? (
+          <Box className="fade-in-up" sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 4 }}>
+            <Card sx={{
+              bgcolor: "rgba(255, 255, 255, 0.015)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: "24px",
+              backdropFilter: "blur(20px)",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
+              p: { xs: 4, sm: 6 },
+              textAlign: "center",
+              maxWidth: 700,
+              width: "100%",
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: "-30%",
+                left: "30%",
+                width: "40%",
+                height: "60%",
+                background: (theme: any) => `radial-gradient(circle, ${theme.palette.primary.main}22 0%, transparent 70%)`,
+                filter: "blur(40px)",
+                zIndex: -1
+              }
+            }}>
+              <Typography sx={{ fontSize: "4.5rem", mb: 3, display: "inline-block", animation: "bounce 2s infinite" }}>
+                🚀
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 900, mb: 2, letterSpacing: "-0.01em" }}>
+                Welcome to your Broadcaster Ledger!
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 4, lineHeight: 1.7, fontSize: "1.05rem", px: { xs: 2, sm: 6 } }}>
+                Your transaction history is currently empty. Get started by sharing your profile tipping link with your stream audience, or support other creators on the platform!
+              </Typography>
+
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ justifyContent: "center", alignItems: "center" }}>
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    if (user?.username) {
+                      const tippingLink = `${window.location.origin}/${user.username}`;
+                      navigator.clipboard.writeText(tippingLink);
+                      toast.success("Tipping link copied to clipboard!");
+                    } else {
+                      toast.error("Please set a username in settings first!");
+                    }
+                  }}
+                  sx={{
+                    borderRadius: "12px",
+                    fontWeight: 800,
+                    px: 4,
+                    py: 1.5,
+                    background: (theme: any) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary?.main || theme.palette.primary.main} 100%)`,
+                    boxShadow: (theme: any) => `0 4px 15px ${theme.palette.primary.main}4d`,
+                    "&.MuiButton-root": { color: "#fff" },
+                    "&:hover": {
+                      transform: "translateY(-2px)",
+                      boxShadow: (theme: any) => `0 6px 20px ${theme.palette.primary.main}66`
+                    }
+                  }}
+                >
+                  Copy Tipping Link
+                </Button>
+                <Button
+                  component={RouterLink}
+                  to="/leaderboard"
+                  variant="outlined"
+                  sx={{
+                    borderRadius: "12px",
+                    fontWeight: 800,
+                    px: 4,
+                    py: 1.5,
+                    borderColor: "rgba(255,255,255,0.15)",
+                    color: "text.primary",
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      bgcolor: "rgba(255,255,255,0.05)",
+                      borderColor: "rgba(255,255,255,0.3)",
+                      transform: "translateY(-2px)"
+                    }
+                  }}
+                >
+                  Explore Leaderboard
+                </Button>
+              </Stack>
+            </Card>
+          </Box>
+        ) : (
+          <>
+            {/* ---- LED statistics cards ---- */}
+            <Grid container spacing={3} sx={{ mb: 5 }} className="fade-in-up">
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{ bgcolor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", borderRadius: "20px" }}>
               <CardContent sx={{ p: 3 }}>
@@ -370,7 +467,7 @@ export default function ActivityPage() {
                   <Tab label="All Activities" />
                   <Tab label="Verified Tips" />
                   <Tab label="Failed Txs" />
-                  {/* <Tab label="Refunds" /> */}
+                  <Tab label="Received Tips" />
                   <Tab label="Sent Tips" />
                 </Tabs>
               </Box>
@@ -739,6 +836,8 @@ export default function ActivityPage() {
           </Grid>
 
         </Grid>
+        </>
+      )}
       </Container>
 
     </Box>

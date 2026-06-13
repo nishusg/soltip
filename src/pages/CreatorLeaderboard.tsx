@@ -190,7 +190,8 @@ export default function CreatorLeaderboard() {
   return (
     <Box sx={{ maxWidth: 1000, mx: "auto", py: { xs: 4, md: 8 }, px: 2, position: "relative", pb: loggedInUserRank ? 16 : 8 }}>
       {/* Dynamic CSS animations for new tip pulsing */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes realTimeTipPulse {
           0% {
             border-color: #14F195;
@@ -382,7 +383,7 @@ export default function CreatorLeaderboard() {
                 >
                   {/* Platform Glow Side Border */}
                   <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: 5, bgcolor: "#c0c0c0" }} />
-                  <Typography variant="h4" sx={{ fontWeight: 900, color: "#c0c0c0", opacity: 0.8, mb: 1 }}>🥈 2nd</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 900, color: "#c0c0c0", opacity: 0.8, mb: 1 }}>2nd</Typography>
                   <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
                     <Box sx={{ p: 0.5, border: "2px solid #c0c0c0", borderRadius: "50%" }}>
                       <BoringAvatar size={76} name={secondPlace.name || secondPlace.wallet_address} variant="beam" colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
@@ -390,7 +391,7 @@ export default function CreatorLeaderboard() {
                   </Box>
                   <Typography variant="h6" noWrap sx={{ fontWeight: 800 }}>{secondPlace.name || shorten(secondPlace.wallet_address)}</Typography>
                   <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shorten(secondPlace.wallet_address)}</Typography>
-                  
+
                   <Box sx={{ bgcolor: "rgba(192, 192, 192, 0.1)", py: 1, px: 2, borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: 0.5, mb: 2 }}>
                     <Typography variant="h6" sx={{ fontWeight: 900, color: "#fff", display: "flex", alignItems: "baseline" }}>
                       {formatSol(secondPlace.total_received)}
@@ -443,8 +444,8 @@ export default function CreatorLeaderboard() {
                 >
                   <Box className="gold-shine" sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: "none" }} />
                   <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: 6, bgcolor: "#ffd700" }} />
-                  
-                  <Typography variant="h3" sx={{ fontWeight: 900, color: "#ffd700", mb: 1, textShadow: "0 0 10px rgba(255,215,0,0.5)" }}>👑 1st</Typography>
+
+                  <Typography variant="h3" sx={{ fontWeight: 900, color: "#ffd700", mb: 1, textShadow: "0 0 10px rgba(255,215,0,0.5)" }}>1st</Typography>
                   <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
                     <Box sx={{ p: 0.5, border: "3px solid #ffd700", borderRadius: "50%", boxShadow: "0 0 20px rgba(255,215,0,0.3)" }}>
                       <BoringAvatar size={90} name={firstPlace.name || firstPlace.wallet_address} variant="beam" colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
@@ -452,7 +453,7 @@ export default function CreatorLeaderboard() {
                   </Box>
                   <Typography variant="h5" noWrap sx={{ fontWeight: 900, color: "#ffd700" }}>{firstPlace.name || shorten(firstPlace.wallet_address)}</Typography>
                   <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shorten(firstPlace.wallet_address)}</Typography>
-                  
+
                   <Box sx={{ bgcolor: "rgba(255, 215, 0, 0.15)", py: 1, px: 2.5, borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: 0.5, mb: 2, border: "1px solid rgba(255,215,0,0.3)" }}>
                     <Typography variant="h5" sx={{ fontWeight: 900, color: "#ffd700", display: "flex", alignItems: "baseline" }}>
                       {formatSol(firstPlace.total_received)}
@@ -504,7 +505,7 @@ export default function CreatorLeaderboard() {
                   }}
                 >
                   <Box sx={{ position: "absolute", top: 0, left: 0, width: "100%", height: 5, bgcolor: "#cd7f32" }} />
-                  <Typography variant="h4" sx={{ fontWeight: 900, color: "#cd7f32", opacity: 0.8, mb: 1 }}>🥉 3rd</Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 900, color: "#cd7f32", opacity: 0.8, mb: 1 }}>3rd</Typography>
                   <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
                     <Box sx={{ p: 0.5, border: "2px solid #cd7f32", borderRadius: "50%" }}>
                       <BoringAvatar size={70} name={thirdPlace.name || thirdPlace.wallet_address} variant="beam" colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
@@ -512,7 +513,7 @@ export default function CreatorLeaderboard() {
                   </Box>
                   <Typography variant="h6" noWrap sx={{ fontWeight: 800 }}>{thirdPlace.name || shorten(thirdPlace.wallet_address)}</Typography>
                   <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shorten(thirdPlace.wallet_address)}</Typography>
-                  
+
                   <Box sx={{ bgcolor: "rgba(205, 127, 50, 0.1)", py: 1, px: 2, borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: 0.5, mb: 2 }}>
                     <Typography variant="h6" sx={{ fontWeight: 900, color: "#fff", display: "flex", alignItems: "baseline" }}>
                       {formatSol(thirdPlace.total_received)}
@@ -568,24 +569,24 @@ export default function CreatorLeaderboard() {
                 : /* creator.is_premium
                   ? "1px solid rgba(255, 215, 0, 0.4)"
                   : */ isTop3
-                    ? `1px solid ${rankColors[globalIndex]}66`
-                    : "1px solid rgba(255,255,255,0.06)";
+                  ? `1px solid ${rankColors[globalIndex]}66`
+                  : "1px solid rgba(255,255,255,0.06)";
 
               const backgroundStyle = isCurrentUser
                 ? "rgba(56, 189, 248, 0.08)"
                 : /* creator.is_premium
                   ? "linear-gradient(135deg, rgba(255, 215, 0, 0.07) 0%, rgba(255, 215, 0, 0.02) 100%)"
                   : */ isTop3
-                    ? `linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%)`
-                    : "rgba(255,255,255,0.02)";
+                  ? `linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%)`
+                  : "rgba(255,255,255,0.02)";
 
               const glowBoxShadow = isCurrentUser
                 ? "0 0 25px rgba(56, 189, 248, 0.15)"
                 : /* creator.is_premium
                   ? "0 0 25px rgba(255, 215, 0, 0.08)"
                   : */ isTop3
-                    ? `0 0 25px ${rankColors[globalIndex]}1a`
-                    : "0 4px 15px rgba(0,0,0,0.15)";
+                  ? `0 0 25px ${rankColors[globalIndex]}1a`
+                  : "0 4px 15px rgba(0,0,0,0.15)";
 
               return (
                 <Card
@@ -653,23 +654,23 @@ export default function CreatorLeaderboard() {
                           : /* creator.is_premium
                             ? "rgba(255, 215, 0, 0.08)"
                             : */ isTop3
-                              ? `${rankColors[globalIndex]}12`
-                              : "rgba(255,255,255,0.03)",
+                            ? `${rankColors[globalIndex]}12`
+                            : "rgba(255,255,255,0.03)",
                         border: `1.5px solid ${isCurrentUser ? "#38BDF8" : /* creator.is_premium ? "#FFD700" : */ isTop3 ? rankColors[globalIndex] + "66" : "rgba(255,255,255,0.08)"}`,
                         color: isCurrentUser
                           ? "#38BDF8"
                           : /* creator.is_premium
                             ? "#FFD700"
                             : */ isTop3
-                              ? rankColors[globalIndex]
-                              : "text.secondary",
+                            ? rankColors[globalIndex]
+                            : "text.secondary",
                         fontSize: isTop3 ? { xs: "1rem", sm: "1.25rem" } : "0.95rem",
                         fontWeight: 900,
                         mr: { xs: 1.5, sm: 3 },
                         flexShrink: 0
                       }}
                     >
-                      {globalIndex === 0 ? "👑" : globalIndex + 1}
+                      {globalIndex + 1}
                     </Box>
 
                     {/* Avatar */}
@@ -688,15 +689,15 @@ export default function CreatorLeaderboard() {
                           : /* creator.is_premium
                             ? "rgba(255, 215, 0, 0.15)"
                             : */ isTop3
-                              ? `${rankColors[globalIndex]}22`
-                              : "rgba(255,255,255,0.08)",
+                            ? `${rankColors[globalIndex]}22`
+                            : "rgba(255,255,255,0.08)",
                         border: isCurrentUser
                           ? "1px solid #38BDF8"
                           : /* creator.is_premium
                             ? "1px solid #FFD700"
                             : */ isTop3
-                              ? `1px solid ${rankColors[globalIndex]}66`
-                              : "1px solid rgba(255,255,255,0.08)",
+                            ? `1px solid ${rankColors[globalIndex]}66`
+                            : "1px solid rgba(255,255,255,0.08)",
                         flexShrink: 0
                       }}
                     >

@@ -13,7 +13,6 @@ import toast from "react-hot-toast";
 import TipForm from "../components/features/tips/TipForm";
 import SEO from "../components/common/SEO";
 import { SITE_NAME } from "../shared/constants";
-
 import BoringAvatar from "boring-avatars";
 
 interface UserProfile {

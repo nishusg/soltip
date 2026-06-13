@@ -99,11 +99,41 @@ interface ConfettiParticle {
   opacity: number;
 }
 
+const TwitterIconSvg = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6 }}>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+const TwitchIconSvg = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6 }}>
+    <path d="M11.571 4.714h1.715v5.143H11.57zm3.002 0H16.29v5.143h-1.717zm5.143-3.429v13.714h-5.143l-3.428 3.429v-3.429H7.286L3 10.286V1.286h16.716M21 0H1.286v12h5.143v4.286l4.286-4.286h4.286z" />
+  </svg>
+);
+
+const YoutubeIconSvg = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6 }}>
+    <path d="M23.498 6.163a3.003 3.003 0 00-2.11-2.11C19.518 3.5 12 3.5 12 3.5s-7.517 0-9.388.553a3.003 3.003 0 00-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 002.11 2.11c1.871.553 9.388.553 9.388.553s7.518 0 9.388-.553a3.003 3.003 0 002.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+  </svg>
+);
+
+const KickIconSvg = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6 }}>
+    <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zM9 16H7v-8h2v2h2V8h2v8h-2v-2H9v2zm8-2a2 2 0 01-2 2h-1v-8h1a2 2 0 012 2v4z" />
+  </svg>
+);
+
+const DiscordIconSvg = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6 }}>
+    <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.094 13.094 0 01-1.873-.894.077.077 0 01-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 01.077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 01.078.009c.12.099.246.195.373.289a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.894.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.156-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.156 2.418z" />
+  </svg>
+);
+
 export default function PublicProfilePage() {
   const { username } = useParams<{ username: string }>();
   const { connection } = useConnection();
   const wallet = useWallet();
-  const { isAuthenticated, login, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, login, isLoading: authLoading, user } = useAuth();
   const { socket } = useSocket();
 
   const [creator, setCreator] = useState<CreatorProfile | null>(null);
@@ -464,25 +494,15 @@ export default function PublicProfilePage() {
     document.getElementById("public-superchats-header")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const getTipTierColor = (lamports: number) => {
-    const sol = lamports / 1e9;
-    if (sol >= 5.0) return "#ff2d55";
-    if (sol >= 1.0) return "#ff9500";
-    if (sol >= 0.5) return "#ffcc00";
-    if (sol >= 0.1) return "#14F195";
-    return "rgba(255, 255, 255, 0.08)";
-  };
-
-
 
   // Load Custom Theme Dynamically
   const currentTheme = useMemo(() => {
-    if (creator) {
-      const themeKey = creator.selected_theme || "gold";
+    if (user) {
+      const themeKey = user.selected_theme || "gold";
       return premiumThemes[themeKey] || premiumThemes.gold;
     }
     return baseTheme;
-  }, [creator]);
+  }, [user]);
 
   const premiumStyles = useMemo(() => {
     let styles = "";
@@ -513,6 +533,11 @@ export default function PublicProfilePage() {
       @keyframes pulseBorder {
         0%, 100% { box-shadow: 0 0 0 4px ${currentTheme.palette.background.default}, 0 8px 32px ${currentTheme.palette.primary.main}40; }
         50% { box-shadow: 0 0 0 6px ${currentTheme.palette.primary.main}50, 0 12px 48px ${currentTheme.palette.primary.main}60; }
+      }
+      @keyframes liveStatusPulse {
+        0% { transform: scale(0.95); opacity: 0.7; }
+        50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 12px rgba(255,23,68,0.5); }
+        100% { transform: scale(0.95); opacity: 0.7; }
       }
     `;
     return styles;
@@ -688,14 +713,14 @@ export default function PublicProfilePage() {
               {/* Floating Glassmorphic Creator Rank / Premium Status Badge */}
               <Chip
                 icon={<VerifiedIcon sx={{ color: "inherit !important", fontSize: "14px !important" }} />}
-                label="VERIFIED CREATOR" /* creator.is_premium ? "PREMIUM PARTNER" : "VERIFIED CREATOR" */
+                label="VERIFIED CREATOR"
                 sx={{
                   position: "absolute",
                   top: 15,
                   right: 15,
-                  background: "rgba(11, 15, 23, 0.75)",
+                  background: "rgba(11, 15, 23, 0.85)",
                   backdropFilter: "blur(10px)",
-                  border: `1px solid ${currentTheme.palette.primary.main}44`,
+                  border: `1px solid ${currentTheme.palette.primary.main}55`,
                   color: `${currentTheme.palette.primary.main} !important`,
                   fontWeight: 900,
                   letterSpacing: "0.08em",
@@ -801,21 +826,7 @@ export default function PublicProfilePage() {
                         <Typography variant="h4" sx={{ fontWeight: 900, fontSize: { xs: "1.65rem", sm: "2.125rem" } }}>
                           {creator.name}
                         </Typography>
-                        {/* creator.is_premium && (
-                          <VerifiedIcon sx={{ color: "#14F195", fontSize: { xs: 22, sm: 26 }, filter: "drop-shadow(0 0 5px rgba(20,241,149,0.3))" }} />
-                        ) */}
-                        {/* creator.is_premium && (
-                          <Chip
-                            label="PREMIUM"
-                            size="small"
-                            sx={{
-                              background: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
-                              color: "#000",
-                              fontWeight: 900,
-                              fontSize: "0.6rem"
-                            }}
-                          />
-                        ) */}
+                        <VerifiedIcon sx={{ color: "#14F195", fontSize: { xs: 20, sm: 24 }, filter: "drop-shadow(0 0 5px rgba(20,241,149,0.3))" }} />
                       </Stack>
                       <Typography variant="h6" color="primary" sx={{ fontWeight: 700, mt: 0.2, fontSize: { xs: "0.95rem", sm: "1.25rem" }, textAlign: { xs: "center", sm: "left" } }}>
                         @{creator.username}
@@ -840,10 +851,12 @@ export default function PublicProfilePage() {
                           px: 1.2,
                           borderRadius: "50px",
                           fontSize: "0.7rem",
-                          border: isLive ? "1px solid #ff17444d" : "1px solid #00e6764d",
-                          bgcolor: isLive ? "rgba(255,23,68,0.1)" : "rgba(0,230,118,0.08)",
+                          border: isLive ? "1px solid #ff174488" : "1px solid #00e67688",
+                          bgcolor: isLive ? "rgba(255,23,68,0.15)" : "rgba(0,230,118,0.1)",
                           color: isLive ? "#ff4444" : "#00e676",
-                          letterSpacing: "0.03em"
+                          letterSpacing: "0.03em",
+                          boxShadow: isLive ? "0 0 12px rgba(255,23,68,0.4)" : "0 0 10px rgba(0,230,118,0.25)",
+                          animation: isLive ? "liveStatusPulse 2.5s infinite ease-in-out" : "none"
                         }}
                       />
                       <Button
@@ -957,10 +970,26 @@ export default function PublicProfilePage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           variant="outlined"
-
-                          sx={{ borderRadius: "10px", fontWeight: 700 }}
+                          startIcon={<TwitterIconSvg />}
+                          sx={{
+                            borderRadius: "12px",
+                            fontWeight: 700,
+                            borderColor: "rgba(255, 255, 255, 0.12)",
+                            color: "text.primary",
+                            bgcolor: "rgba(255, 255, 255, 0.02)",
+                            textTransform: "none",
+                            px: 2,
+                            py: 1,
+                            transition: "all 0.2s",
+                            "&:hover": {
+                              bgcolor: "rgba(255, 255, 255, 0.08)",
+                              borderColor: "rgba(255, 255, 255, 0.3)",
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 4px 12px rgba(255, 255, 255, 0.05)"
+                            }
+                          }}
                         >
-                          Twitter
+                          X / Twitter
                         </Button>
                       ) : null;
                     })()}
@@ -971,8 +1000,24 @@ export default function PublicProfilePage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           variant="outlined"
-
-                          sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#6441a5", color: "#b9a3e3", "&:hover": { bgcolor: "rgba(100,65,165,0.1)", borderColor: "#7d5bbe" } }}
+                          startIcon={<TwitchIconSvg />}
+                          sx={{
+                            borderRadius: "12px",
+                            fontWeight: 700,
+                            borderColor: "#6441a54d",
+                            color: "#b9a3e3",
+                            bgcolor: "rgba(100, 65, 165, 0.05)",
+                            textTransform: "none",
+                            px: 2,
+                            py: 1,
+                            transition: "all 0.2s",
+                            "&:hover": {
+                              bgcolor: "rgba(100, 65, 165, 0.15)",
+                              borderColor: "#7d5bbe",
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 4px 12px rgba(100, 65, 165, 0.2)"
+                            }
+                          }}
                         >
                           Twitch
                         </Button>
@@ -985,8 +1030,24 @@ export default function PublicProfilePage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           variant="outlined"
-
-                          sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#ff0000", color: "#ff8080", "&:hover": { bgcolor: "rgba(255,0,0,0.1)", borderColor: "#cc0000" } }}
+                          startIcon={<YoutubeIconSvg />}
+                          sx={{
+                            borderRadius: "12px",
+                            fontWeight: 700,
+                            borderColor: "#ff00004d",
+                            color: "#ff8080",
+                            bgcolor: "rgba(255, 0, 0, 0.03)",
+                            textTransform: "none",
+                            px: 2,
+                            py: 1,
+                            transition: "all 0.2s",
+                            "&:hover": {
+                              bgcolor: "rgba(255, 0, 0, 0.1)",
+                              borderColor: "#cc0000",
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 4px 12px rgba(255, 0, 0, 0.2)"
+                            }
+                          }}
                         >
                           YouTube
                         </Button>
@@ -999,8 +1060,24 @@ export default function PublicProfilePage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           variant="outlined"
-
-                          sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#53fc18", color: "#9fff7d", "&:hover": { bgcolor: "rgba(83,252,24,0.1)", borderColor: "#41d60f" } }}
+                          startIcon={<KickIconSvg />}
+                          sx={{
+                            borderRadius: "12px",
+                            fontWeight: 700,
+                            borderColor: "#53fc184d",
+                            color: "#9fff7d",
+                            bgcolor: "rgba(83, 252, 24, 0.03)",
+                            textTransform: "none",
+                            px: 2,
+                            py: 1,
+                            transition: "all 0.2s",
+                            "&:hover": {
+                              bgcolor: "rgba(83, 252, 24, 0.1)",
+                              borderColor: "#41d60f",
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 4px 12px rgba(83, 252, 24, 0.2)"
+                            }
+                          }}
                         >
                           Kick
                         </Button>
@@ -1013,8 +1090,24 @@ export default function PublicProfilePage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           variant="outlined"
-
-                          sx={{ borderRadius: "10px", fontWeight: 700, borderColor: "#5865F2", color: "#8ea1ff", "&:hover": { bgcolor: "rgba(88,101,242,0.1)", borderColor: "#4752c4" } }}
+                          startIcon={<DiscordIconSvg />}
+                          sx={{
+                            borderRadius: "12px",
+                            fontWeight: 700,
+                            borderColor: "#5865F24d",
+                            color: "#8ea1ff",
+                            bgcolor: "rgba(88, 101, 242, 0.03)",
+                            textTransform: "none",
+                            px: 2,
+                            py: 1,
+                            transition: "all 0.2s",
+                            "&:hover": {
+                              bgcolor: "rgba(88, 101, 242, 0.1)",
+                              borderColor: "#4752c4",
+                              transform: "translateY(-1px)",
+                              boxShadow: "0 4px 12px rgba(88, 101, 242, 0.2)"
+                            }
+                          }}
                         >
                           Discord
                         </Button>
@@ -1335,63 +1428,155 @@ export default function PublicProfilePage() {
                       </Box>
                     ) : (
                       <Stack spacing={2.5}>
-                        {tips.map((tip, idx) => (
-                          <Box key={tip.tx_hash}>
-                            <Stack direction="row" spacing={2} sx={{ p: 2, borderRadius: "14px", bgcolor: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)" }}>
-                              <Box sx={{ width: 44, height: 44, borderRadius: "10px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                <BoringAvatar
-                                  name={tip.sender_name || tip.sender_wallet}
-                                  variant="beam"
-                                  size={44}
-                                  colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
-                                />
-                              </Box>
+                        {tips.map((tip, idx) => {
+                          const getTipTier = (amountInLamports: number) => {
+                            const sol = amountInLamports / 1e9;
+                            if (sol >= 2.5) {
+                              return {
+                                name: "Legendary",
+                                color: "#ff2d55",
+                                badge: "🏆 Legendary Support",
+                                bg: "linear-gradient(135deg, rgba(255, 45, 85, 0.08) 0%, rgba(11, 15, 23, 0.95) 100%)",
+                                borderColor: "rgba(255, 45, 85, 0.45)",
+                                glow: "0 0 15px rgba(255, 45, 85, 0.15)"
+                              };
+                            }
+                            if (sol >= 1.0) {
+                              return {
+                                name: "Epic",
+                                color: "#ff9500",
+                                badge: "💎 Epic Support",
+                                bg: "linear-gradient(135deg, rgba(255, 149, 0, 0.06) 0%, rgba(11, 15, 23, 0.95) 100%)",
+                                borderColor: "rgba(255, 149, 0, 0.35)",
+                                glow: "0 0 12px rgba(255, 149, 0, 0.1)"
+                              };
+                            }
+                            if (sol >= 0.5) {
+                              return {
+                                name: "Premium",
+                                color: "#ffcc00",
+                                badge: "⭐ Premium Support",
+                                bg: "linear-gradient(135deg, rgba(255, 204, 0, 0.04) 0%, rgba(11, 15, 23, 0.95) 100%)",
+                                borderColor: "rgba(255, 204, 0, 0.25)",
+                                glow: "0 0 8px rgba(255, 204, 0, 0.05)"
+                              };
+                            }
+                            if (sol >= 0.1) {
+                              return {
+                                name: "Standard",
+                                color: "#14F195",
+                                badge: "⚡ Standard Support",
+                                bg: "rgba(255, 255, 255, 0.015)",
+                                borderColor: "rgba(20, 241, 149, 0.2)",
+                                glow: "none"
+                              };
+                            }
+                            return {
+                              name: "Starter",
+                              color: "rgba(255, 255, 255, 0.08)",
+                              badge: "",
+                              bg: "rgba(255, 255, 255, 0.015)",
+                              borderColor: "rgba(255, 255, 255, 0.04)",
+                              glow: "none"
+                            };
+                          };
 
-                              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                                <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
-                                  <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                                    {tip.sender_name || shorten(tip.sender_wallet)}
-                                  </Typography>
-                                  <Chip
-                                    label={`${formatSol(tip.amount)} SOL`}
-                                    size="small"
-                                    color="primary"
-                                    sx={{ fontWeight: 800, fontSize: "0.75rem", borderRadius: "8px", background: `linear-gradient(135deg, ${currentTheme.palette.primary.main} 0%, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main} 100%)` }}
+                          const tier = getTipTier(tip.amount);
+
+                          return (
+                            <Box key={tip.tx_hash}>
+                              <Stack
+                                direction="row"
+                                spacing={2}
+                                sx={{
+                                  p: 2.5,
+                                  borderRadius: "16px",
+                                  bgcolor: tier.bg,
+                                  border: `1px solid ${tier.borderColor}`,
+                                  boxShadow: tier.glow,
+                                  position: "relative",
+                                  overflow: "hidden",
+                                  transition: "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
+                                  "&:hover": {
+                                    transform: "translateY(-2px)",
+                                    boxShadow: tier.name !== "Starter" ? tier.glow : "0 4px 12px rgba(0,0,0,0.1)",
+                                    borderColor: tier.color !== "rgba(255, 255, 255, 0.08)" ? tier.color : "rgba(255, 255, 255, 0.12)"
+                                  }
+                                }}
+                              >
+                                <Box sx={{ width: 44, height: 44, borderRadius: "10px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                  <BoringAvatar
+                                    name={tip.sender_name || tip.sender_wallet}
+                                    variant="beam"
+                                    size={44}
+                                    colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
                                   />
-                                </Stack>
+                                </Box>
 
-                                {tip.message && (
-                                  <Box sx={{
-                                    mt: 1.5,
-                                    p: 1.5,
-                                    bgcolor: "rgba(255,255,255,0.02)",
-                                    borderRadius: "8px",
-                                    borderLeft: `3.5px solid ${getTipTierColor(tip.amount)}`
-                                  }}>
-                                    <Typography variant="body2" sx={{ fontStyle: "italic", opacity: 0.95, lineHeight: 1.5 }}>
-                                      "{tip.message}"
+                                <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                                  <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+                                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                                        {tip.sender_name || shorten(tip.sender_wallet)}
+                                      </Typography>
+                                      {tier.badge && (
+                                        <Chip
+                                          label={tier.badge}
+                                          size="small"
+                                          sx={{
+                                            bgcolor: `${tier.color}15`,
+                                            color: tier.color,
+                                            border: `1px solid ${tier.color}33`,
+                                            fontWeight: 900,
+                                            fontSize: "0.62rem",
+                                            borderRadius: "6px",
+                                            height: 16,
+                                            "& .MuiChip-label": { px: 0.6 }
+                                          }}
+                                        />
+                                      )}
+                                    </Stack>
+                                    <Chip
+                                      label={`${formatSol(tip.amount)} SOL`}
+                                      size="small"
+                                      color="primary"
+                                      sx={{ fontWeight: 800, fontSize: "0.75rem", borderRadius: "8px", background: `linear-gradient(135deg, ${currentTheme.palette.primary.main} 0%, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main} 100%)` }}
+                                    />
+                                  </Stack>
+
+                                  {tip.message && (
+                                    <Box sx={{
+                                      mt: 1.5,
+                                      p: 1.5,
+                                      bgcolor: "rgba(255, 255, 255, 0.02)",
+                                      borderRadius: "8px",
+                                      borderLeft: `3.5px solid ${tier.color}`
+                                    }}>
+                                      <Typography variant="body2" sx={{ fontStyle: "italic", opacity: 0.95, lineHeight: 1.5 }}>
+                                        "{tip.message}"
+                                      </Typography>
+                                    </Box>
+                                  )}
+
+                                  <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mt: 1.5 }}>
+                                    <Typography variant="caption" color="text.secondary">
+                                      {formatTime(tip.timestamp)}
                                     </Typography>
-                                  </Box>
-                                )}
-
-                                <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mt: 1.5 }}>
-                                  <Typography variant="caption" color="text.secondary">
-                                    {formatTime(tip.timestamp)}
-                                  </Typography>
-                                  <Link
-                                    href={getExplorerUrl(tip.tx_hash)}
-                                    target="_blank"
-                                    rel="noreferrer noopener"
-                                    sx={{ display: "flex", alignItems: "center", gap: 0.5, fontSize: "0.72rem", textDecoration: "none", opacity: 0.8, "&:hover": { opacity: 1, color: "primary.main" } }}
-                                  >
-                                    Explorer <OpenInNewIcon sx={{ fontSize: 11 }} />
-                                  </Link>
-                                </Stack>
-                              </Box>
-                            </Stack>
-                            {idx < tips.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", my: 1 }} />}
-                          </Box>
-                        ))}
+                                    <Link
+                                      href={getExplorerUrl(tip.tx_hash)}
+                                      target="_blank"
+                                      rel="noreferrer noopener"
+                                      sx={{ display: "flex", alignItems: "center", gap: 0.5, fontSize: "0.72rem", textDecoration: "none", opacity: 0.8, "&:hover": { opacity: 1, color: "primary.main" } }}
+                                    >
+                                      Explorer <OpenInNewIcon sx={{ fontSize: 11 }} />
+                                    </Link>
+                                  </Stack>
+                                </Box>
+                              </Stack>
+                              {idx < tips.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", my: 1 }} />}
+                            </Box>
+                          );
+                        })}
                       </Stack>
                     )}
                     {totalPages > 1 && (
@@ -1520,37 +1705,56 @@ export default function PublicProfilePage() {
                             Quick Preset Tip (SOL)
                           </Typography>
                           <Grid container spacing={1.5}>
-                            {[0.1, 0.5, 1.0, 2.5].map((preset) => (
-                              <Grid size={{ xs: 6, sm: 3 }} key={preset}>
-                                <Button
-                                  variant="outlined"
-                                  fullWidth
-                                  onClick={() => handlePresetTip(preset)}
-                                  sx={{
-                                    py: 1.5,
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    borderRadius: "12px",
-                                    fontWeight: 800,
-                                    transition: "all 0.2s ease",
-                                    border: amount === preset.toString()
-                                      ? `2px solid ${tipTier.color}`
-                                      : "1px solid rgba(255,255,255,0.06)",
-                                    bgcolor: amount === preset.toString()
-                                      ? `${tipTier.color}14`
-                                      : "rgba(255,255,255,0.02)",
-                                    "&:hover": {
-                                      bgcolor: "rgba(255,255,255,0.05)",
-                                      borderColor: "rgba(255,255,255,0.15)"
-                                    }
-                                  }}
-                                >
-                                  <Typography variant="body1" sx={{ fontWeight: 900 }}>
-                                    {preset} SOL
-                                  </Typography>
-                                </Button>
-                              </Grid>
-                            ))}
+                            {[0.1, 0.5, 1.0, 2.5].map((preset) => {
+                              const getPresetStyles = (val: number) => {
+                                if (val >= 2.5) return { color: "#ff2d55", label: "Legendary Support", glow: "0 0 18px rgba(255, 45, 85, 0.4)" };
+                                if (val >= 1.0) return { color: "#ff9500", label: "Epic Support", glow: "0 0 14px rgba(255, 149, 0, 0.3)" };
+                                if (val >= 0.5) return { color: "#ffcc00", label: "Premium Support", glow: "0 0 10px rgba(255, 204, 0, 0.25)" };
+                                return { color: "#14F195", label: "Standard Support", glow: "0 0 8px rgba(20, 241, 149, 0.2)" };
+                              };
+                              const styles = getPresetStyles(preset);
+                              const isSelected = amount === preset.toString();
+
+                              return (
+                                <Grid size={{ xs: 6, sm: 3 }} key={preset}>
+                                  <Button
+                                    variant="outlined"
+                                    fullWidth
+                                    onClick={() => handlePresetTip(preset)}
+                                    sx={{
+                                      py: 1.5,
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      borderRadius: "12px",
+                                      fontWeight: 800,
+                                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                                      border: isSelected
+                                        ? `2px solid ${styles.color}`
+                                        : "1px solid rgba(255,255,255,0.06)",
+                                      bgcolor: isSelected
+                                        ? `${styles.color}14`
+                                        : "rgba(255,255,255,0.02)",
+                                      color: isSelected ? styles.color : "text.secondary",
+                                      boxShadow: isSelected ? styles.glow : "none",
+                                      "&:hover": {
+                                        transform: "translateY(-2px)",
+                                        borderColor: styles.color,
+                                        boxShadow: styles.glow,
+                                        bgcolor: `${styles.color}0a`,
+                                        color: "#fff"
+                                      }
+                                    }}
+                                  >
+                                    <Typography variant="body1" sx={{ fontWeight: 900 }}>
+                                      {preset} SOL
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ fontSize: "0.55rem", opacity: 0.8, textTransform: "uppercase", mt: 0.5, fontWeight: 900 }}>
+                                      {styles.label.split(" ")[0]}
+                                    </Typography>
+                                  </Button>
+                                </Grid>
+                              );
+                            })}
                           </Grid>
                         </Box>
 
