@@ -18,6 +18,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App";
+import toast from "react-hot-toast";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 
@@ -37,7 +38,18 @@ function Root() {
   return (
     <HelmetProvider>
       <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets} autoConnect>
+        <WalletProvider
+          wallets={wallets}
+          autoConnect
+          onError={(error) => {
+            console.error("Solana wallet error:", error);
+            if (error.name === "WalletNotReadyError") {
+              toast.error("Phantom Wallet not detected! Please install the Phantom browser extension.");
+            } else {
+              toast.error(error.message || "Solana Wallet Connection Error");
+            }
+          }}
+        >
           <WalletModalProvider>
             <SocketProvider>
               <AuthProvider>

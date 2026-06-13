@@ -4,10 +4,12 @@ import { getUserProfile } from "../services/api";
 import { getExplorerUrl } from "../services/solana";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWalletAuth } from "../hooks/useWalletAuth";
-import { Container, Card, CardContent, Typography, Box, Button, List, ListItem, Divider, Link, Chip, Tabs, Tab, Pagination } from "@mui/material";
+import { Container, Card, CardContent, Typography, Box, Button, List, ListItem, Divider, Link, Chip, Tabs, Tab, Pagination, Tooltip } from "@mui/material";
 import { ProfilePageSkeleton } from "../components/common/LoadingSkeletons";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ErrorIcon from "@mui/icons-material/Error";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import toast from "react-hot-toast";
 import TipForm from "../components/features/tips/TipForm";
 import SEO from "../components/common/SEO";
 import { SITE_NAME } from "../shared/constants";
@@ -103,6 +105,12 @@ export default function ProfilePage() {
     fetchPaginatedTips();
   }, [wallet, page, activeTab, loading]);
 
+  const copyWallet = () => {
+    if (!user) return;
+    navigator.clipboard.writeText(user.wallet_address);
+    toast.success("Wallet address copied!", { icon: "📋" });
+  };
+
   function shorten(addr: string): string {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   }
@@ -178,9 +186,34 @@ export default function ProfilePage() {
               <Typography variant="h4" gutterBottom sx={{ fontWeight: 800 }}>
                 {user.name || shorten(user.wallet_address)}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {user.wallet_address}
-              </Typography>
+              <Tooltip title="Copy Wallet Address" arrow>
+                <Box
+                  onClick={copyWallet}
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 1.2,
+                    px: 1.8,
+                    py: 0.8,
+                    borderRadius: "8px",
+                    bgcolor: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    mb: 2.5,
+                    "&:hover": { 
+                      bgcolor: "rgba(255,255,255,0.07)", 
+                      borderColor: "rgba(255,255,255,0.12)",
+                      transform: "translateY(-1px)"
+                    }
+                  }}
+                >
+                  <Typography variant="body2" sx={{ fontFamily: "'Space Mono', monospace", color: "text.secondary", fontWeight: 500 }}>
+                    {shorten(user.wallet_address)}
+                  </Typography>
+                  <ContentCopyIcon sx={{ fontSize: 13, color: "text.secondary" }} />
+                </Box>
+              </Tooltip>
 
               {user.bio && (
                 <Typography variant="body1" sx={{ mb: 3, fontStyle: "italic", color: "text.secondary", maxWidth: 500, mx: "auto" }}>

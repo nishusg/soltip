@@ -38,6 +38,7 @@ interface Creator {
   name: string;
   total_received: number;
   is_premium?: boolean;
+  rank?: number;
 }
 
 
@@ -553,7 +554,9 @@ export default function CreatorLeaderboard() {
           <List sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {paginatedCreators.map((creator) => {
               // Rank index relative to the main collection (actual leaderboard position)
-              const globalIndex = (page - 1) * itemsPerPage + creators.findIndex((c) => c.wallet_address === creator.wallet_address);
+              const globalIndex = creator.rank !== undefined
+                ? creator.rank - 1
+                : (page - 1) * itemsPerPage + creators.findIndex((c) => c.wallet_address === creator.wallet_address);
               const isTop3 = globalIndex < 3;
               const isCurrentUser = user && user.wallet_address === creator.wallet_address;
               const isUpdating = !!recentUpdates[creator.wallet_address];

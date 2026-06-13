@@ -198,15 +198,25 @@ export default function WalletConnect() {
           Power your broadcast with instant on-chain alerts, custom superchat widgets, and ultra-low platform fees. The premium Web3 tipping protocol constructed exclusively for Solana.
         </Typography>
 
-        <Box sx={{ display: "flex", justifyContent: "center", gap: 2.5, flexWrap: "wrap" }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "center",
+            gap: 2,
+            alignItems: { xs: "stretch", sm: "center" },
+            maxWidth: { xs: "340px", sm: "100%" },
+            mx: "auto"
+          }}
+        >
           {isAuthenticated ? (
             <Button
               component={RouterLink}
               to="/dashboard"
               variant="contained"
               size="large"
-               
               sx={{
+                width: { xs: "100%", sm: "auto" },
                 px: 6,
                 py: 2,
                 borderRadius: "14px",
@@ -224,8 +234,8 @@ export default function WalletConnect() {
               variant="contained"
               size="large"
               onClick={() => document.querySelector<HTMLButtonElement>(".wallet-adapter-button")?.click()}
-               
               sx={{
+                width: { xs: "100%", sm: "auto" },
                 px: 6,
                 py: 2,
                 borderRadius: "14px",
@@ -245,6 +255,7 @@ export default function WalletConnect() {
             variant="outlined"
             size="large"
             sx={{
+              width: { xs: "100%", sm: "auto" },
               px: 5,
               py: 2,
               borderRadius: "14px",

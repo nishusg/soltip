@@ -358,8 +358,8 @@ export default function Navbar() {
                 },
                 paper: {
                   sx: {
-                    bgcolor: "rgba(8, 9, 12, 0.96)",
-                    backdropFilter: "blur(24px)",
+                    bgcolor: "rgba(8, 9, 12, 0.98) !important",
+                    backdropFilter: "blur(24px) !important",
                     border: "1px solid rgba(255,255,255,0.08)",
                     borderRadius: "20px",
                     mt: 1.5,
@@ -552,8 +552,8 @@ export default function Navbar() {
                   },
                   paper: {
                     sx: {
-                      bgcolor: "rgba(8, 9, 12, 0.98)",
-                      backdropFilter: "blur(24px)",
+                      bgcolor: "rgba(8, 9, 12, 0.98) !important",
+                      backdropFilter: "blur(24px) !important",
                       border: "1px solid rgba(255,255,255,0.08)",
                       borderRadius: "20px",
                       mt: 1.5,
