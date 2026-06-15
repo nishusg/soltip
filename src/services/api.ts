@@ -277,6 +277,11 @@ export async function updateProfile(data: {
   });
 }
 
+/** Check if a username slug is available */
+export async function checkUsernameAvailability(username: string) {
+  return api(`/creators/check-username?username=${encodeURIComponent(username)}`);
+}
+
 /** Get the current authenticated user's profile */
 export async function getMe() {
   return api("/creators/me");

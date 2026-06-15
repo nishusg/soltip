@@ -133,7 +133,7 @@ export default function PublicProfilePage() {
   const { username } = useParams<{ username: string }>();
   const { connection } = useConnection();
   const wallet = useWallet();
-  const { isAuthenticated, login, isLoading: authLoading, user } = useAuth();
+  const { isAuthenticated, login, isLoading: authLoading } = useAuth();
   const { socket } = useSocket();
 
   const [creator, setCreator] = useState<CreatorProfile | null>(null);
@@ -497,12 +497,12 @@ export default function PublicProfilePage() {
 
   // Load Custom Theme Dynamically
   const currentTheme = useMemo(() => {
-    if (user) {
-      const themeKey = user.selected_theme || "gold";
+    if (creator) {
+      const themeKey = creator.selected_theme || "gold";
       return premiumThemes[themeKey] || premiumThemes.gold;
     }
     return baseTheme;
-  }, [user]);
+  }, [creator]);
 
   const premiumStyles = useMemo(() => {
     let styles = "";
@@ -743,17 +743,16 @@ export default function PublicProfilePage() {
               }} />
             </Box>
 
-            <CardContent sx={{ pt: 0, px: { xs: 3, md: 6 }, pb: 5 }}>
+            <CardContent sx={{ pt: 0, px: { xs: 3, md: 5 }, pb: 4 }}>
               <Box sx={{
                 display: "flex",
                 flexDirection: { xs: "column", sm: "row" },
                 alignItems: { xs: "center", sm: "flex-end" },
-                gap: { xs: 2.5, sm: 3.5 },
+                gap: { xs: 2, sm: 3.5 },
                 mb: 4,
-                flexWrap: { xs: "wrap", sm: "nowrap" },
                 width: "100%"
               }}>
-                {/* Avatar container pulled up individually */}
+                {/* Floating Avatar Container */}
                 <Box
                   sx={{
                     width: { xs: 100, sm: 120 },
@@ -806,9 +805,9 @@ export default function PublicProfilePage() {
                 }}>
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
-                    spacing={1.5}
+                    spacing={2}
                     sx={{
-                      alignItems: "center",
+                      alignItems: { xs: "center", sm: "center" },
                       justifyContent: "space-between",
                       mb: 2,
                       width: "100%"
@@ -823,24 +822,23 @@ export default function PublicProfilePage() {
                           justifyContent: { xs: "center", sm: "flex-start" }
                         }}
                       >
-                        <Typography variant="h4" sx={{ fontWeight: 900, fontSize: { xs: "1.65rem", sm: "2.125rem" } }}>
+                        <Typography variant="h4" sx={{ fontWeight: 900, fontSize: { xs: "1.75rem", sm: "2.25rem" }, fontFamily: "'Space Grotesk', sans-serif", letterSpacing: "-0.02em" }}>
                           {creator.name}
                         </Typography>
-                        <VerifiedIcon sx={{ color: "#14F195", fontSize: { xs: 20, sm: 24 }, filter: "drop-shadow(0 0 5px rgba(20,241,149,0.3))" }} />
+                        <VerifiedIcon sx={{ color: "#14F195", fontSize: { xs: 22, sm: 26 }, filter: "drop-shadow(0 0 6px rgba(20,241,149,0.35))" }} />
                       </Stack>
-                      <Typography variant="h6" color="primary" sx={{ fontWeight: 700, mt: 0.2, fontSize: { xs: "0.95rem", sm: "1.25rem" }, textAlign: { xs: "center", sm: "left" } }}>
+                      <Typography variant="h6" color="primary" sx={{ fontWeight: 700, mt: 0.2, fontSize: { xs: "0.95rem", sm: "1.15rem" } }}>
                         @{creator.username}
                       </Typography>
                     </Box>
 
-                    {/* Live Badge + Share Button */}
+                    {/* Live Badge + Share Button Row */}
                     <Stack
                       direction="row"
                       spacing={1.5}
                       sx={{
                         alignItems: "center",
-                        justifyContent: { xs: "center", sm: "flex-end" },
-                        mt: { xs: 1.5, sm: 0 }
+                        justifyContent: { xs: "center", sm: "flex-end" }
                       }}
                     >
                       <Chip
@@ -848,9 +846,9 @@ export default function PublicProfilePage() {
                         size="small"
                         sx={{
                           fontWeight: 900,
-                          px: 1.2,
+                          px: 1.5,
                           borderRadius: "50px",
-                          fontSize: "0.7rem",
+                          fontSize: "0.75rem",
                           border: isLive ? "1px solid #ff174488" : "1px solid #00e67688",
                           bgcolor: isLive ? "rgba(255,23,68,0.15)" : "rgba(0,230,118,0.1)",
                           color: isLive ? "#ff4444" : "#00e676",
@@ -863,38 +861,39 @@ export default function PublicProfilePage() {
                         variant="outlined"
                         size="small"
                         onClick={copyShareableLink}
-
                         sx={{
-                          borderRadius: "8px",
+                          borderRadius: "10px",
                           fontWeight: 700,
-                          fontSize: "0.7rem",
-                          px: 1.5,
-                          py: 0.6,
-                          borderColor: `${currentTheme.palette.primary.main}55`,
-                          color: "text.secondary",
-                          bgcolor: `${currentTheme.palette.primary.main}08`,
+                          fontSize: "0.75rem",
+                          px: 2,
+                          py: 0.8,
+                          borderColor: `${currentTheme.palette.primary.main}44`,
+                          color: "text.primary",
+                          bgcolor: "rgba(255,255,255,0.02)",
+                          textTransform: "none",
                           "&:hover": {
                             borderColor: currentTheme.palette.primary.main,
                             bgcolor: `${currentTheme.palette.primary.main}14`,
-                            color: "text.primary"
                           }
                         }}
                       >
-                        Copy Link
+                        Copy Shareable Link
                       </Button>
                     </Stack>
                   </Stack>
 
-                  {/* Creator Wallet Address + Share row */}
+                  {/* Creator Wallet Address & Bio Row */}
                   <Stack
-                    direction="row"
-                    spacing={1.5}
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={2}
                     sx={{
-                      alignItems: "center",
-                      mb: 2,
+                      alignItems: { xs: "center", sm: "center" },
+                      justifyContent: "space-between",
                       flexWrap: "wrap",
-                      gap: 1.5,
-                      justifyContent: { xs: "center", sm: "flex-start" }
+                      gap: 2,
+                      width: "100%",
+                      pt: 1.5,
+                      borderTop: "1px solid rgba(255,255,255,0.05)"
                     }}
                   >
                     <Box
@@ -902,57 +901,42 @@ export default function PublicProfilePage() {
                       sx={{
                         display: "inline-flex",
                         alignItems: "center",
-                        gap: 1,
-                        px: 1.5,
-                        py: 0.6,
-                        borderRadius: "6px",
-                        bgcolor: "rgba(255,255,255,0.03)",
+                        gap: 1.2,
+                        px: 1.8,
+                        py: 0.7,
+                        borderRadius: "8px",
+                        bgcolor: "rgba(255,255,255,0.02)",
                         border: "1px solid rgba(255,255,255,0.06)",
                         cursor: "pointer",
                         transition: "all 0.2s",
-                        "&:hover": { bgcolor: "rgba(255,255,255,0.07)", borderColor: "rgba(255,255,255,0.12)" }
+                        "&:hover": {
+                          bgcolor: "rgba(255,255,255,0.05)",
+                          borderColor: "rgba(255,255,255,0.12)",
+                          transform: "translateY(-1px)"
+                        }
                       }}
                     >
-                      <Typography sx={{ fontFamily: "'Space Mono', monospace", fontSize: "0.75rem", color: "text.secondary" }}>
+                      <Typography sx={{ fontFamily: "'Space Mono', monospace", fontSize: "0.8rem", color: "text.secondary" }}>
                         {shorten(creator.wallet_address)}
                       </Typography>
-                      <ContentCopyIcon sx={{ fontSize: 11, color: "text.secondary" }} />
+                      <ContentCopyIcon sx={{ fontSize: 13, color: "text.secondary" }} />
                     </Box>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={copyShareableLink}
 
-                      sx={{
-                        borderRadius: "6px",
-                        fontWeight: 800,
-                        fontSize: "0.75rem",
-                        px: 1.5,
-                        py: 0.6,
-                        background: `linear-gradient(135deg, ${currentTheme.palette.primary.main} 0%, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main} 100%)`,
-                        boxShadow: `0 4px 12px ${currentTheme.palette.primary.main}20`,
-                        "&:hover": { transform: "translateY(-1px)", boxShadow: `0 6px 14px ${currentTheme.palette.primary.main}40` }
-                      }}
-                    >
-                      Copy Shareable Link
-                    </Button>
+                    {creator.bio && (
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          color: "text.secondary",
+                          maxWidth: 600,
+                          lineHeight: 1.6,
+                          fontSize: "0.95rem",
+                          textAlign: { xs: "center", sm: "right" }
+                        }}
+                      >
+                        {creator.bio}
+                      </Typography>
+                    )}
                   </Stack>
-
-                  {creator.bio && (
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        color: "text.secondary",
-                        maxWidth: 700,
-                        lineHeight: 1.6,
-                        fontSize: { xs: "0.9rem", sm: "1rem" },
-                        textAlign: { xs: "center", sm: "left" },
-                        mx: { xs: "auto", sm: 0 }
-                      }}
-                    >
-                      {creator.bio}
-                    </Typography>
-                  )}
                 </Box>
               </Box>
 
@@ -1124,21 +1108,27 @@ export default function PublicProfilePage() {
             <Grid size={{ xs: 12, sm: 4 }}>
               <Card sx={{
                 bgcolor: "rgba(255, 255, 255, 0.015)",
-                border: "1px solid rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.05)",
                 boxShadow: "none",
-                "&:hover": { bgcolor: "rgba(255, 255, 255, 0.03)", transform: "translateY(-2px)" },
-                transition: "all 0.2s"
+                borderRadius: "16px",
+                "&:hover": {
+                  bgcolor: "rgba(255, 255, 255, 0.03)",
+                  transform: "translateY(-4px)",
+                  borderColor: `${currentTheme.palette.primary.main}44`,
+                  boxShadow: `0 8px 30px ${currentTheme.palette.primary.main}15`
+                },
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
               }}>
-                <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, py: "16px !important" }}>
-                  <Box sx={{ p: 1.2, borderRadius: "10px", bgcolor: `${currentTheme.palette.primary.main}15`, color: "primary.main", display: "flex" }}>
-                    <MonetizationOnIcon />
+                <CardContent sx={{ display: "flex", alignItems: "center", gap: 2.5, py: "20px !important" }}>
+                  <Box sx={{ p: 1.5, borderRadius: "12px", bgcolor: `${currentTheme.palette.primary.main}15`, color: "primary.main", display: "flex" }}>
+                    <MonetizationOnIcon sx={{ fontSize: 28 }} />
                   </Box>
                   <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", textTransform: "uppercase", fontWeight: 800, letterSpacing: "0.08em", fontSize: "0.68rem" }}>
                       Total Supported
                     </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 900 }}>
-                      {creatorStats.volumeSol.toFixed(2)} SOL
+                    <Typography variant="h5" sx={{ fontWeight: 900, mt: 0.5, fontFamily: "'Space Grotesk', sans-serif" }}>
+                      {creatorStats.volumeSol.toFixed(2)} <span style={{ fontSize: "0.9rem", opacity: 0.8, fontWeight: 700 }}>SOL</span>
                     </Typography>
                   </Box>
                 </CardContent>
@@ -1148,20 +1138,26 @@ export default function PublicProfilePage() {
             <Grid size={{ xs: 12, sm: 4 }}>
               <Card sx={{
                 bgcolor: "rgba(255, 255, 255, 0.015)",
-                border: "1px solid rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.05)",
                 boxShadow: "none",
-                "&:hover": { bgcolor: "rgba(255, 255, 255, 0.03)", transform: "translateY(-2px)" },
-                transition: "all 0.2s"
+                borderRadius: "16px",
+                "&:hover": {
+                  bgcolor: "rgba(255, 255, 255, 0.03)",
+                  transform: "translateY(-4px)",
+                  borderColor: `${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}44`,
+                  boxShadow: `0 8px 30px ${(currentTheme.palette.secondary?.main || currentTheme.palette.primary.main)}15`
+                },
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
               }}>
-                <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, py: "16px !important" }}>
-                  <Box sx={{ p: 1.2, borderRadius: "10px", bgcolor: `${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}15`, color: "secondary.main", display: "flex" }}>
-                    <EmojiEventsIcon />
+                <CardContent sx={{ display: "flex", alignItems: "center", gap: 2.5, py: "20px !important" }}>
+                  <Box sx={{ p: 1.5, borderRadius: "12px", bgcolor: `${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}15`, color: `${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}`, display: "flex" }}>
+                    <EmojiEventsIcon sx={{ fontSize: 28 }} />
                   </Box>
                   <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", textTransform: "uppercase", fontWeight: 800, letterSpacing: "0.08em", fontSize: "0.68rem" }}>
                       Superchats Count
                     </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 900 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, mt: 0.5, fontFamily: "'Space Grotesk', sans-serif" }}>
                       {creatorStats.totalCount}
                     </Typography>
                   </Box>
@@ -1172,21 +1168,27 @@ export default function PublicProfilePage() {
             <Grid size={{ xs: 12, sm: 4 }}>
               <Card sx={{
                 bgcolor: "rgba(255, 255, 255, 0.015)",
-                border: "1px solid rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.05)",
                 boxShadow: "none",
-                "&:hover": { bgcolor: "rgba(255, 255, 255, 0.03)", transform: "translateY(-2px)" },
-                transition: "all 0.2s"
+                borderRadius: "16px",
+                "&:hover": {
+                  bgcolor: "rgba(255, 255, 255, 0.03)",
+                  transform: "translateY(-4px)",
+                  borderColor: "#14F19544",
+                  boxShadow: "0 8px 30px rgba(20, 241, 149, 0.12)"
+                },
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
               }}>
-                <CardContent sx={{ display: "flex", alignItems: "center", gap: 2, py: "16px !important" }}>
-                  <Box sx={{ p: 1.2, borderRadius: "10px", bgcolor: "success.main15", color: "success.main", display: "flex" }}>
-                    <TrendingUpIcon />
+                <CardContent sx={{ display: "flex", alignItems: "center", gap: 2.5, py: "20px !important" }}>
+                  <Box sx={{ p: 1.5, borderRadius: "12px", bgcolor: "rgba(20, 241, 149, 0.1)", color: "#14F195", display: "flex" }}>
+                    <TrendingUpIcon sx={{ fontSize: 28 }} />
                   </Box>
                   <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", textTransform: "uppercase", fontWeight: 800, letterSpacing: "0.08em", fontSize: "0.68rem" }}>
                       Avg. Tip Size
                     </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 900 }}>
-                      {creatorStats.avgSol.toFixed(3)} SOL
+                    <Typography variant="h5" sx={{ fontWeight: 900, mt: 0.5, fontFamily: "'Space Grotesk', sans-serif" }}>
+                      {creatorStats.avgSol.toFixed(3)} <span style={{ fontSize: "0.9rem", opacity: 0.8, fontWeight: 700 }}>SOL</span>
                     </Typography>
                   </Box>
                 </CardContent>
@@ -1428,7 +1430,7 @@ export default function PublicProfilePage() {
                       </Box>
                     ) : (
                       <Stack spacing={2.5}>
-                        {tips.map((tip, idx) => {
+                        {tips.map((tip) => {
                           const getTipTier = (amountInLamports: number) => {
                             const sol = amountInLamports / 1e9;
                             if (sol >= 2.5) {
@@ -1573,7 +1575,6 @@ export default function PublicProfilePage() {
                                   </Stack>
                                 </Box>
                               </Stack>
-                              {idx < tips.length - 1 && <Divider sx={{ borderColor: "rgba(255,255,255,0.04)", my: 1 }} />}
                             </Box>
                           );
                         })}
@@ -1616,8 +1617,11 @@ export default function PublicProfilePage() {
               <Card sx={{
                 position: "relative",
                 overflow: "visible",
-                border: `2px solid ${tipTier.color}`,
-                boxShadow: tipTier.glow,
+                bgcolor: "rgba(255, 255, 255, 0.01)",
+                backdropFilter: "blur(24px)",
+                borderRadius: "20px",
+                border: `1.5px solid ${tipTier.color === "rgba(255, 255, 255, 0.08)" || tipTier.color === "rgba(255, 255, 255, 0.15)" ? "rgba(255, 255, 255, 0.06)" : tipTier.color}`,
+                boxShadow: tipTier.glow === "none" ? "none" : tipTier.glow,
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
               }}>
                 <Box
