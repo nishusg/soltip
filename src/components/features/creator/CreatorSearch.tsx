@@ -71,7 +71,7 @@ export default function CreatorSearch() {
   return (
     <Box
       sx={{
-        maxWidth: 750,
+        width: "100%",
         mx: "auto",
         p: { xs: 3, md: 5 },
         borderRadius: "24px",

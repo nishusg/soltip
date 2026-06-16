@@ -135,7 +135,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 10, minHeight: "calc(100vh - 64px)" }}>
+    <Container maxWidth="lg" sx={{ py: 10, minHeight: "calc(100vh - 64px)" }}>
       {loading && <ProfilePageSkeleton />}
 
       {error && (

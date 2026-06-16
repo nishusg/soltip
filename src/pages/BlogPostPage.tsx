@@ -111,7 +111,7 @@ export default function BlogPostPage() {
         }} 
       />
 
-      <Container maxWidth="md" sx={{ pt: { xs: 8, md: 10 }, pb: { xs: 6, md: 8 } }}>
+      <Container maxWidth="lg" sx={{ pt: { xs: 8, md: 10 }, pb: { xs: 6, md: 8 } }}>
         
         {/* Back Button */}
         <Button 

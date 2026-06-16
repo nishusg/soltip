@@ -4,7 +4,7 @@ import { getUserProfile, updateProfile, updateTheme, checkUsernameAvailability }
 import toast from "react-hot-toast";
 import { logger } from "../utils/logger";
 import SEO from "../components/common/SEO";
-import { SITE_NAME } from "../shared/constants";
+import { SITE_NAME, SITE_URL } from "../shared/constants";
 
 import { 
   Container, 
@@ -566,7 +566,7 @@ export default function ProfileSettings() {
                         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.05em", display: "flex", alignItems: "center", gap: 0.5 }}>
                             Public URL Slug
-                            <Tooltip title="This slug creates your public tipping link: soltip.in/username">
+                            <Tooltip title={`This slug creates your public tipping link: ${SITE_URL.replace(/^https?:\/\//i, "")}/username`}>
                               <InfoIcon sx={{ fontSize: 16, cursor: "help", color: "text.secondary" }} />
                             </Tooltip>
                           </Typography>
@@ -584,7 +584,7 @@ export default function ProfileSettings() {
                             input: {
                               startAdornment: (
                                 <InputAdornment position="start" sx={{ color: "text.secondary", fontWeight: 700 }}>
-                                  soltip.in/
+                                  {SITE_URL.replace(/^https?:\/\//i, "")}/
                                 </InputAdornment>
                               ),
                               endAdornment: (
