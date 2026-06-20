@@ -91,6 +91,8 @@ export default function AlertCustomizer({
   const [goalCurrent, setGoalCurrent] = useState<number>(0);
   const [isGoalCurrentDirty, setIsGoalCurrentDirty] = useState<boolean>(false);
   const [blockedWordsInput, setBlockedWordsInput] = useState<string>("");
+  const [specialAlertTheme, setSpecialAlertTheme] = useState<string>("none");
+  const [specialAlertThreshold, setSpecialAlertThreshold] = useState<number>(1.0);
 
   // Sync state values when backend profile settings change
   useEffect(() => {
@@ -127,6 +129,12 @@ export default function AlertCustomizer({
       }
       if (initialSettings.blocked_words !== undefined) {
         setBlockedWordsInput(initialSettings.blocked_words.join(", "));
+      }
+      if (initialSettings.special_alert_theme !== undefined) {
+        setSpecialAlertTheme(initialSettings.special_alert_theme);
+      }
+      if (initialSettings.special_alert_threshold !== undefined) {
+        setSpecialAlertThreshold(initialSettings.special_alert_threshold);
       }
     }
   }, [initialSettings, theme, isGoalCurrentDirty]);
@@ -312,6 +320,8 @@ export default function AlertCustomizer({
         goal_enabled: goalEnabled,
         goal_title: goalTitle,
         goal_target: goalTarget,
+        special_alert_theme: specialAlertTheme,
+        special_alert_threshold: specialAlertThreshold,
         blocked_words: blockedWordsInput
           .split(",")
           .map((w) => w.trim())
@@ -1175,6 +1185,79 @@ export default function AlertCustomizer({
             <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, fontSize: "0.68rem", opacity: 0.8 }}>
               💡 A default general profanity blocklist is always active as a base layer.
             </Typography>
+          </Paper>
+        </Grid>
+
+        {/* 6. Fullscreen Takeover Alert Column */}
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Paper sx={{
+            p: 3.5,
+            bgcolor: "rgba(0,0,0,0.15)",
+            border: `1px solid ${userThemeColor}1f`,
+            borderRadius: "20px",
+            height: "100%",
+            transition: "all 0.3s ease",
+            display: "flex",
+            flexDirection: "column",
+            "&:hover": {
+              borderColor: `${userThemeColor}44`,
+              boxShadow: `0 4px 24px ${userThemeColor}0d`
+            }
+          }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 850, display: "flex", alignItems: "center", gap: 1, mb: 3, color: userThemeColor }}>
+              <PaletteIcon sx={{ fontSize: 20 }} /> 🌸 Takeover Alerts
+            </Typography>
+
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+              Trigger screen-wide animations for premium high-value tipping events.
+            </Typography>
+
+            <FormControl fullWidth size="small" sx={{ mb: 3 }}>
+              <InputLabel id="special-alert-theme-label" sx={{ "&.Mui-focused": { color: userThemeColor } }}>Takeover Animation</InputLabel>
+              <Select
+                labelId="special-alert-theme-label"
+                label="Takeover Animation"
+                value={specialAlertTheme}
+                onChange={(e) => setSpecialAlertTheme(e.target.value)}
+                sx={{
+                  borderRadius: "12px",
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: userThemeColor }
+                }}
+              >
+                <MenuItem value="none">None (Disabled)</MenuItem>
+                <MenuItem value="cherry_blossom">Cherry Blossom Shower 🌸</MenuItem>
+                <MenuItem value="confetti">Confetti Rain 🎉</MenuItem>
+                <MenuItem value="fireworks">Fireworks Display 🎆</MenuItem>
+                <MenuItem value="snow">Gentle Snowfall ❄️</MenuItem>
+                <MenuItem value="matrix">Matrix Code Rain 🟢</MenuItem>
+                <MenuItem value="coin_shower">SOL Coin Shower 🪙</MenuItem>
+                <MenuItem value="hearts">Floating Hearts 💖</MenuItem>
+                <MenuItem value="flames">Fire & Flames 🔥</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              label="Minimum Tip to Trigger"
+              type="number"
+              size="small"
+              fullWidth
+              disabled={specialAlertTheme === "none"}
+              value={specialAlertThreshold}
+              onChange={(e) => setSpecialAlertThreshold(Math.max(0, Number(e.target.value)))}
+              slotProps={{
+                input: {
+                  startAdornment: <InputAdornment position="start"><BoltIcon sx={{ color: userThemeColor }} /></InputAdornment>,
+                  endAdornment: <InputAdornment position="end"><Typography sx={{ fontWeight: 700, fontSize: "0.8rem", color: "text.secondary" }}>SOL</Typography></InputAdornment>
+                }
+              }}
+              sx={{
+                "& .MuiInputLabel-root.Mui-focused": { color: userThemeColor },
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "12px",
+                  "&.Mui-focused fieldset": { borderColor: userThemeColor }
+                }
+              }}
+            />
           </Paper>
         </Grid>
       </Grid>

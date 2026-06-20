@@ -339,6 +339,8 @@ export async function saveOverlaySettings(settings: {
   alert_animation?: string;
   queue_system_enabled?: boolean;
   font_size?: number;
+  special_alert_theme?: string;
+  special_alert_threshold?: number;
 }) {
   return api("/creators/overlay-settings", {
     method: "PUT",

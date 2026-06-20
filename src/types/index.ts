@@ -104,5 +104,7 @@ export interface OverlaySettings {
   goal_title?: string;
   goal_target?: number;
   goal_current?: number;
+  special_alert_theme?: string;
+  special_alert_threshold?: number;
   blocked_words?: string[];
 }
