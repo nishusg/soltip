@@ -8,6 +8,10 @@ import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import BoringAvatar from "boring-avatars";
 import { logger } from "../utils/logger";
 import type { DashboardData, Tip, DailyEarning, OverlaySettings } from "../types";
+import { formatSol, shortenAddress } from "../utils/format";
+import { buildOverlayUrl } from "../utils/overlay";
+import { AVATAR_COLORS } from "../shared/constants";
+import { copyToClipboard } from "../utils/clipboard";
 import {
   Container,
   Grid,
@@ -305,12 +309,9 @@ export default function Dashboard() {
 
 
 
-  const formatSol = (lamports: number) => (lamports / LAMPORTS_PER_SOL).toFixed(4);
 
-  const getOverlayUrl = () => {
-    if (!data?.user?.wallet_address || !overlayToken) return null;
-    return `${window.location.origin}/overlay/${data.user.wallet_address}#key=${overlayToken}`;
-  };
+
+  const getOverlayUrl = () => buildOverlayUrl(data?.user?.wallet_address, overlayToken);
 
   const copyOverlayUrl = () => {
     const url = getOverlayUrl();
@@ -318,8 +319,7 @@ export default function Dashboard() {
       toast.error("Generate an overlay token first!");
       return;
     }
-    navigator.clipboard.writeText(url);
-    toast.success("Overlay URL copied! Paste it as a Browser Source in OBS.");
+    copyToClipboard(url, "Overlay URL copied! Paste it as a Browser Source in OBS.");
   };
 
   if (loading) {
@@ -859,7 +859,7 @@ export default function Dashboard() {
                               name={tip.sender_name || tip.sender_wallet}
                               variant="beam"
                               size={48}
-                              colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                              colors={AVATAR_COLORS}
                             />
                           </Box>
                         </ListItemAvatar>
@@ -869,7 +869,7 @@ export default function Dashboard() {
                             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
                               <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
                                 <Link component={RouterLink} to={`/profile/${tip.sender_wallet}`} color="inherit" sx={{ textDecoration: "none", "&:hover": { color: "primary.main" } }}>
-                                  {tip.sender_name || `${tip.sender_wallet.slice(0, 4)}...${tip.sender_wallet.slice(-4)}`}
+                                  {tip.sender_name || shortenAddress(tip.sender_wallet)}
                                 </Link>
                               </Typography>
                               <Typography variant="subtitle1" color="primary.main" sx={{ fontWeight: 900, textShadow: (theme: any) => `0 0 10px ${theme.palette.primary.main}4d` }}>

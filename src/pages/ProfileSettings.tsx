@@ -4,7 +4,10 @@ import { getUserProfile, updateProfile, updateTheme, checkUsernameAvailability }
 import toast from "react-hot-toast";
 import { logger } from "../utils/logger";
 import SEO from "../components/common/SEO";
-import { SITE_NAME, SITE_URL } from "../shared/constants";
+import { SITE_NAME, SITE_URL, AVATAR_COLORS } from "../shared/constants";
+import { shortenAddress } from "../utils/format";
+import { isValidChannel } from "../utils/security";
+import { copyToClipboard } from "../utils/clipboard";
 
 import { 
   Container, 
@@ -325,21 +328,15 @@ export default function ProfileSettings() {
         toast.error("Stream channel name must be 100 characters or less!");
         return;
       }
-      if (embedPlatform === "twitch") {
-        if (!/^[a-zA-Z0-9_]{4,25}$/.test(channelTrimmed)) {
-          toast.error("Twitch channel must be 4 to 25 alphanumeric characters and underscores only!");
-          return;
-        }
-      } else if (embedPlatform === "kick") {
-        if (!/^[a-zA-Z0-9_]{3,30}$/.test(channelTrimmed)) {
-          toast.error("Kick channel must be 3 to 30 alphanumeric characters and underscores only!");
-          return;
-        }
-      } else if (embedPlatform === "youtube") {
-        if (!/^[a-zA-Z0-9_-]{3,30}$/.test(channelTrimmed)) {
-          toast.error("YouTube channel/video ID must be 3 to 30 alphanumeric characters, dashes, or underscores only!");
-          return;
-        }
+      if (embedPlatform === "twitch" && !isValidChannel("twitch", channelTrimmed)) {
+        toast.error("Twitch channel must be 4 to 25 alphanumeric characters and underscores only!");
+        return;
+      } else if (embedPlatform === "kick" && !isValidChannel("kick", channelTrimmed)) {
+        toast.error("Kick channel must be 3 to 30 alphanumeric characters and underscores only!");
+        return;
+      } else if (embedPlatform === "youtube" && !isValidChannel("youtube", channelTrimmed)) {
+        toast.error("YouTube channel/video ID must be 3 to 30 alphanumeric characters, dashes, or underscores only!");
+        return;
       }
     } else if (embedPlatform && !embedChannel.trim()) {
       toast.error("Stream channel is required if platform is selected!");
@@ -397,7 +394,7 @@ export default function ProfileSettings() {
 
   // Shorten wallet address helper for preview
   const previewWalletShort = walletAddress 
-    ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}` 
+    ? shortenAddress(walletAddress, 4) 
     : "ConnectedWallet";
 
   // Active theme color properties
@@ -646,8 +643,7 @@ export default function ProfileSettings() {
                               color="primary" 
                               size="small"
                               onClick={() => {
-                                navigator.clipboard.writeText(`${window.location.origin}/${username.trim().toLowerCase()}`);
-                                toast.success("Copied to clipboard!");
+                                copyToClipboard(`${window.location.origin}/${username.trim().toLowerCase()}`);
                               }}
                               sx={{ textTransform: "none", py: 0.5, borderRadius: "6px", fontWeight: 700 }}
                             >
@@ -1053,7 +1049,7 @@ export default function ProfileSettings() {
                         name={name || "Preview"} 
                         variant="beam" 
                         size={80} 
-                        colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                        colors={AVATAR_COLORS}
                       />
                     </Box>
                   </Box>

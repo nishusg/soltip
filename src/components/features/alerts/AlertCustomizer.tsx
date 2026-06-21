@@ -8,23 +8,23 @@
 // ============================================================================
 
 import React, { useState, useEffect } from "react";
-import { 
-  Paper, 
-  Box, 
-  Typography, 
-  Divider, 
-  Grid, 
-  FormControlLabel, 
-  Switch, 
-  TextField, 
-  InputAdornment, 
-  FormControl, 
-  InputLabel, 
-  Select, 
-  MenuItem, 
-  Slider, 
-  Button, 
-  Chip, 
+import {
+  Paper,
+  Box,
+  Typography,
+  Divider,
+  Grid,
+  FormControlLabel,
+  Switch,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Slider,
+  Button,
+  Chip,
   useTheme
 } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
@@ -39,6 +39,8 @@ import toast from "react-hot-toast";
 import { logger } from "../../../utils/logger";
 import type { OverlaySettings } from "../../../types";
 import { SITE_NAME } from "../../../shared/constants";
+import { buildOverlayUrl, buildGoalOverlayUrl } from "../../../utils/overlay";
+import { copyToClipboard } from "../../../utils/clipboard";
 
 
 interface AlertCustomizerProps {
@@ -150,17 +152,17 @@ export default function AlertCustomizer({
   const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     if (!file.type.startsWith("audio/")) {
       toast.error("Please upload a valid audio file (MP3, WAV, etc.)");
       return;
     }
-    
+
     if (file.size > 2 * 1024 * 1024) { // 2MB cap
       toast.error("Custom audio files are capped at 2MB for stream performance.");
       return;
     }
-    
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const base64Url = event.target?.result as string;
@@ -184,20 +186,20 @@ export default function AlertCustomizer({
         const osc1 = ctx.createOscillator();
         const osc2 = ctx.createOscillator();
         const gainNode = ctx.createGain();
-        
+
         osc1.type = "sine";
         osc1.frequency.setValueAtTime(880, now); // A5
-        
+
         osc2.type = "sine";
         osc2.frequency.setValueAtTime(1200, now); // Metallic overtone
-        
+
         gainNode.gain.setValueAtTime(volume, now);
         gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
-        
+
         osc1.connect(gainNode);
         osc2.connect(gainNode);
         gainNode.connect(ctx.destination);
-        
+
         osc1.start();
         osc2.start();
         osc1.stop(now + 1.2);
@@ -205,18 +207,18 @@ export default function AlertCustomizer({
       } else if (alertSoundPreset === "swoosh") {
         const osc = ctx.createOscillator();
         const gainNode = ctx.createGain();
-        
+
         osc.type = "triangle";
         osc.frequency.setValueAtTime(80, now);
         osc.frequency.exponentialRampToValueAtTime(880, now + 0.6);
-        
+
         gainNode.gain.setValueAtTime(0.0001, now);
         gainNode.gain.linearRampToValueAtTime(volume, now + 0.2);
         gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
-        
+
         osc.connect(gainNode);
         gainNode.connect(ctx.destination);
-        
+
         osc.start();
         osc.stop(now + 0.6);
       } else if (alertSoundPreset === "chime") {
@@ -341,13 +343,9 @@ export default function AlertCustomizer({
     }
   };
 
-  const getOverlayUrl = () => {
-    return `${window.location.origin}/overlay/${walletAddress}#key=${overlayToken}`;
-  };
+  const getOverlayUrl = () => buildOverlayUrl(walletAddress, overlayToken);
 
-  const getGoalOverlayUrl = () => {
-    return `${window.location.origin}/overlay/${walletAddress}?widget=goal#key=${overlayToken}`;
-  };
+  const getGoalOverlayUrl = () => buildGoalOverlayUrl(walletAddress, overlayToken);
 
   return (
     <Paper sx={{
@@ -385,7 +383,7 @@ export default function AlertCustomizer({
             variant="outlined"
             onClick={onSendTestAlert}
             disabled={testLoading}
-             
+
             sx={{
               borderRadius: "14px",
               px: 3,
@@ -407,7 +405,7 @@ export default function AlertCustomizer({
             variant="contained"
             onClick={handleSave}
             disabled={saveLoading}
-             
+
             sx={{
               borderRadius: "14px",
               px: 3.5,
@@ -462,14 +460,18 @@ export default function AlertCustomizer({
                 border: "1px solid rgba(255,255,255,0.04)",
                 flexGrow: 1
               }}>
-                {getOverlayUrl()}
+                {getOverlayUrl() || "Overlay URL not generated yet"}
               </Box>
               <Button
                 variant="outlined"
                 size="small"
                 onClick={() => {
-                  navigator.clipboard.writeText(getOverlayUrl());
-                  toast.success("Overlay source link copied!");
+                  const url = getOverlayUrl();
+                  if (url) {
+                    copyToClipboard(url, "Overlay source link copied!");
+                  } else {
+                    toast.error("Generate an overlay token first!");
+                  }
                 }}
                 sx={{
                   borderRadius: "10px",
@@ -506,14 +508,18 @@ export default function AlertCustomizer({
                 border: "1px solid rgba(255,255,255,0.04)",
                 flexGrow: 1
               }}>
-                {getGoalOverlayUrl()}
+                {getGoalOverlayUrl() || "Goal URL not generated yet"}
               </Box>
               <Button
                 variant="outlined"
                 size="small"
                 onClick={() => {
-                  navigator.clipboard.writeText(getGoalOverlayUrl());
-                  toast.success("Goal source link copied!");
+                  const url = getGoalOverlayUrl();
+                  if (url) {
+                    copyToClipboard(url, "Goal source link copied!");
+                  } else {
+                    toast.error("Generate an overlay token first!");
+                  }
                 }}
                 sx={{
                   borderRadius: "10px",
@@ -865,7 +871,7 @@ export default function AlertCustomizer({
                     variant="outlined"
                     component="label"
                     size="small"
-                     
+
                     sx={{
                       borderRadius: "10px",
                       textTransform: "none",
@@ -920,7 +926,7 @@ export default function AlertCustomizer({
                 variant="outlined"
                 size="small"
                 onClick={playPreviewSound}
-                 
+
                 sx={{
                   borderRadius: "10px",
                   borderColor: `${userThemeColor}44`,

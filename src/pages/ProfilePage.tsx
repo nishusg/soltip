@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
 import { getUserProfile } from "../services/api";
 import { getExplorerUrl } from "../services/solana";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import { Container, Card, CardContent, Typography, Box, Button, List, ListItem, Divider, Link, Chip, Tabs, Tab, Pagination, Tooltip, Grid } from "@mui/material";
 import { ProfilePageSkeleton } from "../components/common/LoadingSkeletons";
@@ -11,11 +10,13 @@ import ErrorIcon from "@mui/icons-material/Error";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import toast from "react-hot-toast";
 import TipForm from "../components/features/tips/TipForm";
 import SEO from "../components/common/SEO";
-import { SITE_NAME } from "../shared/constants";
 import BoringAvatar from "boring-avatars";
+import type { Tip } from "../types";
+import { shortenAddress, formatSol, formatTimeDefault as formatTime } from "../utils/format";
+import { AVATAR_COLORS, SITE_NAME } from "../shared/constants";
+import { copyToClipboard } from "../utils/clipboard";
 
 interface UserProfile {
   wallet_address: string;
@@ -23,19 +24,6 @@ interface UserProfile {
   bio?: string;
   total_received: number;
   total_sent: number;
-}
-
-interface Tip {
-  tx_hash: string;
-  sender_wallet: string;
-  creator_wallet: string;
-  sender_name?: string;
-  creator_name?: string;
-  amount: number;
-  fee: number;
-  message: string;
-  timestamp: string;
-  status: string;
 }
 
 export default function ProfilePage() {
@@ -108,26 +96,8 @@ export default function ProfilePage() {
 
   const copyWallet = () => {
     if (!user) return;
-    navigator.clipboard.writeText(user.wallet_address);
-    toast.success("Wallet address copied!", { icon: "📋" });
+    copyToClipboard(user.wallet_address, "Wallet address copied!", { icon: "📋" });
   };
-
-  function shorten(addr: string): string {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-  }
-
-  function formatSol(lamports: number): string {
-    return (lamports / LAMPORTS_PER_SOL).toFixed(4);
-  }
-
-  function formatTime(ts: string): string {
-    const date = new Date(ts);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-    return date.toLocaleDateString();
-  }
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -155,8 +125,8 @@ export default function ProfilePage() {
       {!loading && user && (
         <Box sx={{ position: "relative", animation: "fadeInUp 0.6s ease-out" }}>
           <SEO 
-            title={user.name || shorten(user.wallet_address)} 
-            description={user.bio || `Send a superchat to ${user.name || shorten(user.wallet_address)} on ${SITE_NAME} — the ultimate Solana engagement platform.`}
+            title={user.name || shortenAddress(user.wallet_address, 6)} 
+            description={user.bio || `Send a superchat to ${user.name || shortenAddress(user.wallet_address, 6)} on ${SITE_NAME} — the ultimate Solana engagement platform.`}
           />
           
           {/* Glowing Background Orbs */}
@@ -265,7 +235,7 @@ export default function ProfilePage() {
                       name={user.name || user.wallet_address}
                       variant="beam"
                       size={86}
-                      colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                      colors={AVATAR_COLORS}
                     />
                   </Box>
                 </Box>
@@ -273,7 +243,7 @@ export default function ProfilePage() {
                 {/* Name / Handle details */}
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5, display: "flex", alignItems: "center", justifyContent: { xs: "center", sm: "flex-start" }, gap: 1 }}>
-                    {user.name || shorten(user.wallet_address)}
+                    {user.name || shortenAddress(user.wallet_address, 6)}
                   </Typography>
                   
                   <Tooltip title="Copy Wallet Address" arrow>
@@ -298,7 +268,7 @@ export default function ProfilePage() {
                       }}
                     >
                       <Typography variant="caption" sx={{ fontFamily: "'Space Mono', monospace", color: "text.secondary" }}>
-                        {shorten(user.wallet_address)}
+                        {shortenAddress(user.wallet_address, 6)}
                       </Typography>
                       <ContentCopyIcon sx={{ fontSize: 11, color: "text.secondary" }} />
                     </Box>
@@ -449,7 +419,7 @@ export default function ProfilePage() {
                               name={activeTab === 0 ? (tip.sender_name || tip.sender_wallet) : (tip.creator_name || tip.creator_wallet)}
                               variant="beam"
                               size={44}
-                              colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                              colors={AVATAR_COLORS}
                             />
                           </Box>
 
@@ -473,9 +443,9 @@ export default function ProfilePage() {
                               
                               <Typography variant="body2" color="text.secondary">
                                 {activeTab === 0 ? (
-                                  <>from <Link component={RouterLink} to={`/profile/${tip.sender_wallet}`} color="inherit" sx={{ fontWeight: 600, "&:hover": { color: "primary.main" } }}>{tip.sender_name || shorten(tip.sender_wallet)}</Link></>
+                                  <>from <Link component={RouterLink} to={`/profile/${tip.sender_wallet}`} color="inherit" sx={{ fontWeight: 600, "&:hover": { color: "primary.main" } }}>{tip.sender_name || shortenAddress(tip.sender_wallet, 6)}</Link></>
                                 ) : (
-                                  <>to <Link component={RouterLink} to={`/profile/${tip.creator_wallet}`} color="inherit" sx={{ fontWeight: 600, "&:hover": { color: "primary.main" } }}>{tip.creator_name || shorten(tip.creator_wallet)}</Link></>
+                                  <>to <Link component={RouterLink} to={`/profile/${tip.creator_wallet}`} color="inherit" sx={{ fontWeight: 600, "&:hover": { color: "primary.main" } }}>{tip.creator_name || shortenAddress(tip.creator_wallet, 6)}</Link></>
                                 )}
                               </Typography>
                             </Box>

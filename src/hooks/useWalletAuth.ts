@@ -15,17 +15,7 @@
 
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useAuth } from "../context/AuthContext";
-
-/**
- * Shorten a Solana address for display: "ABCD...WXYZ"
- *
- * @param address — full base58 address
- * @param chars — number of chars to show on each side (default 4)
- * @returns shortened string
- */
-function shortenAddress(address: string, chars = 4): string {
-  return `${address.slice(0, chars)}...${address.slice(-chars)}`;
-}
+import { shortenAddress } from "../utils/format";
 
 /**
  * Combined wallet + auth hook.

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useRealtimeTips } from "../hooks/useRealtimeTips";
+import { shortenAddress, formatSol } from "../utils/format";
 import { getLeaderboard } from "../services/api";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import { logger } from "../utils/logger";
+import { AVATAR_COLORS } from "../shared/constants";
 import {
   Box,
   Typography,
@@ -146,13 +147,6 @@ export default function CreatorLeaderboard() {
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
-  function shorten(addr: string): string {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-  }
-
-  function formatSol(lamports: number): string {
-    return (lamports / LAMPORTS_PER_SOL).toFixed(4);
-  }
 
   // ---------------------------------------------------------------------------
   const filteredCreators = creators;
@@ -386,11 +380,11 @@ export default function CreatorLeaderboard() {
                   <Typography variant="h4" sx={{ fontWeight: 900, color: "#c0c0c0", opacity: 0.8, mb: 1 }}>2nd</Typography>
                   <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
                     <Box sx={{ p: 0.5, border: "2px solid #c0c0c0", borderRadius: "50%" }}>
-                      <BoringAvatar size={76} name={secondPlace.name || secondPlace.wallet_address} variant="beam" colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
+                      <BoringAvatar size={76} name={secondPlace.name || secondPlace.wallet_address} variant="beam" colors={AVATAR_COLORS} />
                     </Box>
                   </Box>
-                  <Typography variant="h6" noWrap sx={{ fontWeight: 800 }}>{secondPlace.name || shorten(secondPlace.wallet_address)}</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shorten(secondPlace.wallet_address)}</Typography>
+                  <Typography variant="h6" noWrap sx={{ fontWeight: 800 }}>{secondPlace.name || shortenAddress(secondPlace.wallet_address, 6)}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shortenAddress(secondPlace.wallet_address, 6)}</Typography>
 
                   <Box sx={{ bgcolor: "rgba(192, 192, 192, 0.1)", py: 1, px: 2, borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: 0.5, mb: 2 }}>
                     <Typography variant="h6" sx={{ fontWeight: 900, color: "#fff", display: "flex", alignItems: "baseline" }}>
@@ -448,11 +442,11 @@ export default function CreatorLeaderboard() {
                   <Typography variant="h3" sx={{ fontWeight: 900, color: "#ffd700", mb: 1, textShadow: "0 0 10px rgba(255,215,0,0.5)" }}>1st</Typography>
                   <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
                     <Box sx={{ p: 0.5, border: "3px solid #ffd700", borderRadius: "50%", boxShadow: "0 0 20px rgba(255,215,0,0.3)" }}>
-                      <BoringAvatar size={90} name={firstPlace.name || firstPlace.wallet_address} variant="beam" colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
+                      <BoringAvatar size={90} name={firstPlace.name || firstPlace.wallet_address} variant="beam" colors={AVATAR_COLORS} />
                     </Box>
                   </Box>
-                  <Typography variant="h5" noWrap sx={{ fontWeight: 900, color: "#ffd700" }}>{firstPlace.name || shorten(firstPlace.wallet_address)}</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shorten(firstPlace.wallet_address)}</Typography>
+                  <Typography variant="h5" noWrap sx={{ fontWeight: 900, color: "#ffd700" }}>{firstPlace.name || shortenAddress(firstPlace.wallet_address, 6)}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shortenAddress(firstPlace.wallet_address, 6)}</Typography>
 
                   <Box sx={{ bgcolor: "rgba(255, 215, 0, 0.15)", py: 1, px: 2.5, borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: 0.5, mb: 2, border: "1px solid rgba(255,215,0,0.3)" }}>
                     <Typography variant="h5" sx={{ fontWeight: 900, color: "#ffd700", display: "flex", alignItems: "baseline" }}>
@@ -508,11 +502,11 @@ export default function CreatorLeaderboard() {
                   <Typography variant="h4" sx={{ fontWeight: 900, color: "#cd7f32", opacity: 0.8, mb: 1 }}>3rd</Typography>
                   <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
                     <Box sx={{ p: 0.5, border: "2px solid #cd7f32", borderRadius: "50%" }}>
-                      <BoringAvatar size={70} name={thirdPlace.name || thirdPlace.wallet_address} variant="beam" colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
+                      <BoringAvatar size={70} name={thirdPlace.name || thirdPlace.wallet_address} variant="beam" colors={AVATAR_COLORS} />
                     </Box>
                   </Box>
-                  <Typography variant="h6" noWrap sx={{ fontWeight: 800 }}>{thirdPlace.name || shorten(thirdPlace.wallet_address)}</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shorten(thirdPlace.wallet_address)}</Typography>
+                  <Typography variant="h6" noWrap sx={{ fontWeight: 800 }}>{thirdPlace.name || shortenAddress(thirdPlace.wallet_address, 6)}</Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: "monospace", display: "block", mb: 2 }}>{shortenAddress(thirdPlace.wallet_address, 6)}</Typography>
 
                   <Box sx={{ bgcolor: "rgba(205, 127, 50, 0.1)", py: 1, px: 2, borderRadius: "12px", display: "inline-flex", alignItems: "center", gap: 0.5, mb: 2 }}>
                     <Typography variant="h6" sx={{ fontWeight: 900, color: "#fff", display: "flex", alignItems: "baseline" }}>
@@ -705,7 +699,7 @@ export default function CreatorLeaderboard() {
                         name={creator.name || creator.wallet_address}
                         variant="beam"
                         size="100%"
-                        colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                        colors={AVATAR_COLORS}
                       />
                     </Box>
 
@@ -713,7 +707,7 @@ export default function CreatorLeaderboard() {
                     <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                       <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1, mb: 0.5 }}>
                         <Typography variant="h6" noWrap sx={{ fontWeight: 800, fontSize: { xs: "0.95rem", sm: "1.15rem" }, color: /* creator.is_premium ? "#FFD700" : */ isCurrentUser ? "#38BDF8" : "inherit" }}>
-                          {creator.name || shorten(creator.wallet_address)}
+                          {creator.name || shortenAddress(creator.wallet_address, 6)}
                         </Typography>
 
                         {isCurrentUser && (
@@ -765,7 +759,7 @@ export default function CreatorLeaderboard() {
                         )}
                       </Box>
                       <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "monospace", opacity: 0.65, fontSize: { xs: "0.7rem", sm: "0.8rem" } }}>
-                        {shorten(creator.wallet_address)}
+                        {shortenAddress(creator.wallet_address, 6)}
                       </Typography>
                     </Box>
 

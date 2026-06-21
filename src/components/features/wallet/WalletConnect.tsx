@@ -5,7 +5,7 @@ import { useWalletAuth } from "../../../hooks/useWalletAuth";
 import BoringAvatar from "boring-avatars";
 import toast from "react-hot-toast";
 import SEO from "../../common/SEO";
-import { SITE_NAME, SITE_URL, PLATFORM_FEE_PCT } from "../../../shared/constants";
+import { SITE_NAME, SITE_URL, PLATFORM_FEE_PCT, AVATAR_COLORS } from "../../../shared/constants";
 
 // Material Icons
 import FlashOnIcon from "@mui/icons-material/FlashOn";
@@ -307,7 +307,7 @@ export default function WalletConnect() {
                     }
                   }}
                 >
-                  <BoringAvatar name={c.name} variant="beam" size={26} colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
+                  <BoringAvatar name={c.name} variant="beam" size={26} colors={AVATAR_COLORS} />
                   <Typography sx={{ fontWeight: 850, fontSize: "0.92rem", color: "text.primary" }}>{c.name}</Typography>
                 </Paper>
               </Grid>
@@ -806,7 +806,7 @@ export default function WalletConnect() {
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <BoringAvatar name={t.author} variant="beam" size={40} colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
+                    <BoringAvatar name={t.author} variant="beam" size={40} colors={AVATAR_COLORS} />
                     <Box>
                       <Typography sx={{ fontWeight: 850, fontSize: "0.9rem" }}>{t.author}</Typography>
                       <Typography variant="caption" color="text.secondary">{t.role}</Typography>

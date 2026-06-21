@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { SOCKET_URL } from "../shared/constants";
 import { logger } from "../utils/logger";
 import { sanitizeSenderName } from "../utils/security";
+import { formatSol } from "../utils/format";
 
 interface SocketContextType {
   socket: Socket | null;
@@ -55,10 +56,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (notif.type === "tip_received") {
         const safeSender = sanitizeSenderName(notif.data?.sender);
         const safeAmount = Number(notif.data?.amount) || 0;
-        toast.success(`You received a ${safeAmount / 1e9} SOL Super Chat from ${safeSender}!`, { duration: 5000 });
+        toast.success(`You received a ${formatSol(safeAmount)} SOL Super Chat from ${safeSender}!`, { duration: 5000 });
       } else if (notif.type === "payment_confirmed") {
         const safeAmount = Number(notif.data?.amount) || 0;
-        toast.success(`Your payment of ${safeAmount / 1e9} SOL was confirmed!`, { duration: 4000 });
+        toast.success(`Your payment of ${formatSol(safeAmount)} SOL was confirmed!`, { duration: 4000 });
       }
     });
 

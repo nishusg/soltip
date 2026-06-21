@@ -47,24 +47,14 @@ import BoringAvatar from "boring-avatars";
 import { useWalletAuth } from "../hooks/useWalletAuth";
 import { useAuth } from "../context/AuthContext";
 import { listTransactions/*, refundTransaction*/ } from "../services/api";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import SEO from "../components/common/SEO";
 import toast from "react-hot-toast";
+import { Tip } from "../types";
+import { shortenAddress, formatSol, formatRelativeTime, formatAbsoluteTimestamp } from "../utils/format";
+import { AVATAR_COLORS } from "../shared/constants";
+import { copyToClipboard } from "../utils/clipboard";
 
-interface Transaction {
-  _id: string;
-  tx_hash: string;
-  sender_wallet: string;
-  creator_wallet: string;
-  sender_name?: string;
-  creator_name?: string;
-  amount: number;
-  fee: number;
-  message: string;
-  timestamp: string;
-  status: string;
-  error_message?: string;
-}
+type Transaction = Tip & { error_message?: string };
 
 export default function ActivityPage() {
   const { walletAddress, isAuthenticated } = useWalletAuth();
@@ -155,44 +145,11 @@ export default function ActivityPage() {
     return `https://explorer.solana.com/tx/${txHash}?cluster=devnet`;
   };
 
-  const shorten = (addr: string): string => {
-    if (!addr) return "";
-    return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
-  };
 
-  const formatSol = (lamports: number): string => {
-    return (lamports / LAMPORTS_PER_SOL).toFixed(4);
-  };
 
-  const getAbsoluteTimestamp = (ts: string): string => {
-    const date = new Date(ts);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    });
-  };
+  const getAbsoluteTimestamp = (ts: string) => formatAbsoluteTimestamp(ts, true);
 
-  const getRelativeTime = (ts: string): string => {
-    const date = new Date(ts);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-
-    if (diff < 60000) return "just now";
-    if (diff < 3600000) {
-      const mins = Math.floor(diff / 60000);
-      return `${mins}m ago`;
-    }
-    if (diff < 86400000) {
-      const hrs = Math.floor(diff / 3600000);
-      return `${hrs}h ago`;
-    }
-    const days = Math.floor(diff / 86400000);
-    return `${days}d ago`;
-  };
+  const getRelativeTime = (ts: string) => formatRelativeTime(ts);
 
   const maxSupporterTotal = useMemo(() => {
     if (topSupporters.length === 0) return 1;
@@ -331,8 +288,7 @@ export default function ActivityPage() {
                   onClick={() => {
                     if (user?.username) {
                       const tippingLink = `${window.location.origin}/${user.username}`;
-                      navigator.clipboard.writeText(tippingLink);
-                      toast.success("Tipping link copied to clipboard!");
+                      copyToClipboard(tippingLink, "Tipping link copied to clipboard!");
                     } else {
                       toast.error("Please set a username in settings first!");
                     }
@@ -529,7 +485,7 @@ export default function ActivityPage() {
                                   name={isSent ? (tx.creator_name || tx.creator_wallet) : (tx.sender_name || tx.sender_wallet)}
                                   variant="beam"
                                   size="100%"
-                                  colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                                  colors={AVATAR_COLORS}
                                 />
                               </Box>
                               <Box>
@@ -538,9 +494,9 @@ export default function ActivityPage() {
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "'Space Mono', monospace", fontSize: "0.82rem" }}>
                                   {isSent ? (
-                                    <>To <Link component={RouterLink} to={`/profile/${tx.creator_wallet}`} color="primary" sx={{ fontWeight: 700, textDecoration: "none" }}>{tx.creator_name || shorten(tx.creator_wallet)}</Link></>
+                                    <>To <Link component={RouterLink} to={`/profile/${tx.creator_wallet}`} color="primary" sx={{ fontWeight: 700, textDecoration: "none" }}>{tx.creator_name || shortenAddress(tx.creator_wallet, 4)}</Link></>
                                   ) : (
-                                    <>From <Link component={RouterLink} to={`/profile/${tx.sender_wallet}`} color="secondary" sx={{ fontWeight: 700, textDecoration: "none" }}>{tx.sender_name || shorten(tx.sender_wallet)}</Link></>
+                                    <>From <Link component={RouterLink} to={`/profile/${tx.sender_wallet}`} color="secondary" sx={{ fontWeight: 700, textDecoration: "none" }}>{tx.sender_name || shortenAddress(tx.sender_wallet, 4)}</Link></>
                                   )}
                                 </Typography>
                               </Box>
@@ -796,7 +752,7 @@ export default function ActivityPage() {
                                 name={supporter.wallet}
                                 variant="marble"
                                 size={26}
-                                colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                                colors={AVATAR_COLORS}
                               />
                               
                               <Typography variant="body2" sx={{ fontWeight: 800, color: "#fff" }}>

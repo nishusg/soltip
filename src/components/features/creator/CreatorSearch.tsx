@@ -19,6 +19,8 @@ import FlashOnIcon from "@mui/icons-material/FlashOn";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 import { searchCreators } from "../../../services/api";
 import { CreatorSearchSkeleton } from "../../common/LoadingSkeletons";
+import { shortenAddress } from "../../../utils/format";
+import { AVATAR_COLORS } from "../../../shared/constants";
 
 export default function CreatorSearch() {
   // Creator Search State
@@ -190,7 +192,7 @@ export default function CreatorSearch() {
                       size={44}
                       name={creator.username || creator.wallet_address}
                       variant="marble"
-                      colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                      colors={AVATAR_COLORS}
                     />
                   </Box>
 
@@ -217,7 +219,7 @@ export default function CreatorSearch() {
                       ) */}
                     </Stack>
                     <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
-                      {creator.username ? `@${creator.username}` : `${creator.wallet_address.slice(0, 4)}...${creator.wallet_address.slice(-4)}`}
+                      {creator.username ? `@${creator.username}` : shortenAddress(creator.wallet_address)}
                     </Typography>
                   </Box>
 

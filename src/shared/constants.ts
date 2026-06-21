@@ -28,3 +28,12 @@ export const FEE_PERCENTAGE = PLATFORM_FEE_PCT / 100;
 export const SITE_NAME = import.meta.env.VITE_SITE_NAME;
 export const SITE_URL = import.meta.env.VITE_SITE_URL;
 
+// UI / Design tokens
+/** Canonical Solana-branded palette used for all BoringAvatar instances. */
+export const AVATAR_COLORS: [string, string, string, string, string] = [
+  "#9945FF", // Solana purple
+  "#14F195", // Solana green
+  "#8052FF", // Deep violet
+  "#00FF80", // Neon mint
+  "#E1C3FF", // Soft lavender
+];

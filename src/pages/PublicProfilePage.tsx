@@ -1,39 +1,34 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { buildSafeSocialUrl, isValidChannel } from "../utils/security";
 import { useParams, Link as RouterLink } from "react-router-dom";
-import { getPublicProfileByUsername, verifyAndStoreTransaction, getTransactionStatus } from "../services/api";
-import { getExplorerUrl, sendTip, calculateFeeBreakdown } from "../services/solana";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useAuth } from "../context/AuthContext";
+import { getPublicProfileByUsername } from "../services/api";
+import { getExplorerUrl } from "../services/solana";
+import { getTipTierConfig } from "../utils/tipTier";
 import { useSocket } from "../context/SocketContext";
 import { baseTheme, premiumThemes } from "../themes";
 import { getPremiumOverrides } from "../themes/shared";
 import BoringAvatar from "boring-avatars";
 import SEO from "../components/common/SEO";
+import ConfettiShower from "../components/common/ConfettiShower";
+import TipForm from "../components/features/tips/TipForm";
 import {
   Container,
   Card,
   CardContent,
   Typography,
   Box,
-  CircularProgress,
   Button,
   TextField,
-  Alert,
   Stack,
   Chip,
   Grid,
   Link,
-  Divider,
   ThemeProvider,
   CssBaseline,
-  IconButton,
   Pagination,
   InputAdornment
 } from "@mui/material";
 import { PublicProfileSkeleton } from "../components/common/LoadingSkeletons";
-import LockIcon from "@mui/icons-material/Lock";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import ErrorIcon from "@mui/icons-material/Error";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -42,10 +37,13 @@ import SearchIcon from "@mui/icons-material/Search";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import toast from "react-hot-toast";
 import { logger } from "../utils/logger";
-import { SITE_NAME, PLATFORM_FEE_PCT } from "../shared/constants";
+import { SITE_NAME } from "../shared/constants";
+import { Tip as EnrichedTip } from "../types";
+import { shortenAddress, formatSol, formatTimeDefault as formatTime } from "../utils/format";
+import { AVATAR_COLORS } from "../shared/constants";
+import { copyToClipboard } from "../utils/clipboard";
 
 
 interface CreatorProfile {
@@ -74,30 +72,8 @@ interface CreatorProfile {
   };
 }
 
-interface EnrichedTip {
-  tx_hash: string;
-  sender_wallet: string;
-  creator_wallet: string;
-  sender_name?: string;
-  creator_name?: string;
-  amount: number;
-  fee: number;
-  message: string;
-  timestamp: string;
-  status: string;
-}
 
-interface ConfettiParticle {
-  x: number;
-  y: number;
-  size: number;
-  color: string;
-  speedX: number;
-  speedY: number;
-  rotation: number;
-  rotationSpeed: number;
-  opacity: number;
-}
+
 
 const TwitterIconSvg = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6 }}>
@@ -131,9 +107,6 @@ const DiscordIconSvg = () => (
 
 export default function PublicProfilePage() {
   const { username } = useParams<{ username: string }>();
-  const { connection } = useConnection();
-  const wallet = useWallet();
-  const { isAuthenticated, login, isLoading: authLoading } = useAuth();
   const { socket } = useSocket();
 
   const [creator, setCreator] = useState<CreatorProfile | null>(null);
@@ -149,17 +122,8 @@ export default function PublicProfilePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "large" | "message">("all");
   const [showConfetti, setShowConfetti] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Tip Form State
-  const [amount, setAmount] = useState("");
-  const [message, setMessage] = useState("");
-  const [txStatus, setTxStatus] = useState<"idle" | "sending" | "verifying" | "success" | "error">("idle");
-  const [txHash, setTxHash] = useState<string | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [verificationStatus, setVerificationStatus] = useState<"pending" | "verified" | "failed" | null>(null);
-  const [checkingStatus, setCheckingStatus] = useState(false);
-  const isSubmitting = useRef(false);
+
 
   // Reset states when username changes
   useEffect(() => {
@@ -268,226 +232,31 @@ export default function PublicProfilePage() {
 
 
 
-  // Confetti Particle Animation Loop
-  useEffect(() => {
-    if (!showConfetti || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
 
-    let animationFrameId: number;
-    const particles: ConfettiParticle[] = [];
-    const colors = ["#9945FF", "#14F195", "#38BDF8", "#FFD700", "#FF2D55", "#FF9500"];
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    window.addEventListener("resize", handleResize);
-
-    for (let i = 0; i < 180; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height - canvas.height - 50,
-        size: Math.random() * 8 + 6,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        speedX: Math.random() * 6 - 3,
-        speedY: Math.random() * 8 + 4,
-        rotation: Math.random() * 360,
-        rotationSpeed: Math.random() * 4 - 2,
-        opacity: 1
-      });
-    }
-
-    let frames = 0;
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      let active = false;
-
-      particles.forEach(p => {
-        p.y += p.speedY;
-        p.x += p.speedX;
-        p.rotation += p.rotationSpeed;
-
-        if (p.y < canvas.height) {
-          active = true;
-        } else {
-          p.opacity -= 0.015;
-          if (p.opacity > 0) active = true;
-        }
-
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate((p.rotation * Math.PI) / 180);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = Math.max(0, p.opacity);
-        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-        ctx.restore();
-      });
-
-      frames++;
-      if (active && frames < 300) {
-        animationFrameId = requestAnimationFrame(animate);
-      } else {
-        setShowConfetti(false);
-      }
-    };
-
-    animate();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [showConfetti]);
-
-  // Handle Preset Tip Click
-  const handlePresetTip = (val: number) => {
-    setAmount(val.toString());
-  };
-
-  const feeBreakdown = useMemo(() => {
-    const parsed = parseFloat(amount);
-    if (isNaN(parsed) || parsed <= 0) return null;
-    return calculateFeeBreakdown(parsed);
-  }, [amount]);
-
-  const isFormValid = useMemo(() => {
-    if (!creator) return false;
-    const parsed = parseFloat(amount);
-    if (isNaN(parsed) || parsed < 0.01) return false;
-    if (message.length > 280) return false;
-    return true;
-  }, [creator, amount, message]);
-
-  // Handle Tipping
-  async function handleSendTip(e: React.FormEvent) {
-    e.preventDefault();
-    if (!creator || !wallet.publicKey || !isAuthenticated) return;
-    if (txStatus === "sending" || txStatus === "verifying") return;
-    if (isSubmitting.current) return;
-
-    isSubmitting.current = true;
-    setTxStatus("sending");
-    setErrorMsg(null);
-    setTxHash(null);
-    setVerificationStatus(null);
-
+  const reloadProfileData = async () => {
     try {
-      const signature = await sendTip(
-        connection,
-        wallet,
-        creator.wallet_address,
-        parseFloat(amount)
-      );
-
-      setTxHash(signature);
-      setTxStatus("verifying");
-
-      try {
-        await verifyAndStoreTransaction({
-          tx_hash: signature,
-          sender_wallet: wallet.publicKey.toString(),
-          creator_wallet: creator.wallet_address,
-          message: message.trim()
-        });
-        setVerificationStatus("pending");
-      } catch (verifyErr) {
-        logger.warn("Backend verification error:", verifyErr);
-        toast.error("Tip sent, but backend indexing failed");
-      }
-
-      setTxStatus("success");
-      setAmount("");
-      setMessage("");
-      setShowConfetti(true); // Trigger Confetti upon signature confirmation
-
-      // Reload recent superchats & profile settings (including goal progress)
-      const updatedData = await getPublicProfileByUsername(username!, 1, 5, searchQuery, filterType);
+      const updatedData = await getPublicProfileByUsername(username!, page, 5, searchQuery, filterType);
       setCreator(updatedData.user);
       setTips(updatedData.recent_tips || []);
       setTotalPages(updatedData.pagination?.pages || 1);
       if (updatedData.stats) {
         setCreatorStats(updatedData.stats);
       }
-      setPage(1);
     } catch (err: any) {
-      setTxStatus("error");
-      const msg = err.message || "Transaction execution failed";
-      setErrorMsg(msg);
-    } finally {
-      isSubmitting.current = false;
-    }
-  }
-
-  const handleCheckStatus = async () => {
-    if (!txHash) return;
-    setCheckingStatus(true);
-    try {
-      const res = await getTransactionStatus(txHash);
-      setVerificationStatus(res.status);
-      if (res.status === "verified") {
-        setShowConfetti(true); // Celebrate again on verified state confirmation
-        toast.success("Tip verified successfully!", { icon: "🎉" });
-        // Reload recent superchats & profile settings
-        const updatedData = await getPublicProfileByUsername(username!, page, 5, searchQuery, filterType);
-        setCreator(updatedData.user);
-        setTips(updatedData.recent_tips || []);
-        setTotalPages(updatedData.pagination?.pages || 1);
-        if (updatedData.stats) {
-          setCreatorStats(updatedData.stats);
-        }
-      }
-    } catch (err: any) {
-      logger.error("Status check failed:", err);
-    } finally {
-      setCheckingStatus(false);
+      logger.error("Failed to reload profile data:", err);
     }
   };
 
   const copyWallet = () => {
     if (!creator) return;
-    navigator.clipboard.writeText(creator.wallet_address);
-    toast.success("Wallet address copied!", { icon: "📋" });
+    copyToClipboard(creator.wallet_address, "Wallet address copied!", { icon: "📋" });
   };
 
   const copyShareableLink = () => {
     const link = `${window.location.origin}/${creator?.username}`;
-    navigator.clipboard.writeText(link);
-    toast.success("Shareable link copied!", { icon: "🔗" });
+    copyToClipboard(link, "Shareable link copied!", { icon: "🔗" });
   };
-
-  function shorten(addr: string): string {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-  }
-
-  function formatSol(lamports: number): string {
-    return (lamports / 1e9).toFixed(4);
-  }
-
-  function formatTime(ts: string): string {
-    const date = new Date(ts);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    if (diff < 60000) return "Just now";
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-    return date.toLocaleDateString();
-  }
-
-  // Dynamic Tipping Tier Configuration
-  const tipTier = useMemo(() => {
-    const parsed = parseFloat(amount);
-    if (isNaN(parsed) || parsed <= 0) return { name: "Starter", color: "rgba(255, 255, 255, 0.08)", glow: "none", text: "text.secondary", badge: "🌱 Starter Support" };
-    if (parsed >= 5.0) return { name: "Legendary", color: "#ff2d55", glow: "0 0 30px rgba(255, 45, 85, 0.5)", text: "#ff2d55", badge: "🏆 Legendary Support" };
-    if (parsed >= 1.0) return { name: "Epic", color: "#ff9500", glow: "0 0 24px rgba(255, 149, 0, 0.4)", text: "#ff9500", badge: "💎 Epic Support" };
-    if (parsed >= 0.5) return { name: "Premium", color: "#ffcc00", glow: "0 0 18px rgba(255, 204, 0, 0.35)", text: "#ffcc00", badge: "⭐ Premium Support" };
-    if (parsed >= 0.1) return { name: "Standard", color: "#14F195", glow: "0 0 14px rgba(20, 241, 149, 0.25)", text: "#14F195", badge: "⚡ Standard Support" };
-    return { name: "Starter", color: "rgba(255, 255, 255, 0.15)", glow: "none", text: "text.secondary", badge: "🌱 Starter Support" };
-  }, [amount]);
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -575,18 +344,7 @@ export default function PublicProfilePage() {
       {premiumStyles && <style dangerouslySetInnerHTML={{ __html: premiumStyles }} />}
 
       {showConfetti && (
-        <canvas
-          ref={canvasRef}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            zIndex: 9999,
-            pointerEvents: "none"
-          }}
-        />
+        <ConfettiShower mode="burst" onComplete={() => setShowConfetti(false)} />
       )}
 
       <Box sx={{ position: "relative", minHeight: "calc(100vh - 64px)", pb: 12 }}>
@@ -790,7 +548,7 @@ export default function PublicProfilePage() {
                       name={creator.name || creator.wallet_address}
                       variant="beam"
                       size={108}
-                      colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                      colors={AVATAR_COLORS}
                     />
                   </Box>
                 </Box>
@@ -917,7 +675,7 @@ export default function PublicProfilePage() {
                       }}
                     >
                       <Typography sx={{ fontFamily: "'Space Mono', monospace", fontSize: "0.8rem", color: "text.secondary" }}>
-                        {shorten(creator.wallet_address)}
+                        {shortenAddress(creator.wallet_address, 6)}
                       </Typography>
                       <ContentCopyIcon sx={{ fontSize: 13, color: "text.secondary" }} />
                     </Box>
@@ -1111,6 +869,15 @@ export default function PublicProfilePage() {
                 border: "1px solid rgba(255,255,255,0.05)",
                 boxShadow: "none",
                 borderRadius: "16px",
+                overflow: "hidden",
+                position: "relative",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0, left: 0, right: 0,
+                  height: "3px",
+                  background: `linear-gradient(90deg, ${currentTheme.palette.primary.main}, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main})`,
+                },
                 "&:hover": {
                   bgcolor: "rgba(255, 255, 255, 0.03)",
                   transform: "translateY(-4px)",
@@ -1130,6 +897,9 @@ export default function PublicProfilePage() {
                     <Typography variant="h5" sx={{ fontWeight: 900, mt: 0.5, fontFamily: "'Space Grotesk', sans-serif" }}>
                       {creatorStats.volumeSol.toFixed(2)} <span style={{ fontSize: "0.9rem", opacity: 0.8, fontWeight: 700 }}>SOL</span>
                     </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.68rem" }}>
+                      ≈ ${(creatorStats.volumeSol * 150).toFixed(2)} USD
+                    </Typography>
                   </Box>
                 </CardContent>
               </Card>
@@ -1141,6 +911,15 @@ export default function PublicProfilePage() {
                 border: "1px solid rgba(255,255,255,0.05)",
                 boxShadow: "none",
                 borderRadius: "16px",
+                overflow: "hidden",
+                position: "relative",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0, left: 0, right: 0,
+                  height: "3px",
+                  background: `linear-gradient(90deg, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main}, #ff9500)`,
+                },
                 "&:hover": {
                   bgcolor: "rgba(255, 255, 255, 0.03)",
                   transform: "translateY(-4px)",
@@ -1160,6 +939,9 @@ export default function PublicProfilePage() {
                     <Typography variant="h5" sx={{ fontWeight: 900, mt: 0.5, fontFamily: "'Space Grotesk', sans-serif" }}>
                       {creatorStats.totalCount}
                     </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.68rem" }}>
+                      {creatorStats.totalCount === 1 ? "1 superchat" : `${creatorStats.totalCount} superchats`}
+                    </Typography>
                   </Box>
                 </CardContent>
               </Card>
@@ -1171,6 +953,15 @@ export default function PublicProfilePage() {
                 border: "1px solid rgba(255,255,255,0.05)",
                 boxShadow: "none",
                 borderRadius: "16px",
+                overflow: "hidden",
+                position: "relative",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0, left: 0, right: 0,
+                  height: "3px",
+                  background: "linear-gradient(90deg, #14F195, #00c97a)",
+                },
                 "&:hover": {
                   bgcolor: "rgba(255, 255, 255, 0.03)",
                   transform: "translateY(-4px)",
@@ -1189,6 +980,9 @@ export default function PublicProfilePage() {
                     </Typography>
                     <Typography variant="h5" sx={{ fontWeight: 900, mt: 0.5, fontFamily: "'Space Grotesk', sans-serif" }}>
                       {creatorStats.avgSol.toFixed(3)} <span style={{ fontSize: "0.9rem", opacity: 0.8, fontWeight: 700 }}>SOL</span>
+                    </Typography>
+                    <Typography variant="caption" sx={{ fontSize: "0.68rem", color: "#14F195", fontWeight: 700 }}>
+                      per superchat
                     </Typography>
                   </Box>
                 </CardContent>
@@ -1421,69 +1215,38 @@ export default function PublicProfilePage() {
                     </Stack>
 
                     {tips.length === 0 ? (
-                      <Box sx={{ textAlign: "center", py: 6 }}>
-                        <Typography sx={{ fontSize: "2.5rem", mb: 1 }}>⚡</Typography>
-                        <Typography sx={{ fontWeight: 700, mb: 0.5 }}>No Superchats Found</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Try searching for another term or tip to be the first!
+                      <Box sx={{ textAlign: "center", py: 8 }}>
+                        <Box sx={{
+                          width: 72, height: 72,
+                          borderRadius: "50%",
+                          bgcolor: `${currentTheme.palette.primary.main}12`,
+                          border: `1px solid ${currentTheme.palette.primary.main}22`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          mx: "auto", mb: 3,
+                          fontSize: "2rem"
+                        }}>⚡</Box>
+                        <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>No Superchats Yet</Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 280, mx: "auto" }}>
+                          Be the first to send a superchat to <strong>@{creator.username}</strong> and claim the top spot!
                         </Typography>
+                        <Chip
+                          label="⚡ Send First Superchat"
+                          sx={{
+                            bgcolor: `${currentTheme.palette.primary.main}18`,
+                            color: currentTheme.palette.primary.main,
+                            border: `1px solid ${currentTheme.palette.primary.main}35`,
+                            fontWeight: 800,
+                            cursor: "default",
+                            px: 1
+                          }}
+                        />
                       </Box>
                     ) : (
                       <Stack spacing={2.5}>
                         {tips.map((tip) => {
-                          const getTipTier = (amountInLamports: number) => {
-                            const sol = amountInLamports / 1e9;
-                            if (sol >= 2.5) {
-                              return {
-                                name: "Legendary",
-                                color: "#ff2d55",
-                                badge: "🏆 Legendary Support",
-                                bg: "linear-gradient(135deg, rgba(255, 45, 85, 0.08) 0%, rgba(11, 15, 23, 0.95) 100%)",
-                                borderColor: "rgba(255, 45, 85, 0.45)",
-                                glow: "0 0 15px rgba(255, 45, 85, 0.15)"
-                              };
-                            }
-                            if (sol >= 1.0) {
-                              return {
-                                name: "Epic",
-                                color: "#ff9500",
-                                badge: "💎 Epic Support",
-                                bg: "linear-gradient(135deg, rgba(255, 149, 0, 0.06) 0%, rgba(11, 15, 23, 0.95) 100%)",
-                                borderColor: "rgba(255, 149, 0, 0.35)",
-                                glow: "0 0 12px rgba(255, 149, 0, 0.1)"
-                              };
-                            }
-                            if (sol >= 0.5) {
-                              return {
-                                name: "Premium",
-                                color: "#ffcc00",
-                                badge: "⭐ Premium Support",
-                                bg: "linear-gradient(135deg, rgba(255, 204, 0, 0.04) 0%, rgba(11, 15, 23, 0.95) 100%)",
-                                borderColor: "rgba(255, 204, 0, 0.25)",
-                                glow: "0 0 8px rgba(255, 204, 0, 0.05)"
-                              };
-                            }
-                            if (sol >= 0.1) {
-                              return {
-                                name: "Standard",
-                                color: "#14F195",
-                                badge: "⚡ Standard Support",
-                                bg: "rgba(255, 255, 255, 0.015)",
-                                borderColor: "rgba(20, 241, 149, 0.2)",
-                                glow: "none"
-                              };
-                            }
-                            return {
-                              name: "Starter",
-                              color: "rgba(255, 255, 255, 0.08)",
-                              badge: "",
-                              bg: "rgba(255, 255, 255, 0.015)",
-                              borderColor: "rgba(255, 255, 255, 0.04)",
-                              glow: "none"
-                            };
-                          };
-
-                          const tier = getTipTier(tip.amount);
+                          const tier = getTipTierConfig(tip.amount / 1e9);
+                          const maxAmount = Math.max(...tips.map(t => t.amount));
+                          const isTopTip = tip.amount === maxAmount && tips.length > 1;
 
                           return (
                             <Box key={tip.tx_hash}>
@@ -1494,8 +1257,8 @@ export default function PublicProfilePage() {
                                   p: 2.5,
                                   borderRadius: "16px",
                                   bgcolor: tier.bg,
-                                  border: `1px solid ${tier.borderColor}`,
-                                  boxShadow: tier.glow,
+                                  border: `1px solid ${isTopTip ? tier.color + "66" : tier.borderColor}`,
+                                  boxShadow: isTopTip ? tier.glow : "none",
                                   position: "relative",
                                   overflow: "hidden",
                                   transition: "transform 0.2s, box-shadow 0.2s, border-color 0.2s",
@@ -1506,12 +1269,23 @@ export default function PublicProfilePage() {
                                   }
                                 }}
                               >
-                                <Box sx={{ width: 44, height: 44, borderRadius: "10px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                {/* Left colored accent bar */}
+                                {tier.name !== "Starter" && (
+                                  <Box sx={{
+                                    position: "absolute",
+                                    left: 0, top: 0, bottom: 0,
+                                    width: "3px",
+                                    background: `linear-gradient(180deg, ${tier.color}, ${tier.color}55)`,
+                                    borderRadius: "16px 0 0 16px"
+                                  }} />
+                                )}
+
+                                <Box sx={{ width: 44, height: 44, borderRadius: "10px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, ml: tier.name !== "Starter" ? 0.5 : 0 }}>
                                   <BoringAvatar
                                     name={tip.sender_name || tip.sender_wallet}
                                     variant="beam"
                                     size={44}
-                                    colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                                    colors={AVATAR_COLORS}
                                   />
                                 </Box>
 
@@ -1519,8 +1293,11 @@ export default function PublicProfilePage() {
                                   <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
                                     <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                                       <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                                        {tip.sender_name || shorten(tip.sender_wallet)}
+                                        {tip.sender_name || shortenAddress(tip.sender_wallet, 6)}
                                       </Typography>
+                                      {isTopTip && (
+                                        <Typography sx={{ fontSize: "0.9rem" }} title="Top Supporter">👑</Typography>
+                                      )}
                                       {tier.badge && (
                                         <Chip
                                           label={tier.badge}
@@ -1541,8 +1318,14 @@ export default function PublicProfilePage() {
                                     <Chip
                                       label={`${formatSol(tip.amount)} SOL`}
                                       size="small"
-                                      color="primary"
-                                      sx={{ fontWeight: 800, fontSize: "0.75rem", borderRadius: "8px", background: `linear-gradient(135deg, ${currentTheme.palette.primary.main} 0%, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main} 100%)` }}
+                                      sx={{
+                                        fontWeight: 800,
+                                        fontSize: "0.75rem",
+                                        borderRadius: "8px",
+                                        bgcolor: `${tier.color}20`,
+                                        color: tier.name !== "Starter" ? tier.color : "text.primary",
+                                        border: `1px solid ${tier.color}40`,
+                                      }}
                                     />
                                   </Stack>
 
@@ -1550,11 +1333,11 @@ export default function PublicProfilePage() {
                                     <Box sx={{
                                       mt: 1.5,
                                       p: 1.5,
-                                      bgcolor: "rgba(255, 255, 255, 0.02)",
+                                      bgcolor: "rgba(255, 255, 255, 0.025)",
                                       borderRadius: "8px",
-                                      borderLeft: `3.5px solid ${tier.color}`
+                                      borderLeft: `3px solid ${tier.color}`,
                                     }}>
-                                      <Typography variant="body2" sx={{ fontStyle: "italic", opacity: 0.95, lineHeight: 1.5 }}>
+                                      <Typography variant="body2" sx={{ fontStyle: "italic", opacity: 0.95, lineHeight: 1.6 }}>
                                         "{tip.message}"
                                       </Typography>
                                     </Box>
@@ -1613,280 +1396,20 @@ export default function PublicProfilePage() {
             {/* Right: Quick Tip Widget Panel */}
             <Grid size={{ xs: 12, md: isLive ? 5 : 6 }}>
 
-              {/* Tipping Panel Widget */}
-              <Card sx={{
-                position: "relative",
-                overflow: "visible",
-                bgcolor: "rgba(255, 255, 255, 0.01)",
-                backdropFilter: "blur(24px)",
-                borderRadius: "20px",
-                border: `1.5px solid ${tipTier.color === "rgba(255, 255, 255, 0.08)" || tipTier.color === "rgba(255, 255, 255, 0.15)" ? "rgba(255, 255, 255, 0.06)" : tipTier.color}`,
-                boxShadow: tipTier.glow === "none" ? "none" : tipTier.glow,
-                transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-              }}>
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: -2,
-                    left: "10%",
-                    right: "10%",
-                    height: "3px",
-                    background: `linear-gradient(90deg, transparent, ${tipTier.color}, transparent)`,
-                    transition: "all 0.4s ease"
-                  }}
-                />
-
-                <CardContent sx={{ p: { xs: 3, md: 5 } }}>
-                  <Stack direction="row" spacing={2} sx={{ alignItems: "center", mb: 1, justifyContent: "space-between" }}>
-                    <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-                      <Box sx={{ width: 40, height: 40, borderRadius: "10px", overflow: "hidden", flexShrink: 0 }}>
-                        <BoringAvatar name={creator.name || creator.wallet_address} variant="beam" size={40} colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]} />
-                      </Box>
-                      <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 900, lineHeight: 1.2 }}>⚡ Tip {creator.name}</Typography>
-                        <Typography variant="caption" color="text.secondary">@{creator.username}</Typography>
-                      </Box>
-                    </Stack>
-
-                    {amount && parseFloat(amount) > 0 && (
-                      <Chip
-                        label={tipTier.badge}
-                        size="small"
-                        sx={{
-                          bgcolor: `${tipTier.color}15`,
-                          color: tipTier.color,
-                          border: `1px solid ${tipTier.color}35`,
-                          fontWeight: 900,
-                          fontSize: "0.72rem",
-                          borderRadius: "6px",
-                          px: 0.5
-                        }}
-                      />
-                    )}
-                  </Stack>
-                  <Divider sx={{ borderColor: "rgba(255,255,255,0.06)", my: 2 }} />
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Verified on-chain tip direct to creator's wallet — {PLATFORM_FEE_PCT}% platform fee.
-                  </Typography>
-
-                  {!isAuthenticated ? (
-                    <Box sx={{ textAlign: "center", py: 4 }}>
-                      <Box sx={{ width: 64, height: 64, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.03)", display: "flex", alignItems: "center", justifyContent: "center", mx: "auto", mb: 3, border: "1px solid rgba(255,255,255,0.06)" }}>
-                        <LockIcon sx={{ fontSize: 32, color: "text.secondary" }} />
-                      </Box>
-                      {!wallet.connected ? (
-                        <>
-                          <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>Connect Solana Wallet</Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 3, px: 2 }}>Connect your Phantom or Solana wallet to begin.</Typography>
-                          <Box sx={{ display: "flex", justifyContent: "center", "& .wallet-adapter-button": { height: "46px", borderRadius: "10px", fontWeight: 600, background: `linear-gradient(135deg, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main} 0%, ${currentTheme.palette.primary.main} 100%) !important` } }}>
-                            <WalletMultiButton />
-                          </Box>
-                        </>
-                      ) : (
-                        <>
-                          <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>Session Signature Required</Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 3, px: 2 }}>Sign the authentication message in your wallet to verify your identity and send tips.</Typography>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={login}
-                            disabled={authLoading}
-                            size="large"
-                            sx={{ px: 5, borderRadius: "10px" }}
-                          >
-                            {authLoading ? "Verifying..." : "Sign & Continue"}
-                          </Button>
-                        </>
-                      )}
-                    </Box>
-                  ) : (
-                    <form onSubmit={handleSendTip}>
-                      <Stack spacing={3}>
-
-                        {/* Preset Tipping Buttons Grid */}
-                        <Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                            Quick Preset Tip (SOL)
-                          </Typography>
-                          <Grid container spacing={1.5}>
-                            {[0.1, 0.5, 1.0, 2.5].map((preset) => {
-                              const getPresetStyles = (val: number) => {
-                                if (val >= 2.5) return { color: "#ff2d55", label: "Legendary Support", glow: "0 0 18px rgba(255, 45, 85, 0.4)" };
-                                if (val >= 1.0) return { color: "#ff9500", label: "Epic Support", glow: "0 0 14px rgba(255, 149, 0, 0.3)" };
-                                if (val >= 0.5) return { color: "#ffcc00", label: "Premium Support", glow: "0 0 10px rgba(255, 204, 0, 0.25)" };
-                                return { color: "#14F195", label: "Standard Support", glow: "0 0 8px rgba(20, 241, 149, 0.2)" };
-                              };
-                              const styles = getPresetStyles(preset);
-                              const isSelected = amount === preset.toString();
-
-                              return (
-                                <Grid size={{ xs: 6, sm: 3 }} key={preset}>
-                                  <Button
-                                    variant="outlined"
-                                    fullWidth
-                                    onClick={() => handlePresetTip(preset)}
-                                    sx={{
-                                      py: 1.5,
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      borderRadius: "12px",
-                                      fontWeight: 800,
-                                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                                      border: isSelected
-                                        ? `2px solid ${styles.color}`
-                                        : "1px solid rgba(255,255,255,0.06)",
-                                      bgcolor: isSelected
-                                        ? `${styles.color}14`
-                                        : "rgba(255,255,255,0.02)",
-                                      color: isSelected ? styles.color : "text.secondary",
-                                      boxShadow: isSelected ? styles.glow : "none",
-                                      "&:hover": {
-                                        transform: "translateY(-2px)",
-                                        borderColor: styles.color,
-                                        boxShadow: styles.glow,
-                                        bgcolor: `${styles.color}0a`,
-                                        color: "#fff"
-                                      }
-                                    }}
-                                  >
-                                    <Typography variant="body1" sx={{ fontWeight: 900 }}>
-                                      {preset} SOL
-                                    </Typography>
-                                    <Typography variant="caption" sx={{ fontSize: "0.55rem", opacity: 0.8, textTransform: "uppercase", mt: 0.5, fontWeight: 900 }}>
-                                      {styles.label.split(" ")[0]}
-                                    </Typography>
-                                  </Button>
-                                </Grid>
-                              );
-                            })}
-                          </Grid>
-                        </Box>
-
-                        <Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                            Custom Amount
-                          </Typography>
-                          <TextField
-                            variant="outlined"
-                            type="number"
-                            fullWidth
-                            placeholder="0.01"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            disabled={txStatus === "sending" || txStatus === "verifying"}
-                            slotProps={{
-                              htmlInput: { min: 0.01, step: 0.01 },
-                              input: {
-                                sx: { fontSize: "1.02rem" }
-                              }
-                            }}
-                          />
-
-                          {feeBreakdown && (
-                            <Box sx={{ mt: 2, p: 2.5, bgcolor: "rgba(255,255,255,0.015)", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.04)" }}>
-                              <Stack spacing={1.5}>
-                                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                  <Typography variant="caption" color="text.secondary">Platform fee ({PLATFORM_FEE_PCT}%)</Typography>
-                                  <Typography variant="caption" sx={{ fontWeight: 700, color: "error.light" }}>
-                                    -{feeBreakdown.fee} SOL
-                                  </Typography>
-                                </Box>
-                                <Box sx={{ display: "flex", justifyContent: "space-between", pt: 1.5, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-                                  <Typography variant="body2" sx={{ fontWeight: 700 }}>Creator receives</Typography>
-                                  <Typography variant="body2" sx={{ fontWeight: 900, color: tipTier.color }}>
-                                    {feeBreakdown.creatorAmount} SOL
-                                  </Typography>
-                                </Box>
-                              </Stack>
-                            </Box>
-                          )}
-                        </Box>
-
-                        <Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                            Message
-                          </Typography>
-                          <TextField
-                            variant="outlined"
-                            multiline
-                            rows={3}
-                            fullWidth
-                            placeholder="Type a message (it will display on stream)..."
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            disabled={txStatus === "sending" || txStatus === "verifying"}
-                            helperText={`${message.length}/280`}
-                            slotProps={{
-                              formHelperText: { sx: { textAlign: "right", fontWeight: 500 } },
-                              input: { sx: { fontSize: "1.02rem" } },
-                              htmlInput: { maxLength: 280 }
-                            }}
-                          />
-                        </Box>
-
-                        <Button
-                          type="submit"
-                          variant="contained"
-                          color="primary"
-                          size="large"
-                          disabled={!isFormValid || txStatus === "sending" || txStatus === "verifying"}
-
-                          sx={{ py: 1.8, fontSize: "1.05rem", borderRadius: "10px", background: `linear-gradient(135deg, ${currentTheme.palette.secondary?.main || currentTheme.palette.primary.main} 0%, ${currentTheme.palette.primary.main} 100%)` }}
-                        >
-                          {txStatus === "sending" && "Executing Tip..."}
-                          {txStatus === "verifying" && "Verifying Tip..."}
-                          {txStatus === "idle" && "Send Superchat"}
-                          {txStatus === "success" && "Send Another"}
-                          {txStatus === "error" && "Retry Transaction"}
-                        </Button>
-                      </Stack>
-                    </form>
-                  )}
-
-                  {/* Transaction status logs */}
-                  {txHash && (
-                    <Alert
-                      severity="success"
-                      sx={{ mt: 3, borderRadius: "10px", bgcolor: "rgba(16, 185, 129, 0.08)", border: "1px solid rgba(16, 185, 129, 0.15)", color: "#fff" }}
-                    >
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Tip successful!</Typography>
-                      <Link
-                        href={getExplorerUrl(txHash)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        sx={{ color: "primary.main", textDecoration: "none", fontWeight: 700, fontSize: "0.8rem", mt: 0.5, display: "inline-block" }}
-                      >
-                        View Solana Tx →
-                      </Link>
-
-                      <Box sx={{ mt: 2, pt: 1.5, borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", alignItems: "center", gap: 1 }}>
-                        <Typography variant="caption" sx={{ fontWeight: 700, opacity: 0.8 }}>Verification:</Typography>
-                        {verificationStatus === "verified" ? (
-                          <Chip label="Verified" color="success" size="small" sx={{ fontWeight: 800, borderRadius: "6px", height: 20 }} />
-                        ) : verificationStatus === "failed" ? (
-                          <Chip label="Failed" color="error" size="small" sx={{ fontWeight: 800, borderRadius: "6px", height: 20 }} />
-                        ) : (
-                          <Chip label="Pending" color="warning" size="small" variant="outlined" sx={{ fontWeight: 800, borderRadius: "6px", height: 20 }} />
-                        )}
-                        {verificationStatus !== "verified" && (
-                          <IconButton size="small" onClick={handleCheckStatus} disabled={checkingStatus} sx={{ ml: 1, p: 0.2 }}>
-                            {checkingStatus ? <CircularProgress size={12} color="inherit" /> : <RefreshIcon sx={{ fontSize: 14 }} />}
-                          </IconButton>
-                        )}
-                      </Box>
-                    </Alert>
-                  )}
-
-                  {txStatus === "error" && errorMsg && (
-                    <Alert
-                      severity="error"
-                      sx={{ mt: 3, borderRadius: "10px", bgcolor: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.15)", color: "#fff" }}
-                    >
-                      {errorMsg}
-                    </Alert>
-                  )}
-                </CardContent>
-              </Card>
+              <TipForm
+                defaultCreatorAddress={creator.wallet_address}
+                creatorName={creator.name || creator.wallet_address}
+                creatorUsername={creator.username}
+                onSuccess={() => {
+                  setShowConfetti(true);
+                  reloadProfileData();
+                }}
+                onVerificationSuccess={() => {
+                  setShowConfetti(true);
+                  toast.success("Tip verified successfully!", { icon: "🎉" });
+                  reloadProfileData();
+                }}
+              />
             </Grid>
           </Grid>
         </Container>

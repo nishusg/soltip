@@ -5,14 +5,16 @@ import { useAuth } from "../../../context/AuthContext";
 import { useRealtimeTips } from "../../../hooks/useRealtimeTips";
 import { listTransactions } from "../../../services/api";
 import { getExplorerUrl } from "../../../services/solana";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { Card, CardContent, Typography, List, ListItem, Box, Link, Chip, Tooltip, Button } from "@mui/material";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import BoringAvatar from "boring-avatars";
 import { logger } from "../../../utils/logger";
 import type { Tip } from "../../../types";
+import { shortenAddress, formatSol, formatTimeWithMinutes as formatTime } from "../../../utils/format";
 import { RecentTipsSkeleton } from "../../common/LoadingSkeletons";
 import toast from "react-hot-toast";
+import { AVATAR_COLORS } from "../../../shared/constants";
+import { copyToClipboard } from "../../../utils/clipboard";
 
 export default function RecentTips() {
   const { walletAddress, isAuthenticated } = useWalletAuth();
@@ -56,29 +58,7 @@ export default function RecentTips() {
 
   if (!isAuthenticated) return null;
 
-  function shorten(addr: string): string {
-    return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
-  }
 
-  function formatSol(lamports: number): string {
-    return (lamports / LAMPORTS_PER_SOL).toFixed(4);
-  }
-
-  function formatTime(ts: string): string {
-    const date = new Date(ts);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-
-    if (diff < 3600000) {
-      const mins = Math.floor(diff / 60000);
-      return `${mins}m ago`;
-    }
-    if (diff < 86400000) {
-      const hrs = Math.floor(diff / 3600000);
-      return `${hrs}h ago`;
-    }
-    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
 
   return (
     <Card 
@@ -128,8 +108,7 @@ export default function RecentTips() {
                 onClick={() => {
                   if (user?.username) {
                     const tippingLink = `${window.location.origin}/${user.username}`;
-                    navigator.clipboard.writeText(tippingLink);
-                    toast.success("Tipping link copied!");
+                    copyToClipboard(tippingLink, "Tipping link copied!");
                   } else {
                     toast.error("Please set a username in settings first!");
                   }
@@ -210,7 +189,7 @@ export default function RecentTips() {
                           name={isSent ? (tx.creator_name || tx.creator_wallet) : (tx.sender_name || tx.sender_wallet)}
                           variant="beam"
                           size="100%"
-                          colors={["#9945FF", "#14F195", "#8052FF", "#00FF80", "#E1C3FF"]}
+                          colors={AVATAR_COLORS}
                         />
                       </Box>
                       <Box>
@@ -219,9 +198,9 @@ export default function RecentTips() {
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "monospace", opacity: 0.8 }}>
                           {isSent ? (
-                            <>To <Link component={RouterLink} to={`/profile/${tx.creator_wallet}`} color="inherit" sx={{ fontWeight: 700 }}>{tx.creator_name || shorten(tx.creator_wallet)}</Link></>
+                            <>To <Link component={RouterLink} to={`/profile/${tx.creator_wallet}`} color="inherit" sx={{ fontWeight: 700 }}>{tx.creator_name || shortenAddress(tx.creator_wallet, 4)}</Link></>
                           ) : (
-                            <>From <Link component={RouterLink} to={`/profile/${tx.sender_wallet}`} color="inherit" sx={{ fontWeight: 700 }}>{tx.sender_name || shorten(tx.sender_wallet)}</Link></>
+                            <>From <Link component={RouterLink} to={`/profile/${tx.sender_wallet}`} color="inherit" sx={{ fontWeight: 700 }}>{tx.sender_name || shortenAddress(tx.sender_wallet, 4)}</Link></>
                           )}
                         </Typography>
                       </Box>
