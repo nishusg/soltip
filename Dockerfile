@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Use npm install to avoid strict peer-dependency errors that fail npm ci
 COPY package.json package-lock.json* ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 COPY . .
 
