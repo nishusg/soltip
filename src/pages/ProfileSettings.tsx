@@ -6,7 +6,7 @@ import { logger } from "../utils/logger";
 import SEO from "../components/common/SEO";
 import { SITE_NAME, SITE_URL, AVATAR_COLORS } from "../shared/constants";
 import { shortenAddress } from "../utils/format";
-import { isValidChannel } from "../utils/security";
+import { isValidChannel, buildSafeSocialUrl } from "../utils/security";
 import { copyToClipboard } from "../utils/clipboard";
 
 import { 
@@ -245,6 +245,9 @@ export default function ProfileSettings() {
     return () => clearTimeout(timer);
   }, [username, initialUsername]);
   
+  /**
+   * Loads the creator's profile data from the backend and initializes the form state.
+   */
   const loadProfile = async () => {
     if (!walletAddress) return;
     try {
@@ -274,6 +277,12 @@ export default function ProfileSettings() {
     }
   };
 
+  /**
+   * Validates and saves the updated profile information, including display name, bio, 
+   * username, socials, and stream embed settings.
+   *
+   * @param {FormEvent} e - Form submission event
+   */
   async function handleSave(e: FormEvent) {
     e.preventDefault();
     if (!isAuthenticated) return;
@@ -346,19 +355,38 @@ export default function ProfileSettings() {
       return;
     }
 
+    // Validate and resolve social links/handles dynamically to eliminate code duplication
+    const socialsToValidate = [
+      { key: "twitter", value: twitter, label: "Twitter URL or handle" },
+      { key: "twitch", value: twitch, label: "Twitch URL or channel" },
+      { key: "youtube", value: youtube, label: "YouTube URL or channel" },
+      { key: "kick", value: kick, label: "Kick URL or channel" },
+      { key: "discord", value: discord, label: "Discord invite link" },
+    ] as const;
+
+    const finalSocials: Record<string, string> = {};
+
+    for (const item of socialsToValidate) {
+      const trimmedVal = item.value.trim();
+      if (trimmedVal) {
+        const resolvedUrl = buildSafeSocialUrl(item.key, trimmedVal);
+        if (!resolvedUrl) {
+          toast.error(`Invalid ${item.label}!`);
+          return;
+        }
+        finalSocials[item.key] = resolvedUrl;
+      } else {
+        finalSocials[item.key] = "";
+      }
+    }
+
     setLoading(true);
     try {
       await updateProfile({ 
         name: name.trim(), 
         bio, 
         username: username.trim(),
-        socials: {
-          twitter: twitter.trim(),
-          twitch: twitch.trim(),
-          youtube: youtube.trim(),
-          kick: kick.trim(),
-          discord: discord.trim(),
-        },
+        socials: finalSocials,
         stream_embed: {
           platform: embedPlatform,
           channel: embedChannel.trim(),
@@ -374,6 +402,11 @@ export default function ProfileSettings() {
     }
   }
 
+  /**
+   * Updates the selected visual theme for the creator's tipping page.
+   *
+   * @param {string} theme - The ID of the selected theme (e.g. "gold", "cyberpunk")
+   */
   async function handleThemeChange(theme: string) {
     setThemeLoading(true);
     try {
@@ -388,6 +421,9 @@ export default function ProfileSettings() {
     }
   }
 
+  /**
+   * Handles switching tabs within the Settings tab panel.
+   */
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };

@@ -29,6 +29,10 @@ const SOCIAL_DOMAIN_ALLOWLIST: Record<string, string[]> = {
  * For each platform, if the input is a raw username/slug it's prefixed with
  * the canonical platform URL. If it looks like a full URL, the domain is
  * validated against an allowlist to prevent open-redirect / phishing attacks.
+ *
+ * @param {keyof typeof SOCIAL_DOMAIN_ALLOWLIST} platform - The social platform key
+ * @param {string | undefined} value - The raw social handle or full URL input
+ * @returns {string | null} The resolved canonical safe URL, or null if invalid
  */
 export function buildSafeSocialUrl(
   platform: keyof typeof SOCIAL_DOMAIN_ALLOWLIST,
@@ -36,8 +40,16 @@ export function buildSafeSocialUrl(
 ): string | null {
   if (!value || !value.trim()) return null;
 
-  const trimmed = value.trim();
+  let trimmed = value.trim();
   const allowedDomains = SOCIAL_DOMAIN_ALLOWLIST[platform];
+
+  // Check if the input starts with an allowed domain (e.g. twitter.com/username) and prepend protocol
+  const startsWithDomain = allowedDomains.some(domain => 
+    trimmed.toLowerCase().startsWith(domain + "/") || trimmed.toLowerCase() === domain
+  );
+  if (startsWithDomain && !/^https?:\/\//i.test(trimmed)) {
+    trimmed = "https://" + trimmed;
+  }
 
   // If it looks like a URL (starts with http:// or https://), validate the domain
   if (/^https?:\/\//i.test(trimmed)) {
@@ -60,17 +72,21 @@ export function buildSafeSocialUrl(
     return null;
   }
 
-  // Treat as a username/slug — build canonical URL
+  // Treat as a username/slug or invite code — build canonical URL
   const prefixes: Record<string, string> = {
     twitter: "https://twitter.com/",
     twitch: "https://twitch.tv/",
     youtube: "https://youtube.com/",
     kick: "https://kick.com/",
-    discord: "https://",
+    discord: "https://discord.gg/",
   };
 
-  return `${prefixes[platform]}${encodeURIComponent(trimmed)}`;
+  // Strip leading '@' symbol from handles if present
+  const cleanHandle = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
+
+  return `${prefixes[platform]}${encodeURIComponent(cleanHandle)}`;
 }
+
 
 // ---------------------------------------------------------------------------
 // Stream Embed Channel Validation
@@ -87,6 +103,10 @@ const CHANNEL_PATTERNS: Record<string, RegExp> = {
  * Validate a stream embed channel value on the rendering side.
  * Returns `true` if the channel matches the expected format for the platform.
  * This is a defense-in-depth check — the same validation exists in ProfileSettings.
+ *
+ * @param {string} platform - The streaming platform (twitch, youtube, kick)
+ * @param {string} channel - The channel handle or slug
+ * @returns {boolean} True if the channel format matches the platform regex pattern
  */
 export function isValidChannel(platform: string, channel: string): boolean {
   if (!platform || !channel) return false;
@@ -103,10 +123,18 @@ export function isValidChannel(platform: string, channel: string): boolean {
  * Validate a custom media URL (for alert sounds and GIFs).
  * Only allows HTTPS URLs to prevent loading insecure/malicious content.
  * Returns the URL if valid, empty string otherwise.
+ *
+ * @param {string | undefined} url - The media URL or base64 data URI to validate
+ * @returns {string} The validated URL/data URI, or an empty string if invalid
  */
 export function validateMediaUrl(url: string | undefined): string {
   if (!url || !url.trim()) return "";
   const trimmed = url.trim();
+
+  // Allow safe base64 data URIs for media (audio or images)
+  if (/^data:(audio|image)\/[a-z0-9+.-]+;base64,/i.test(trimmed)) {
+    return trimmed;
+  }
 
   // Only allow https:// scheme
   if (!/^https:\/\//i.test(trimmed)) return "";
@@ -132,6 +160,9 @@ export function validateMediaUrl(url: string | undefined): string {
  *
  * NOTE: This is a convenience check only — the backend must always validate
  * tokens authoritatively. We add a 30-second buffer to avoid race conditions.
+ *
+ * @param {string} token - The raw JWT token string
+ * @returns {boolean} True if the token is valid and not expired, false otherwise
  */
 export function isTokenValid(token: string): boolean {
   try {
@@ -171,6 +202,9 @@ const MAX_DISPLAY_MESSAGE_LENGTH = 280;
  * - Enforces maximum length
  * - Strips control characters (except newlines)
  * - Replaces potential HTML-like sequences (belt-and-suspenders for React)
+ *
+ * @param {string | undefined} message - The raw message to sanitize
+ * @returns {string} The cleaned and sanitized message
  */
 export function sanitizeMessage(message: string | undefined): string {
   if (!message) return "";
@@ -186,6 +220,9 @@ export function sanitizeMessage(message: string | undefined): string {
 
 /**
  * Sanitize a sender name for display and TTS.
+ *
+ * @param {string | undefined} name - The raw sender name to sanitize
+ * @returns {string} The cleaned sender name, or "Anonymous" if empty
  */
 export function sanitizeSenderName(name: string | undefined): string {
   if (!name) return "Anonymous";
